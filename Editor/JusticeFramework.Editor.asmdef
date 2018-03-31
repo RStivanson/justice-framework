@@ -1,0 +1,12 @@
+{
+    "name": "JusticeFramework.Editor",
+    "references": [
+        "JusticeFramework",
+        "JusticeFramework.Data",
+        "JusticeFramework.Utility"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}
