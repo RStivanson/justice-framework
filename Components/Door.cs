@@ -4,7 +4,6 @@ using JusticeFramework.Data.Models;
 using JusticeFramework.Data;
 using JusticeFramework.Data.Events;
 using JusticeFramework.Data.Interfaces;
-using JusticeFramework.Utility;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
@@ -56,7 +55,7 @@ namespace JusticeFramework.Components {
 		
 		public override EInteractionType InteractionType {
 			get {
-				switch (DoorType) {
+				switch (DoorModel.doorType) {
 					case EDoorType.Portal:
 						return EInteractionType.Open;
 					default:
@@ -71,10 +70,6 @@ namespace JusticeFramework.Components {
 
 		public ELockDifficulty LockDifficulty {
 			get { return lockDifficulty; }
-		}
-		
-		public EDoorType DoorType {
-			get { return DoorModel.doorType; }
 		}
 		
 		public string DestinationScene {
@@ -133,7 +128,7 @@ namespace JusticeFramework.Components {
 			if (IsLocked) {
 				Debug.Log("Unable to open this door, it is currently locked!");
 			} else {
-				switch (DoorType) {
+				switch (DoorModel.doorType) {
 					case EDoorType.Portal:
 						GameManager.SendToScene(DestinationScene, DestinationPosition, DestinationRotation);
 						break;

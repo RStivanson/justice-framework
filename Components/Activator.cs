@@ -1,6 +1,5 @@
 ﻿using System;
 using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
 using JusticeFramework.Data.Events;
 using JusticeFramework.Data.Interfaces;
 using JusticeFramework.Utility.Extensions;
@@ -33,7 +32,13 @@ namespace JusticeFramework.Components {
 		/// </summary>
 		[SerializeField]
 		private AudioSource audioSource;
-
+		
+		/// <summary>
+		/// All linked references to be affected when activated
+		/// </summary>
+		[SerializeField]
+		private Reference[] linkedReferences = null;
+		
 		/// <summary>
 		/// Flag variables stating if the activator is currently on or off
 		/// </summary>
@@ -51,11 +56,6 @@ namespace JusticeFramework.Components {
 		/// <inheritdoc />
 		public override EInteractionType InteractionType {
 			get { return EInteractionType.Activate; }
-		}
-		
-		public GameObject[] Linked {
-			get { return ActivatorModel.linked; }
-			set { ActivatorModel.linked = value; }
 		}
 
 		public AudioClip ActivationSound {
@@ -95,8 +95,7 @@ namespace JusticeFramework.Components {
 			}
 
 			// Activate all attached references
-			foreach (GameObject linkedReference in ActivatorModel.linked) {
-				Reference reference = linkedReference.GetComponent<Reference>();
+			foreach (Reference reference in linkedReferences) {
 				reference?.Activate(this, new ActivateEventArgs(this, sender));
 			}
 

@@ -1,6 +1,4 @@
 ﻿using System;
-using JusticeFramework.Data;
-using UnityEngine;
 
 namespace JusticeFramework.Data.Models {
 	/// <inheritdoc />

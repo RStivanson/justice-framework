@@ -8,6 +8,9 @@ namespace JusticeFramework.Data.Models {
 	/// </summary>
 	[Serializable]
 	public class ItemModel : WorldObjectModel {
+		/// <summary>
+		/// The maximum amount of items that can be contained in a stack
+		/// </summary>
 		public const int MAX_STACK_AMOUNT = 999;
 
 		/// <summary>

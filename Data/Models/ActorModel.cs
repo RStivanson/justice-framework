@@ -1,6 +1,5 @@
 ﻿using System;
 using JusticeFramework.Data.Collections;
-using JusticeFramework.Data;
 
 namespace JusticeFramework.Data.Models {
 	/// <inheritdoc />

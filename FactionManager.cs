@@ -25,24 +25,18 @@ namespace JusticeFramework {
 
 			initialized = true;
 
-			if (onProgressChanged != null) {
-				onProgressChanged(false, 0, "Loading actor factions");
-			}
+			onProgressChanged?.Invoke(false, 0, "Loading actor factions");
 
 			factions = Resources.LoadAll<Faction>("Model/Factions/");
 			factionsById = new Dictionary<string, Faction>();
 			
 			for (int i = 0; i < factions.Length; ++i) {
-				if (onProgressChanged != null) {
-					onProgressChanged(false, 0.2f + (0.8f * (i / (float)factions.Length)), "Post-processing faction: " + factions[i].id);
-				}
-				
-				factionsById.Add(factions[i].id, factions[i]);
+				onProgressChanged?.Invoke(false, 0.2f + (0.8f * (i / (float)factions.Length)), "Post-processing faction: " + factions[i].Id);
+
+				factionsById.Add(factions[i].Id, factions[i]);
 			}
 
-			if (onProgressChanged != null) {
-				onProgressChanged(true, 1.0f, "Done");
-			}
+			onProgressChanged?.Invoke(true, 1.0f, "Done");
 		}
 		
 		private Faction GetFactionById(string id) {

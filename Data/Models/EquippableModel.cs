@@ -1,7 +1,12 @@
-﻿using JusticeFramework.Data;
+﻿using System;
 using UnityEngine;
 
 namespace JusticeFramework.Data.Models {
+	/// <inheritdoc />
+	/// <summary>
+	/// Model class the defines shared properties for objects that are equippable to an actor
+	/// </summary>
+	[Serializable]
 	public class EquippableModel : ItemModel {
 		/// <summary>
 		/// The slot where the armor should be equipped

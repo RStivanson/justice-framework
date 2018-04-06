@@ -9,11 +9,6 @@ namespace JusticeFramework.Data.Models {
 	[Serializable]
 	public class ActivatorModel : WorldObjectModel {
 		/// <summary>
-		/// All linked references to be affected when activated
-		/// </summary>
-		public GameObject[] linked = null;
-
-		/// <summary>
 		/// Sound clip to be played upon activation
 		/// </summary>
 		public AudioClip activationSound = null;

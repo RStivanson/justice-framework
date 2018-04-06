@@ -1,4 +1,7 @@
 ﻿namespace JusticeFramework.Data {
+	/// <summary>
+	/// Location of equipment on the actor
+	/// </summary>
 	public enum EEquipSlot {
 		// Armor
 		Head = 0,
