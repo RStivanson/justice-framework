@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace JusticeFramework.UI.Views {
     using Components;
-    using JusticeFramework.Core.Controllers;
     using JusticeFramework.Core.Interfaces;
     using JusticeFramework.Core.UI;
 
@@ -13,7 +12,7 @@ namespace JusticeFramework.UI.Views {
 	public class HudView : Window {
 		[SerializeField]
 		[HideInInspector]
-		private InteractionController interactionController;
+		private IInteractionController interactionController;
 
 		private WorldObject currentTarget;
 		
@@ -33,7 +32,7 @@ namespace JusticeFramework.UI.Views {
 			playerHealthBar.Monitor(player);
 			compass.SetRelativeTo(player.transform);
 
-			interactionController = player.GetComponent<InteractionController>();
+			interactionController = player.GetComponent<IInteractionController>();
 
 			interactionController.OnInteractionTargetChanged += crosshair.OnInteractionTargetChanged;
 			interactionController.OnInteractionTargetChanged += OnInteractionTargetChanged;

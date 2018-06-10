@@ -1,6 +1,6 @@
 ﻿using JusticeFramework.Components;
 using JusticeFramework.Core.AI.BehaviourTree;
-using JusticeFramework.Core.Controllers;
+using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.Managers;
 using JusticeFramework.UI.Views;
 using JusticeFramework.Utility.Extensions;
@@ -93,7 +93,7 @@ public class Game : GameManager {
 
         GetComponent<AudioSource>().clip = ambientMusic;
 		GetComponent<AudioSource>().Play();
-		CommandLibrary.SetInteractionController(playerTrans.GetComponent<InteractionController>());
+		CommandLibrary.SetInteractionController(playerTrans.GetComponent<IInteractionController>());
 		
 		Unpause();
 	}
