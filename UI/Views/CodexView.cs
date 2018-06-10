@@ -1,5 +1,6 @@
 ﻿using System;
 using JusticeFramework.Components;
+using JusticeFramework.Core.UI;
 using UnityEngine;
 using UnityEngine.UI;
 

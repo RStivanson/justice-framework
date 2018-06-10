@@ -1,10 +1,11 @@
 ﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using JusticeFramework.UI.Views;
 using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Managers;
 
 namespace JusticeFramework.Components {
 	[Serializable]

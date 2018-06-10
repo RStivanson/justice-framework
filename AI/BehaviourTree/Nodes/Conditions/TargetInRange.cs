@@ -1,6 +1,6 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Data.AI.BehaviourTree;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes;
+using JusticeFramework.Core.AI.BehaviourTree;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes;
 
 namespace JusticeFramework.AI.BehaviourTree.Nodes.Conditions {
 	public class TargetInRange : Leaf {
@@ -12,7 +12,7 @@ namespace JusticeFramework.AI.BehaviourTree.Nodes.Conditions {
 		
 		protected override ENodeStatus OnTick(TickState tick) {
 			AiController controller = tick.blackboard.Get<AiController>("controller");
-			Reference target = tick.blackboard.Get<Reference>("target");
+			WorldObject target = tick.blackboard.Get<WorldObject>("target");
 
 			if (target == null || (controller.Actor.Transform.position - target.Transform.position).sqrMagnitude > targetRange) {
 				return ENodeStatus.Failure;

@@ -1,19 +1,20 @@
-﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+﻿using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
+using JusticeFramework.Core.Models;
 using JusticeFramework.Utility.Extensions;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
-	/// <inheritdoc cref="Reference" />
-	/// <summary>
-	/// This class houses all model and functions for switches, levers, buttons, etc
-	/// </summary>
-	[Serializable]
+    /// <inheritdoc cref="WorldObject" />
+    /// <summary>
+    /// This class houses all model and functions for switches, levers, buttons, etc
+    /// </summary>
+    [Serializable]
 	[RequireComponent(typeof(Animator))]
 	[RequireComponent(typeof(AudioSource))]
-	public class Activator : Reference, IActivator {
+	public class Activator : WorldObject, IActivator {
 		/// <summary>
 		/// Event called when the activator's state changes
 		/// </summary>
@@ -37,7 +38,7 @@ namespace JusticeFramework.Components {
 		/// All linked references to be affected when activated
 		/// </summary>
 		[SerializeField]
-		private Reference[] linkedReferences = null;
+		private WorldObject[] linkedReferences = null;
 		
 		/// <summary>
 		/// Flag variables stating if the activator is currently on or off
@@ -66,7 +67,7 @@ namespace JusticeFramework.Components {
 #endregion
 
 		/// <inheritdoc />
-		protected override void OnIntialize() {
+		protected override void OnIntialized() {
 			animator = GetComponent<Animator>();
 			audioSource = GetComponent<AudioSource>();
 
@@ -95,7 +96,7 @@ namespace JusticeFramework.Components {
 			}
 
 			// Activate all attached references
-			foreach (Reference reference in linkedReferences) {
+			foreach (WorldObject reference in linkedReferences) {
 				reference?.Activate(this, new ActivateEventArgs(this, sender));
 			}
 

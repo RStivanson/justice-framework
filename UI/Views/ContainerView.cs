@@ -1,13 +1,15 @@
 ﻿using System;
 using JusticeFramework.Components;
-using JusticeFramework.Data.Collections;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Collections;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Interfaces;
 using JusticeFramework.UI.Components;
 using JusticeFramework.Utility.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using JusticeFramework.Core.UI;
+using JusticeFramework.Core.Managers;
 
 namespace JusticeFramework.UI.Views {
     [Serializable]
@@ -99,8 +101,17 @@ namespace JusticeFramework.UI.Views {
             selectedItemNameLabel.text = itemName;
 
             ConsumableModel consumable = selectedItemModel as ConsumableModel;
-            selectedItemDescrLabel.enabled = consumable != null;
-            selectedItemDescrLabel.text = $"Modifier: {consumable?.healthModifier}";
+
+            if (consumable != null) {
+                selectedItemDescrLabel.enabled = true;
+                selectedItemDescrLabel.text = "Effects:\n";
+
+                foreach (StatusEffectModel model in consumable.statusEffects) {
+                    selectedItemDescrLabel.text += $"\t\t{model.buffType.ToString()}\n";
+                }
+            } else {
+                selectedItemDescrLabel.enabled = false;
+            }
         }
 
 #endregion
@@ -129,7 +140,7 @@ namespace JusticeFramework.UI.Views {
                     actor.Consume((ConsumableModel)itemModel);
                     actor.TakeItem(itemModel.id, 1);
                 } else if (itemModel is EquippableModel) {
-                    actor.Equip(GameManager.Spawn(itemModel.id, GameManager.Player.transform.position, Quaternion.identity) as IEquippable);
+                    actor.Equip(GameManager.Spawn(itemModel.id, GameManager.Player.Transform.position, Quaternion.identity) as IEquippable);
                     actor.TakeItem(itemModel.id, quantity);
                 }
             }
@@ -142,7 +153,7 @@ namespace JusticeFramework.UI.Views {
             for (int i = 0; i < container.Inventory.Count; ++i) {
                 int index = i;
                 ItemListEntry entry = container.Inventory[i];
-                ItemModel item = GameManager.AssetManager.GetEntityById<ItemModel>(entry.id);
+                ItemModel item = GameManager.AssetManager.GetById<ItemModel>(entry.id);
 
                 if (item == null) {
                     continue;

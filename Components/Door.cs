@@ -1,15 +1,17 @@
 ﻿using System;
 using JusticeFramework.Console;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using UnityEngine;
+using JusticeFramework.Core.Console;
+using JusticeFramework.Core.Managers;
 
 namespace JusticeFramework.Components {
 	[Serializable]
 	[RequireComponent(typeof(Animator))]
-	public class Door : Reference, IDoor {
+	public class Door : WorldObject, IDoor {
 #region Variables
 
 		[SerializeField]
@@ -23,8 +25,14 @@ namespace JusticeFramework.Components {
 
 		[SerializeField]
 		private ELockDifficulty lockDifficulty;
-		
-		[SerializeField]
+
+        [SerializeField]
+        private bool hasKey;
+
+        [SerializeField]
+        private string keyId;
+
+        [SerializeField]
 		private string destinationScene;
 		
 		[SerializeField]
@@ -90,20 +98,20 @@ namespace JusticeFramework.Components {
 
 #endregion
 		
-		protected override void OnIntialize() {
+		protected override void OnIntialized() {
 			animator = GetComponent<Animator>();
-			animator.SetBool("IsOpen", isOpen);
+			animator?.SetBool("IsOpen", isOpen);
 		}
 		
 		public void Open() {
 			isOpen = true;
-			animator.SetBool("IsOpen", true);
+			animator?.SetBool("IsOpen", true);
 			OnReferenceStateChanged();
 		}
 
 		public void Close() {
 			isOpen = false;
-			animator.SetBool("IsOpen", false);
+			animator?.SetBool("IsOpen", false);
 			OnReferenceStateChanged();
 		}
 		
@@ -126,7 +134,18 @@ namespace JusticeFramework.Components {
 
 		public override void Activate(object sender, ActivateEventArgs e) {
 			if (IsLocked) {
-				Debug.Log("Unable to open this door, it is currently locked!");
+                if (hasKey && e.ActivatedBy != null) {
+                    IContainer container = e.ActivatedBy as IContainer;
+
+                    if (container != null && container.GetQuantity(keyId) > 0) {
+                        container.TakeItem(keyId, 1);
+                        Unlock();
+                    } else {
+                        Debug.Log("Door - Missing key : " + keyId);
+                    }
+                } else {
+                    Debug.Log("Door - Unable to open this door, it is currently locked!");
+                }
 			} else {
 				switch (DoorModel.doorType) {
 					case EDoorType.Portal:

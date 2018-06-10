@@ -1,5 +1,5 @@
-﻿using JusticeFramework.Data.AI.BehaviourTree;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes;
+﻿using JusticeFramework.Core.AI.BehaviourTree;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes;
 
 namespace JusticeFramework.AI.BehaviourTree.Nodes.Conditions {
 	public class HealthLessThanOrEqualTo : Leaf {

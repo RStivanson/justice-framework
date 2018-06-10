@@ -1,8 +1,8 @@
-﻿using JusticeFramework.Data.AI.BehaviourTree;
+﻿using JusticeFramework.Core.AI.BehaviourTree;
 
 namespace JusticeFramework.AI.BehaviourTree.Definitions {
 	public class Combat : BehaviourSet {
-		protected override Data.AI.BehaviourTree.BehaviourTree BuildBehaviourSet() {
+		protected override Core.AI.BehaviourTree.BehaviourTree BuildBehaviourSet() {
 			return null;/*new BehaviourTreeBuilder()
 				.Composite<Selector>()
 					.Composite<Sequence>()

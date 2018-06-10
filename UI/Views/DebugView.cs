@@ -1,8 +1,10 @@
-﻿using System;
+﻿using JusticeFramework.Core.Controllers;
+using JusticeFramework.Core.Managers;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.UI.Views {
-	[Serializable]
+    [Serializable]
 	public class DebugView : MonoBehaviour {
 		private enum DebugTab {
 			System,
@@ -90,9 +92,9 @@ namespace JusticeFramework.UI.Views {
 			GUILayout.BeginVertical("Box");
 			
 			if (GameManager.IsPlaying) {
-				InteractionController controller = GameManager.Player.GetComponent<InteractionController>();
+				InteractionController controller = GameManager.Player.Transform.GetComponent<InteractionController>();
 				
-				GUILayout.Label($"Player Coord: {GameManager.Player.transform.position}");
+				GUILayout.Label($"Player Coord: {GameManager.Player.Transform.position}");
 				GUILayout.Label($"LookAt Id: {controller.Current?.Id}");
 				GUILayout.Label($"LookAt Type: {controller.Current?.GetType().Name}");
 			} else {

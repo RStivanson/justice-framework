@@ -2,9 +2,9 @@
 
 namespace JusticeFramework.Interfaces {
 	public delegate void OnCurrentHealthChanged(IDamageable damagable);
-	public delegate void OnDamageTaken(IDamageable reciever, Reference sender, float amount);
-	public delegate void OnHealingRecieved(IDamageable reciever, Reference sender, float amount);
-	public delegate void OnDeath(IDamageable reciever, Reference sender);
+	public delegate void OnDamageTaken(IDamageable reciever, WorldObject sender, float amount);
+	public delegate void OnHealingRecieved(IDamageable reciever, WorldObject sender, float amount);
+	public delegate void OnDeath(IDamageable reciever, WorldObject sender);
 
 	public interface IDamageable {
 		event OnCurrentHealthChanged onCurrentHealthChanged;

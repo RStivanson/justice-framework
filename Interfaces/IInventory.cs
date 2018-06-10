@@ -1,5 +1,5 @@
-﻿using JusticeFramework.Data.Collections;
-using JusticeFramework.Data.Interfaces;
+﻿using JusticeFramework.Core.Collections;
+using JusticeFramework.Core.Interfaces;
 
 namespace JusticeFramework.Interfaces {
 	public delegate void OnItemAdded(IInventory reciever, string id, int amount);
@@ -9,10 +9,10 @@ namespace JusticeFramework.Interfaces {
 		event OnItemAdded onItemAdded;
 		event OnItemRemoved onItemRemoved;
 
-		ItemList Inventory { get; }
+		Inventory Inventory { get; }
 
 		void GiveItem(string id, int amount);
-		void TakeItem(string id, int amount);
+		bool TakeItem(string id, int amount);
 
 		void ActivateItem(string id);
 	}

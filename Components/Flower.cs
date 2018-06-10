@@ -1,13 +1,14 @@
 ﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using UnityEngine;
+using JusticeFramework.Core;
 
 namespace JusticeFramework.Components {
 	[Serializable]
 	[RequireComponent(typeof(CapsuleCollider))]
-	public class Flower : Reference, IFlower {
+	public class Flower : WorldObject, IFlower {
 #region Variables
 
 		[SerializeField]

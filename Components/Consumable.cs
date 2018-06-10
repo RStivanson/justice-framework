@@ -1,7 +1,8 @@
 ﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Events;
 
 namespace JusticeFramework.Components {
 	[Serializable]
@@ -11,11 +12,7 @@ namespace JusticeFramework.Components {
 		private ConsumableModel ConsumableModel {
 			get { return model as ConsumableModel; }
 		}
-		
-		public int HealthModifier {
-			get { return ConsumableModel.healthModifier; }
-		}
-		
+
 #endregion
-	}
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using JusticeFramework.Data.Collections;
-using JusticeFramework.Data.Models;
+using JusticeFramework.Core.Collections;
+using JusticeFramework.Core.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
