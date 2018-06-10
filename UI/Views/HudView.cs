@@ -37,7 +37,7 @@ namespace JusticeFramework.UI.Views {
 
 			interactionController.OnInteractionTargetChanged += crosshair.OnInteractionTargetChanged;
 			interactionController.OnInteractionTargetChanged += OnInteractionTargetChanged;
-			OnInteractionTargetChanged(interactionController.Current);
+			OnInteractionTargetChanged(interactionController.CurrentTarget);
 		}
 		
 		/// <summary>

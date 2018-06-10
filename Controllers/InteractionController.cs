@@ -6,12 +6,12 @@ using JusticeFramework.Utility.Extensions;
 using System;
 using UnityEngine;
 
-namespace JusticeFramework.Core.Controllers {
-    public delegate void OnWorldTargetChanged(WorldObject newTarget);
-
+namespace JusticeFramework.Controllers {
 	[Serializable]
 	public class InteractionController : MonoBehaviour, IInteractionController {
 		private const float INTERACTION_DISTANCE = 2.5f;
+
+		public event OnWorldTargetChanged OnInteractionTargetChanged;
 
 		[SerializeField]
 		private Transform mainCamera;
@@ -22,17 +22,18 @@ namespace JusticeFramework.Core.Controllers {
 		[SerializeField]
 		private Transform lookingAtTransform;
 
+        [SerializeField]
         private KeyCode attackKeyCode = KeyCode.Mouse0;
+
+        [SerializeField]
         private KeyCode attackSecondaryKeyCode = KeyCode.Mouse1;
 
+        [SerializeField]
         private KeyCode interactKeyCode = KeyCode.E;
 
         private bool ignoreNextKey;
-
 		private RaycastHit raycastHit;
 
-		public event OnWorldTargetChanged OnInteractionTargetChanged;
-		
 		/// <summary>
 		/// The current target the user is looking at
 		/// </summary>

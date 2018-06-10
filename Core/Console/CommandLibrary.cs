@@ -28,7 +28,7 @@ namespace JusticeFramework.Core.Console {
 		private static Dictionary<string, Func<ParameterInfo, string, object>> keywordHandlers;
 
 		[SerializeField]
-		private InteractionController interactionController;
+		private IInteractionController interactionController;
 
 		public CommandLibrary(bool forceReload = false) {
 			if (registeredCommands == null || forceReload) {
@@ -40,7 +40,7 @@ namespace JusticeFramework.Core.Console {
 			}
 		}
 
-		public void SetInteractionController(InteractionController controller) {
+		public void SetInteractionController(IInteractionController controller) {
 			interactionController = controller;
 		}
 
@@ -142,9 +142,9 @@ namespace JusticeFramework.Core.Console {
 			string[] split = data.Split('.');
 
 			if (split.Length == 1) {
-				result = interactionController?.Current;
+				result = interactionController?.CurrentTarget;
 			} else if (split.Length > 1) {
-				result = HandleReferenceModifiers(interactionController?.Current, split[1]);
+				result = HandleReferenceModifiers(interactionController?.CurrentTarget, split[1]);
 			}
 
 			return result;
@@ -290,11 +290,11 @@ namespace JusticeFramework.Core.Console {
 						successfullyInvokedMethod = command.Invoke(parameterObjects, GameManager.Player);
 					} else if (command.commandData.Target == ECommandTarget.LookAt) {
 						if (interactionController != null) {
-							if (interactionController.Current == null || interactionController.Current.NotType(command.parentType)) {
+							if (interactionController.CurrentTarget == null || interactionController.CurrentTarget.NotType(command.parentType)) {
 								throw new Exception($"The specified command '{parameters[0]}' requires a target of type {command.parentType.Name}");
 							}
 							
-							successfullyInvokedMethod = command.Invoke(parameterObjects, interactionController.Current);
+							successfullyInvokedMethod = command.Invoke(parameterObjects, interactionController.CurrentTarget);
 						} else {
 							throw new Exception($"The specified command '{parameters[0]}' requires an InteractionController to be set");
 						}
@@ -391,7 +391,7 @@ namespace JusticeFramework.Core.Console {
 			if (parameter.ToLower().ToLower().Equals(RESERVED_SELF)) {
 				result = GameManager.Player;
 			} else if (parameter.ToLower().ToLower().Equals(RESERVED_TARGET)) {
-				result = interactionController?.Current;
+				result = interactionController?.CurrentTarget;
 			} else if (parameter.ToLower().ToLower().Equals(RESERVED_VECTOR2_ZERO)) {
 				result = Vector2.zero;
 			} else if (parameter.ToLower().ToLower().Equals(RESERVED_VECTOR3_ZERO)) {

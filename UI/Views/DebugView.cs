@@ -95,8 +95,8 @@ namespace JusticeFramework.UI.Views {
 				InteractionController controller = GameManager.Player.Transform.GetComponent<InteractionController>();
 				
 				GUILayout.Label($"Player Coord: {GameManager.Player.Transform.position}");
-				GUILayout.Label($"LookAt Id: {controller.Current?.Id}");
-				GUILayout.Label($"LookAt Type: {controller.Current?.GetType().Name}");
+				GUILayout.Label($"LookAt Id: {controller.CurrentTarget?.Id}");
+				GUILayout.Label($"LookAt Type: {controller.CurrentTarget?.GetType().Name}");
 			} else {
 				GUILayout.Label("Player Coord: --");
 				GUILayout.Label("LookAt Id: --");
