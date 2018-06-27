@@ -24,8 +24,8 @@ namespace JusticeFramework.AI {
 		[SerializeField]
 		private int fieldOfViewAngle = 90;
 		
-		private List<Reference> nearbyReferences;
-		private Dictionary<Type, List<Reference>> referencesByType;
+		private List<WorldObject> nearbyReferences;
+		private Dictionary<Type, List<WorldObject>> referencesByType;
 		
 		public float TimeSinceLastScan {
 			get { return timeSinceLastScan; }
@@ -35,8 +35,8 @@ namespace JusticeFramework.AI {
 			myTransform = transform;
 			timeSinceLastScan = 0;
 
-			nearbyReferences = new List<Reference>();
-			referencesByType = new Dictionary<Type, List<Reference>>();
+			nearbyReferences = new List<WorldObject>();
+			referencesByType = new Dictionary<Type, List<WorldObject>>();
 			
 			ScanSurroundings();
 		}
@@ -74,7 +74,7 @@ namespace JusticeFramework.AI {
 			Collider[] nearbyColliders = Physics.OverlapSphere(transform.position, scanRadius);
 
 			foreach (Collider nearbyCollider in nearbyColliders) {
-				Reference reference = nearbyCollider.transform.GetComponentInCurrentOrParent<Reference>();
+				WorldObject reference = nearbyCollider.transform.GetComponentInCurrentOrParent<WorldObject>();
 
 				if (reference == null || reference.transform == myTransform) {
 					continue;
@@ -82,11 +82,11 @@ namespace JusticeFramework.AI {
 
 				nearbyReferences.Add(reference);
 
-				List<Reference> referenceList;
+				List<WorldObject> referenceList;
 				referencesByType.TryGetValue(reference.GetType(), out referenceList);
 					
 				if (referenceList == null) {
-					referenceList = new List<Reference>();
+					referenceList = new List<WorldObject>();
 					referencesByType.Add(reference.GetType(), referenceList);
 				}
 					
@@ -94,20 +94,20 @@ namespace JusticeFramework.AI {
 			}
 		}
 		
-		public T NearestQuery<T>() where T : Reference {
+		public T NearestQuery<T>() where T : WorldObject {
 			return NearestQuery<T>(null, float.MaxValue);
 		}
 		
-		public T NearestQuery<T>(float withinDistance) where T : Reference {
+		public T NearestQuery<T>(float withinDistance) where T : WorldObject {
 			return NearestQuery<T>(null, withinDistance);
 		}
 
-		public T NearestQuery<T>(Predicate<T> matchCondition, float withinDistance) where T : Reference {
+		public T NearestQuery<T>(Predicate<T> matchCondition, float withinDistance) where T : WorldObject {
 			T closest = null;
 			float lastSqrDistance = float.MaxValue;
 			
 			// Search dictionary of type sorted references for the closest one
-			List<Reference> referenceList;
+			List<WorldObject> referenceList;
 			referencesByType.TryGetValue(typeof(T), out referenceList);
 
 			// If nothing is nearby of that type, return nothing
@@ -115,7 +115,7 @@ namespace JusticeFramework.AI {
 				return null;
 			}
 
-			foreach (Reference reference in referenceList) {
+			foreach (WorldObject reference in referenceList) {
 				if (matchCondition != null && !matchCondition((T)reference)) {
 					continue;
 				}
@@ -137,19 +137,19 @@ namespace JusticeFramework.AI {
 			return closest;
 		}
 
-		public T[] NearbyQuery<T>(bool sortedByClosest = false) where T : Reference {
+		public T[] NearbyQuery<T>(bool sortedByClosest = false) where T : WorldObject {
 			return NearbyQuery<T>(null, float.MaxValue, sortedByClosest);
 		}
 		
-		public T[] NearbyQuery<T>(float withinDistance, bool sortedByClosest = false) where T : Reference {
+		public T[] NearbyQuery<T>(float withinDistance, bool sortedByClosest = false) where T : WorldObject {
 			return NearbyQuery<T>(null, withinDistance, sortedByClosest);
 		}
 		
-		public T[] NearbyQuery<T>(Predicate<T> matchCondition, float withinDistance, bool sortedByClosest = false) where T : Reference {
+		public T[] NearbyQuery<T>(Predicate<T> matchCondition, float withinDistance, bool sortedByClosest = false) where T : WorldObject {
 			List<T> nearbyList = new List<T>();
 			
 			// Search dictionary of type sorted references for the closest one
-			List<Reference> referenceList;
+			List<WorldObject> referenceList;
 			referencesByType.TryGetValue(typeof(T), out referenceList);
 
 			// If nothing is nearby of that type, return nothing
@@ -157,7 +157,7 @@ namespace JusticeFramework.AI {
 				return null;
 			}
 
-			foreach (Reference reference in referenceList) {
+			foreach (WorldObject reference in referenceList) {
 				if (matchCondition != null && !matchCondition((T)reference)) {
 					continue;
 				}
@@ -178,7 +178,7 @@ namespace JusticeFramework.AI {
 			return nearbyList.ToArray();
 		}
 
-		private int CompareReferenceDistance(Reference left, Reference right) {
+		private int CompareReferenceDistance(WorldObject left, WorldObject right) {
 			float leftDistance = (left.Transform.position - myTransform.position).sqrMagnitude;
 			float rightDistance = (right.Transform.position - myTransform.position).sqrMagnitude;
 

@@ -1,13 +1,13 @@
-﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+﻿using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
+using JusticeFramework.Core.Models;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
-	[Serializable]
-	public class Item : Reference, IItem {
+    [Serializable]
+	public class Item : WorldObject, IItem {
 #region Properties
 
 		private ItemModel ItemModel {

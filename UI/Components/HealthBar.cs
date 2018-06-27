@@ -1,5 +1,5 @@
 ﻿using System;
-using JusticeFramework.UI;
+using JusticeFramework.Core.UI.Components;
 using JusticeFramework.Interfaces;
 
 namespace JusticeFramework.UI.Components {

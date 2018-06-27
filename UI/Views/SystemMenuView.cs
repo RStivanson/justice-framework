@@ -1,4 +1,6 @@
-﻿using System;
+﻿using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.UI;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.UI.Views {

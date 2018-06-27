@@ -1,0 +1,8 @@
+{
+    "name": "JusticeFramework.Core",
+    "references": [
+        "JusticeFramework.Utility"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

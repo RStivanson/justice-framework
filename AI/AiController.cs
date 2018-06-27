@@ -1,46 +1,38 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using JusticeFramework.AI.BehaviourTree.Definitions;
-using JusticeFramework.AI.BehaviourTree.Nodes.Actions;
+﻿using JusticeFramework.AI.BehaviourTree.Nodes.Actions;
 using JusticeFramework.AI.BehaviourTree.Nodes.Conditions;
 using JusticeFramework.Components;
-using JusticeFramework.Controllers;
-using JusticeFramework.Data.AI;
-using JusticeFramework.Data.AI.BehaviourTree;
-using JusticeFramework.Data.AI.BehaviourTree.Builder;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes.Composites;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes.Decorators;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes.Leafs;
+using JusticeFramework.Core.AI;
+using JusticeFramework.Core.AI.BehaviourTree;
+using JusticeFramework.Core.AI.BehaviourTree.Builder;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes.Composites;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes.Decorators;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes.Leafs;
+using JusticeFramework.Core.Controllers;
+using JusticeFramework.Core.Managers;
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace JusticeFramework.AI {
-	using BehaveTree = Data.AI.BehaviourTree.BehaviourTree;
-	
-	[RequireComponent(typeof(Actor))]
-	[RequireComponent(typeof(Animator))]
-	[RequireComponent(typeof(NavMeshAgent))]
-	[RequireComponent(typeof(AiVision))]
-	[DisallowMultipleComponent()]
-	[Serializable]
-	public class AiController : Controller {
+    using BehaveTree = Core.AI.BehaviourTree.BehaviourTree;
+
+    [Serializable]
+    [DisallowMultipleComponent()]
+    public class AiController : Controller {
 		public const int HEROIC_ATTACK_BUFFER = 5;
 
 		[SerializeField]
 		private Actor self;
 		
 		[SerializeField]
-		[HideInInspector]
 		private Animator animator;
 		
 		[SerializeField]
-		[HideInInspector]
 		private NavMeshAgent agent;
 		
 		[SerializeField]
-		[HideInInspector]
 		private AiVision vision;
 		
 		public Animator Animator {
@@ -65,18 +57,13 @@ namespace JusticeFramework.AI {
 		private TickState tickState;
 		
 		private void Awake() {
-			self = GetComponent<Actor>();
-			animator = GetComponent<Animator>();
-			vision = GetComponent<AiVision>();
-			agent = GetComponent<NavMeshAgent>();
-			
 			InitalizeBehaviour();
 		}
 
 		private IEnumerator Start() {
 			active = false;
 			
-			Actor.SetRagdollActive(false);
+			Actor?.SetRagdollActive(false);
 			agent.stoppingDistance = 2.0f;
 			
 			yield return new WaitForSeconds(2);
@@ -89,16 +76,18 @@ namespace JusticeFramework.AI {
 			}
 
 			if (!GameManager.IsPaused) {
-				tree?.Tick(tickState);
-				tickState.debug = false;
+				//tree?.Tick(tickState);
+				//tickState.debug = true;
 				//setList[setList.Count - 1]?.Tick(tickState);
 			}
 
 			if (Input.GetKeyDown(KeyCode.G)) {
 				tickState.debug = true;
 			}
-			
-			animator.SetBool("walking", agent.hasPath);
+
+            if (animator != null) {
+                animator?.SetBool("Walking", agent.hasPath);
+            }
 		}
 
 		public void InitalizeBehaviour() {

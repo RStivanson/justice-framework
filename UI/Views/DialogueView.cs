@@ -1,16 +1,17 @@
-﻿using System;
+﻿using JusticeFramework.Components;
+using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models.Dialogue;
+using JusticeFramework.Core.UI;
+using JusticeFramework.Utility.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using JusticeFramework.Components;
-using JusticeFramework.Data.Dialogue;
-using JusticeFramework.Utility.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
-namespace JusticeFramework.UI.Views {	
-	[Serializable]
+namespace JusticeFramework.UI.Views {
+    [Serializable]
 	public class DialogueView : Window {
 		private const float VOICEOVER_TIME_BUFFER = 0.25f;
 
@@ -27,7 +28,6 @@ namespace JusticeFramework.UI.Views {
 		private GameObject responseButtonPrefab;
 
 		[SerializeField]
-		[HideInInspector]
 		private Actor currentTarget;
 
 		[SerializeField]
@@ -39,32 +39,6 @@ namespace JusticeFramework.UI.Views {
 			currentConversations = GameManager.DialogueManager.GetDialogue(currentTarget.Id);
 			
 			BuildResponseList();
-		}
-		
-		private void BuildResponseList() {
-			responsesContainer.DestroyAllChildren();
-
-			currentConversations = GameManager.DialogueManager.GetDialogue(currentTarget.Id);
-
-			if (currentConversations != null) {
-				foreach (Conversation conversation in currentConversations) {
-					foreach (Branch branch in conversation.branches) {
-						Branch tmpBranch = branch;
-						Topic topic = conversation.GetTopic(tmpBranch);
-
-						AddResponse(topic.TopicText, delegate { OnTopicClicked(topic, tmpBranch); });
-					}
-				}
-			}
-		}
-
-		private void AddResponse(string dialogueString, UnityAction onClick) {
-			GameObject spawnedObject = Instantiate(responseButtonPrefab);
-
-			spawnedObject.GetComponent<Button>().onClick.AddListener(onClick);
-			spawnedObject.GetComponentInChildren<Text>().text = dialogueString;
-			
-			spawnedObject.transform.SetParent(responsesContainer, false);
 		}
 		
 		private void SetResponseListVisible() {
@@ -83,11 +57,53 @@ namespace JusticeFramework.UI.Views {
 			
 			SetResponseListVisible();
 		}
-		
-#region Events Callbacks
 
-		private void OnTopicClicked(Topic topic, Branch branch) {
-			Response response = topic.Responses[Random.Range(0, topic.Responses.Count)];
+        #region Response List
+
+        private void BuildResponseList() {
+            responsesContainer.DestroyAllChildren();
+
+            currentConversations = GameManager.DialogueManager.GetDialogue(currentTarget.Id);
+            PopulateResponseList();
+        }
+
+        private void PopulateResponseList() {
+            if (currentConversations == null) {
+                return;
+            }
+
+            foreach (Conversation conversation in currentConversations) {
+                foreach (Branch branch in conversation.branches) {
+                    Branch tmpBranch = branch;
+                    Topic topic = conversation.GetTopic(tmpBranch);
+
+                    if (topic.MeetsConditions(GameManager.Player, currentTarget)) {
+                        AddResponse(topic.TopicText, delegate { OnTopicClicked(topic, tmpBranch); });
+                    }
+                }
+            }
+        }
+
+        private void AddResponse(string dialogueString, UnityAction onClick) {
+            GameObject spawnedObject = Instantiate(responseButtonPrefab);
+
+            spawnedObject.GetComponent<Button>().onClick.AddListener(onClick);
+            spawnedObject.GetComponentInChildren<Text>().text = dialogueString;
+
+            spawnedObject.transform.SetParent(responsesContainer, false);
+        }
+
+        #endregion
+
+        #region Events Callbacks
+
+        private void OnTopicClicked(Topic topic, Branch branch) {
+            Response response = null;
+            for (int i = 0; i < topic.Responses.Count; i++) {
+                if (topic.Responses[i].MeetsConditions(GameManager.Player, currentTarget)) {
+                    response = topic.Responses[i];
+                }
+            }
 
 			float switchTime = 3;
 			if (response.Voiceover != null) {
@@ -97,19 +113,16 @@ namespace JusticeFramework.UI.Views {
 
 			npcText.text = response.ResponseText;
 			
-			// TODO : Add dialogue events
-			//response.ProcessEvents(GameManager.Instance.Player);
-			
 			branch.Advance(response);
 			if (!response.IsExitTrigger) {;
 				BuildResponseList();
 			}
 
 			SetNpcTextVisible();
-			StartCoroutine(OnSwitchTimeUp(switchTime, response.IsExitTrigger));
+			StartCoroutine(OnSwitchTimeUp(switchTime, response));
 		}
 
-		private IEnumerator OnSwitchTimeUp(float switchTime, bool exitOnSwitch) {
+		private IEnumerator OnSwitchTimeUp(float switchTime, Response response) {
 			float currentTime = 0;
 
 			while (currentTime < switchTime) {
@@ -117,7 +130,9 @@ namespace JusticeFramework.UI.Views {
 				yield return 0;
 			}
 
-			if (exitOnSwitch) {
+            response.ProcessEvents(currentTarget, GameManager.Player);
+
+			if (response.IsExitTrigger) {
 				Close();
 			} else {
 				BuildResponseList();

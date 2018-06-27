@@ -1,8 +1,8 @@
 ﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Interfaces;
 using JusticeFramework.Utility.Extensions;
 using UnityEngine;
@@ -24,14 +24,16 @@ namespace JusticeFramework.Components {
 		private Rigidbody thisRigidbody;
 		
 		[SerializeField]
-		private BoxCollider thisCollider;
+		private Collider thisCollider;
 		
 		[SerializeField]
 		private Transform defaultRootBone;
 		
 		[SerializeField]
 		private Transform[] defaultBones;
-		
+
+        private Actor owner;
+
 #endregion
 
 #region Properties
@@ -50,11 +52,23 @@ namespace JusticeFramework.Components {
 		
 		public int ArmorRating {
 			get { return ArmorModel.armorRating; }
-		}
+        }
 
-#endregion
+        public Renderer Renderer {
+            get { return thisRenderer; }
+        }
 
-		protected override void OnIntialize() {
+        public Rigidbody Rigidbody {
+            get { return thisRigidbody; }
+        }
+
+        public Collider Collider {
+            get { return thisCollider; }
+        }
+
+        #endregion
+
+        protected override void OnIntialized() {
 			if (thisRenderer == null) {
 				Debug.LogError($"Skinned mesh renderer on '{name}' has not been defined!");
 			} else {
@@ -66,44 +80,25 @@ namespace JusticeFramework.Components {
 			thisCollider = GetComponent<BoxCollider>();
 		}
 
-		/// <summary>
-		/// Attaches this armor from the skeleton of the given actor
-		/// </summary>
-		/// <param name="actor">The currently attached actor</param>
-		public void Equip(IActor actor) {
-			GameManager.Instance.Unregister(this);
+        public void SetOwner(WorldObject actor) {
+            owner = actor as Actor;
+        }
 
-			SkinnedMeshRenderer actorRenderer = actor.Transform.GetComponentInChildren<SkinnedMeshRenderer>(true);
-			
-			transform.SetParent(actor.Transform);
-
-			transform.localPosition = Vector3.zero;
-
-			thisRigidbody.isKinematic = true;
-			thisCollider.enabled = false;
-
-			thisRenderer.rootBone = actorRenderer.rootBone;
-			thisRenderer.bones = actorRenderer.bones;
-			
-			if (EquipSlot == EEquipSlot.Head) {
-				thisRenderer.enabled = false;
-			}
+        /// <summary>
+        /// Sets the bones of the object to the given renderer's bones
+        /// </summary>
+        /// <param name="renderer">The renderer to set the bones to</param>
+        public void SetBones(SkinnedMeshRenderer renderer) {
+			thisRenderer.rootBone = renderer.rootBone;
+			thisRenderer.bones = renderer.bones;
 		}
 
-		/// <summary>
-		/// Unattaches this armor from the skeleton of the given actor
-		/// </summary>
-		/// <param name="actor">The currently attached actor</param>
-		public void Unequip(IActor actor) {
-			GameManager.Instance.Register(this);
-
-			transform.parent = null;
-
+        /// <summary>
+        /// Resets the objects bones to its original bones
+        /// </summary>
+        public void ClearBones() {
 			thisRenderer.rootBone = defaultRootBone;
 			thisRenderer.bones = defaultBones;
-
-			thisRigidbody.isKinematic = false;
-			thisCollider.enabled = true;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Data;
-using JusticeFramework.Data.AI.BehaviourTree;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes;
+using JusticeFramework.Core;
+using JusticeFramework.Core.AI.BehaviourTree;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes;
 using UnityEngine;
 
 namespace JusticeFramework.AI.BehaviourTree.Nodes.Actions {
