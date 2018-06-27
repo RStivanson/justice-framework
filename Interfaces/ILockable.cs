@@ -1,4 +1,4 @@
-﻿using JusticeFramework.Data;
+﻿using JusticeFramework.Core;
 
 namespace JusticeFramework.Interfaces {
 	public interface ILockable {

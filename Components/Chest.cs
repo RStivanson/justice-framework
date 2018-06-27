@@ -1,18 +1,18 @@
-﻿using System;
-using JusticeFramework.Console;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data.Collections;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+﻿using JusticeFramework.Core;
+using JusticeFramework.Core.Collections;
+using JusticeFramework.Core.Console;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
+using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models;
 using JusticeFramework.Interfaces;
 using JusticeFramework.UI.Views;
-using JusticeFramework.Utility.Extensions;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
-	[Serializable]
-	public class Chest : Reference, IChest, IInventory, ILockable {
+    [Serializable]
+	public class Chest : WorldObject, IChest, IInventory, IInteractable, ILockable {
 		public event OnItemAdded onItemAdded;
 		public event OnItemRemoved onItemRemoved;
 
@@ -22,7 +22,7 @@ namespace JusticeFramework.Components {
 		/// The inventory of items in this container
 		/// </summary>
 		[SerializeField]
-		private ItemList inventory;
+		private Inventory inventory;
 
 		/// <summary>
 		/// Flag indicating if this chest is locked
@@ -56,11 +56,11 @@ namespace JusticeFramework.Components {
 			}
 		}
 		
-		public override EInteractionType InteractionType {
+		public EInteractionType InteractionType {
 			get { return EInteractionType.Loot; }
 		}
 		
-		public ItemList Inventory {
+		public Inventory Inventory {
 			get { return inventory; }
 		}
 		
@@ -80,7 +80,7 @@ namespace JusticeFramework.Components {
 
 		[ConsoleCommand("giveitem", "Gives the chest the item with the given id and quantity", ECommandTarget.LookAt)]
 		public void GiveItem(string id, int amount) {
-			ItemModel item = GameManager.AssetManager.GetEntityById<ItemModel>(id);
+			ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
 
 			if (item == null) {
 				return;
@@ -90,15 +90,22 @@ namespace JusticeFramework.Components {
 			onItemAdded?.Invoke(this, id, amount);
 		}
 		
-		public void TakeItem(string id, int amount) {
+		public bool TakeItem(string id, int amount) {
 			int removed = Inventory.RemoveItem(id, amount);
 
 			if (removed != 0) {
 				onItemRemoved?.Invoke(this, id, removed);
 			}
+
+            return removed != 0;
 		}
-		
-		public void ActivateItem(string id) {
+
+        public int GetQuantity(string id) {
+            ItemListEntry entry = Inventory[id];
+            return entry?.count ?? 0;
+        }
+
+        public void ActivateItem(string id) {
 			Debug.Log($"Container cannot activate items. (name: {name}, id: {id})");
 		}
 		

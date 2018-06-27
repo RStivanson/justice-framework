@@ -17,7 +17,7 @@ namespace JusticeFramework.Editor.Tools {
 				return;
 			}
 
-			Reference referenceScript = activeGameObject.GetComponent<Reference>();
+			WorldObject referenceScript = activeGameObject.GetComponent<WorldObject>();
 
 			if (referenceScript != null && !referenceScript.HasModel()) {
 				Debug.LogWarning($"'{activeGameObject.name}' has no attached model object! Please attach a model script to avoid any errors");

@@ -1,11 +1,13 @@
-﻿using System;
-using JusticeFramework.Components;
-using JusticeFramework.Data;
+﻿using JusticeFramework.Components;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Interfaces;
+using JusticeFramework.Core.UI;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Components {
-	[Serializable]
+    [Serializable]
 	public class Crosshair : Window {
 		[SerializeField]
 		private Image crosshair;
@@ -24,13 +26,13 @@ namespace JusticeFramework.UI.Components {
 
 		[SerializeField]
 		[HideInInspector]
-		private Reference current;
+		private WorldObject current;
 		
 		/// <summary>
 		/// Event called when the interaction controller changes which object it is looking at
 		/// </summary>
 		/// <param name="newTarget">The new object being looked at</param>
-		public void OnInteractionTargetChanged(Reference newTarget) {
+		public void OnInteractionTargetChanged(WorldObject newTarget) {
 			// If this is the same object we are already looking at, do nothing
 			if (ReferenceEquals(newTarget, current)) {
 				return;
@@ -53,10 +55,10 @@ namespace JusticeFramework.UI.Components {
 		/// Event called when the state of the reference object changed
 		/// </summary>
 		/// <param name="changed">The reference object that changed</param>
-		private void OnReferenceStateChanged(Reference changed) {
+		private void OnReferenceStateChanged(WorldObject changed) {
 			// If we somehow are getting updates for a different object, unsubscribe and return
 			if (!ReferenceEquals(current, changed)) {
-				changed.onReferenceStateChanged -= OnReferenceStateChanged;
+				changed.onStateChanged -= OnReferenceStateChanged;
 				return;
 			}
 
@@ -73,10 +75,10 @@ namespace JusticeFramework.UI.Components {
 		/// Switches the current reference to the new reference and handles all event registrations
 		/// </summary>
 		/// <param name="newReference">The new reference to monitor</param>
-		private void SwitchCurrentTarget(Reference newReference) {
+		private void SwitchCurrentTarget(WorldObject newReference) {
 			// Deregister from the old reference if it is not null
 			if (current != null) {
-				current.onReferenceStateChanged -= OnReferenceStateChanged;
+				current.onStateChanged -= OnReferenceStateChanged;
 			}
 
 			// Assign the new reference
@@ -84,7 +86,7 @@ namespace JusticeFramework.UI.Components {
 
 			// Register for state changed events on the new reference if it is not null
 			if (current != null) {
-				current.onReferenceStateChanged += OnReferenceStateChanged;
+				current.onStateChanged += OnReferenceStateChanged;
 			}
 		}
 
@@ -138,7 +140,7 @@ namespace JusticeFramework.UI.Components {
 
 		protected override void OnClose() {
 			if (current != null) {
-				current.onReferenceStateChanged -= OnReferenceStateChanged;
+				current.onStateChanged -= OnReferenceStateChanged;
 			}
 		}
 	}

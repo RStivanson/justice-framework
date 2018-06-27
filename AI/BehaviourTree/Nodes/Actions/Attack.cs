@@ -1,5 +1,5 @@
-﻿using JusticeFramework.Data.AI.BehaviourTree;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes;
+﻿using JusticeFramework.Core.AI.BehaviourTree;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes;
 
 namespace JusticeFramework.AI.BehaviourTree.Nodes.Actions {
 	public class Attack : Leaf {
@@ -7,7 +7,7 @@ namespace JusticeFramework.AI.BehaviourTree.Nodes.Actions {
 			AiController controller = tick.blackboard.Get<AiController>("controller");
 
 			if (!controller.Actor.IsRightSwinging()) {
-				controller.Actor.Swing();
+				//controller.Actor.Swing();
 			}
 
 			return ENodeStatus.Success;
