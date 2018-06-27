@@ -92,8 +92,10 @@ namespace JusticeFramework.Components {
         protected override void OnIntialized() {
             base.OnIntialized();
 
-            if (FireType == EWeaponFireType.Hitbox)
+            if (FireType == EWeaponFireType.Hitbox) {
                 hitbox.HitCollider.enabled = false;
+                hitbox.onHit += OnHit;
+            }
         }
 
         public void SetOwner(WorldObject actor) {
@@ -106,6 +108,10 @@ namespace JusticeFramework.Components {
 
         public void StartFire(IContainer ammoSupply = null) {
             switch (FireType) {
+                case EWeaponFireType.Hitbox:
+                    hitbox.enabled = true;
+
+                    break;
                 case EWeaponFireType.Projectile:
                     if (ammoSupply.TakeItem("TestArrow", 1)) {
                         AmmoModel ammo = GameManager.AssetManager.GetById<AmmoModel>("TestArrow");
@@ -142,6 +148,10 @@ namespace JusticeFramework.Components {
             lastAttackTime = Time.time;
 
             switch (FireType) {
+                case EWeaponFireType.Hitbox:
+                    hitbox.enabled = false;
+
+                    break;
                 case EWeaponFireType.Linear:
                     RaycastHit hit;
                     
@@ -178,6 +188,8 @@ namespace JusticeFramework.Components {
 
         private void OnHit(WorldObject hit) {
             Actor actor = hit as Actor;
+
+            Debug.Log("Weapon - Hit: " + hit.name);
 
             if (actor != null) {
                 actor.Damage(owner, Damage);

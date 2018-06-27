@@ -1,8 +1,9 @@
-﻿using System;
+﻿using JusticeFramework.Components;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Core {
-    public delegate void OnHitboxHit(Transform hit);
+    public delegate void OnHitboxHit(WorldObject worldObject);
 
     [Serializable]
     [RequireComponent(typeof(Collider))]
@@ -23,7 +24,11 @@ namespace JusticeFramework.Core {
         }
 
         private void OnTriggerEnter(Collider other) {
-            onHit?.Invoke(other.transform);
+            WorldObject worldObject = other.transform.GetComponent<WorldObject>();
+
+            if (worldObject != null) {
+                onHit?.Invoke(worldObject);
+            }
         }
     }
 }
