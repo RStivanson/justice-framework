@@ -8,7 +8,6 @@ using JusticeFramework.Components;
 using JusticeFramework.Console;
 using JusticeFramework.Data.Dialogue;
 using JusticeFramework.UI.Views;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;

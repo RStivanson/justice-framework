@@ -21,9 +21,6 @@ namespace JusticeFramework.Components {
 	/// This class houses all model and functions relating for actors (NPCs and Player)
 	/// </summary>
 	[Serializable]
-	[RequireComponent(typeof(AiVision))]
-	[RequireComponent(typeof(AiController))]
-	[RequireComponent(typeof(AudioSource))]
 	public class Actor : Reference, IActor, IDamageable, IInventory {
 		public const int HEROIC_ATTACK_BUFFER = 3;
 		
@@ -43,12 +40,14 @@ namespace JusticeFramework.Components {
 		/// <summary>
 		/// The AI vision component
 		/// </summary>
+        [SerializeField]
 		private AiVision aiVision;
-		
-		/// <summary>
-		/// The AI controller component
-		/// </summary>
-		private AiController aiController;
+
+        /// <summary>
+        /// The AI controller component
+        /// </summary>
+        [SerializeField]
+        private AiController aiController;
 		
 		/// <summary>
 		/// The attached animator component
@@ -61,26 +60,24 @@ namespace JusticeFramework.Components {
 		/// </summary>
 		[SerializeField]
 		private IEquippable[] equipment;
-		
-		/// <summary>
-		/// SkinnedMeshRenderer attached to the Body mesh
-		/// </summary>
-		public SkinnedMeshRenderer bodySMR;
 
-		/// <summary>
-		/// SkinnedMeshRenderer attached to the Head mesh
-		/// </summary>
-		public SkinnedMeshRenderer headSMR;
-		
-		/// <summary>
-		/// The current health value of this actor
-		/// </summary>
-		public float currentHealth = 100;
+        /// <summary>
+        /// SkinnedMeshRenderer attached to the Body mesh
+        /// </summary>
+        [SerializeField]
+        public SkinnedMeshRenderer meshRenderer;
 
-		/// <summary>
-		/// The amount of experience held by the actor
-		/// </summary>
-		public int currentExperience = 0;
+        /// <summary>
+        /// The current health value of this actor
+        /// </summary>
+        [SerializeField]
+        private float currentHealth = 100;
+
+        /// <summary>
+        /// The amount of experience held by the actor
+        /// </summary>
+        [SerializeField]
+        private int currentExperience = 0;
 		
 		/// <summary>
 		/// Flag stating if this actor is currently in combat
@@ -526,7 +523,6 @@ namespace JusticeFramework.Components {
 			animator.SetBool("HasWeapon", equipment[(int)EEquipSlot.Mainhand] != null);
 
 			return true;
-
 		}
 		
 #endregion

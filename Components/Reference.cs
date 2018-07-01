@@ -120,16 +120,38 @@ namespace JusticeFramework.Components {
 			return model != null;
 		}
 		
+        /// <summary>
+        /// Activates the reference
+        /// </summary>
+        /// <param name="sender">The object that is activating the reference</param>
+        /// <param name="e">The activation event arguments</param>
 		public virtual void Activate(object sender, ActivateEventArgs e) {
 		}
 
+        /// <summary>
+        /// Destroys the gameobject
+        /// </summary>
 		[ConsoleCommand("destroy", "Destroys the target reference", ECommandTarget.LookAt)]
 		private void Destroy() {
-			Destroy(this.gameObject);
+			Destroy(gameObject);
 		}
 		
-		public void OnReferenceStateChanged() {
+        /// <summary>
+        /// Activates the internal reference state changed event
+        /// </summary>
+		protected void OnReferenceStateChanged() {
 			onReferenceStateChanged?.Invoke(this);
 		}
+
+        /// <summary>
+        /// Plays a sound from the given audio source
+        /// </summary>
+        /// <param name="source">The source from which the sound should be played</param>
+        /// <param name="clip">The audio clip to play</param>
+        /// <param name="volume">The volume to play the sound at</param>
+        protected void PlaySound(AudioSource source, AudioClip clip, float volume = 1) {
+            // TODO: GameSettings... GetVolume(volume, soundType)?
+            source.PlayOneShot(clip, volume);
+        }
 	}
 }
