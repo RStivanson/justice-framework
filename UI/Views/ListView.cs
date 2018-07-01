@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using JusticeFramework.UI;
+using JusticeFramework.Core.UI;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;

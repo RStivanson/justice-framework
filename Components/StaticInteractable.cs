@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 using JusticeFramework.Components;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Models;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Models;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
 	[Serializable]
-	public class StaticInteractable : Reference {
+	public class StaticInteractable : WorldObject {
 		[SerializeField]
 		private Transform interactPosition;
 

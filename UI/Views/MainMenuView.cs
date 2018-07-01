@@ -1,5 +1,6 @@
 ﻿using System;
-using JusticeFramework.UI;
+using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.UI;
 using UnityEngine;
 
 namespace JusticeFramework.UI.Views {
@@ -14,18 +15,10 @@ namespace JusticeFramework.UI.Views {
 		[SerializeField]
 		private GameObject buttonPrefab;
 
-		[SerializeField]
-		[HideInInspector]
-		private GameManager gameManager;
-
-		public void SetGameManager(GameManager manager) {
-			gameManager = manager;
-		}
-		
 #region Button Callbacks
 
 		public void NewGame() {
-			gameManager?.BeginGame();
+            GameManager.Instance.BeginGame();
 		}
 
 		public void ExitGame() {

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using JusticeFramework.Core.Console;
+using JusticeFramework.Core.UI;
+using System;
 using System.Collections.Generic;
-using JusticeFramework.Console;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Views {
-	[Serializable]
+    [Serializable]
 	public class ConsoleView : Window {
 		public InputField commandTextInput;
 

@@ -1,16 +1,14 @@
 ﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
-using JusticeFramework.Interfaces;
-using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using UnityEngine;
+using JusticeFramework.Core;
 
 namespace JusticeFramework.Components {
 	[Serializable]
 	[RequireComponent(typeof(CapsuleCollider))]
-	public class Flower : Reference, IFlower {
+	public class Flower : WorldObject, IFlower {
 #region Variables
 
 		[SerializeField]
@@ -41,14 +39,6 @@ namespace JusticeFramework.Components {
 			get { return canHarvest; }
 		}
 
-		public string GivesId {
-			get { return flowerModel.harvestData.id; }
-		}
-		
-		public int GivesQuantity {
-			get { return flowerModel.harvestData.quantity; }
-		}
-
 		public int RespawnTimeInSeconds {
 			get { return flowerModel.respawnTimeInSeconds; }
 		}
@@ -74,7 +64,7 @@ namespace JusticeFramework.Components {
 		}
 
 		public void Harvest(IContainer container) {
-			container.GiveItem(GivesId, GivesQuantity);
+			container.GiveItem(FlowerModel.harvestData.id, FlowerModel.harvestData.quantity);
 			
 			canHarvest = false;
 			respawnTimer = 0;
@@ -87,7 +77,7 @@ namespace JusticeFramework.Components {
 			}
 						
 			if (e?.ActivatedBy is IContainer && CanBeHarvested) {
-				Harvest((IContainer)e?.ActivatedBy);
+				Harvest((IContainer)e.ActivatedBy);
 			}
 		}
 	}

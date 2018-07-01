@@ -1,19 +1,20 @@
 ﻿#if UNITY_EDITOR
 
-using System.IO;
-using JusticeFramework.Data.Models;
 using JusticeFramework.Components;
-using JusticeFramework.Data.Dialogue;
-using JusticeFramework.Data.Factions;
-using JusticeFramework.Data.Quest;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Factions;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Models.Dialogue;
+using JusticeFramework.Core.Models.Quest;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace JusticeFramework.Editor.Tools {
-	/// <summary>
-	/// Handles all editor functions relating to SciptableObjects
-	/// </summary>
-	public static class ScriptableObjectTools {
+    /// <summary>
+    /// Handles all editor functions relating to SciptableObjects
+    /// </summary>
+    public static class ScriptableObjectTools {
 		/// <summary>
 		/// Creates a ScriptableObject of the given type with a default name
 		/// </summary>
@@ -67,15 +68,27 @@ namespace JusticeFramework.Editor.Tools {
 			UnityEditor.EditorUtility.FocusProjectWindow();
 			
 			return asset;
-		}
+        }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Faction")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Faction")]
-		public static void CreateFaction() {
-			CreateScriptableObject<Faction>();
-		}
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Merchant Inventory")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Merchant Inventory")]
+        public static void CreateMerchantInventory() {
+            CreateScriptableObject<MerchantInventory>();
+        }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Conversation")]
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Status Effect")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Status Effect")]
+        public static void CreateStatusEffect() {
+            CreateScriptableObject<StatusEffectModel>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Faction")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Faction")]
+        public static void CreateFaction() {
+            CreateScriptableObject<Faction>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Conversation")]
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Conversation")]
 		public static void CreateConversation() {
 			CreateScriptableObject<Conversation>();
@@ -85,19 +98,19 @@ namespace JusticeFramework.Editor.Tools {
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Quest")]
 		public static void CreateQuest() {
 			CreateScriptableObject<Quest>();
-		}
+        }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
-		public static void CreateActivatorData() {
-			CreateScriptableObject<ActivatorModel>();
-		}
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
+        public static void CreateActivatorData() {
+            CreateScriptableObject<ActivatorModel>();
+        }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
-		public static void CreateFlowerData() {
-			CreateScriptableObject<FlowerModel>();
-		}
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Ammo")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Ammo")]
+        public static void CreateAmmoData() {
+            CreateScriptableObject<AmmoModel>();
+        }
 
 		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
@@ -133,15 +146,21 @@ namespace JusticeFramework.Editor.Tools {
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Door")]
 		public static void CreateDoorData() {
 			CreateScriptableObject<DoorModel>();
-		}
-		
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Item")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Item")]
-		public static void CreateItemData() {
-			CreateScriptableObject<ItemModel>();
-		}
+        }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Weapon")]
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
+        public static void CreateFlowerData() {
+            CreateScriptableObject<FlowerModel>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Item")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Item")]
+        public static void CreateItemData() {
+            CreateScriptableObject<ItemModel>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Weapon")]
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Weapon")]
 		public static void CreateWeaponData() {
 			CreateScriptableObject<WeaponModel>();
@@ -161,7 +180,7 @@ namespace JusticeFramework.Editor.Tools {
 				spawnPoint = lastSceneViewCameraTransform.position + (lastSceneViewCameraTransform.forward * 10.0f);
 			}
 
-			Reference reference = ((GameObject)PrefabUtility.InstantiatePrefab(worldObject.prefab)).GetComponent<Reference>();
+			WorldObject reference = ((GameObject)PrefabUtility.InstantiatePrefab(worldObject.prefab)).GetComponent<WorldObject>();
 
 			reference.transform.position = spawnPoint;
 			reference.transform.rotation = Quaternion.identity;
@@ -176,7 +195,7 @@ namespace JusticeFramework.Editor.Tools {
 			WorldObjectModel worldObject = Selection.activeObject as WorldObjectModel;
 			
 			bool hasPrefab = worldObject?.prefab != null;
-			bool prefabHasReferenceScript = worldObject?.prefab?.GetComponent<Reference>() != null;
+			bool prefabHasReferenceScript = worldObject?.prefab?.GetComponent<WorldObject>() != null;
 			
 			return hasPrefab && prefabHasReferenceScript;
 		}

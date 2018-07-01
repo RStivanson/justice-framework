@@ -1,11 +1,11 @@
 ﻿using JusticeFramework.AI.BehaviourTree.Nodes.Actions;
-using JusticeFramework.Data.AI.BehaviourTree;
-using JusticeFramework.Data.AI.BehaviourTree.Builder;
-using JusticeFramework.Data.AI.BehaviourTree.Nodes.Composites;
+using JusticeFramework.Core.AI.BehaviourTree;
+using JusticeFramework.Core.AI.BehaviourTree.Builder;
+using JusticeFramework.Core.AI.BehaviourTree.Nodes.Composites;
 
 namespace JusticeFramework.AI.BehaviourTree.Definitions {
 	public class MoveTo : BehaviourSet {
-		protected override Data.AI.BehaviourTree.BehaviourTree BuildBehaviourSet() {
+		protected override Core.AI.BehaviourTree.BehaviourTree BuildBehaviourSet() {
 			return new BehaviourTreeBuilder()
 					.Composite<MemSequence>()
 						.Leaf<SetLocation>().End()

@@ -1,39 +1,39 @@
 ﻿using System;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
-using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using UnityEngine;
+using JusticeFramework.Core.Managers;
 
 namespace JusticeFramework.Components {
 	[Serializable]
-	[RequireComponent(typeof(Rigidbody))]
-	[RequireComponent(typeof(BoxCollider))]
 	public class Weapon : Item, IWeapon {
 		public event OnItemEquipped OnItemEquipped;
 		public event OnItemUnequipped OnItemUnequipped;
-		
+
 #region Variables
 
-		[SerializeField]
-		private SkinnedMeshRenderer thisRenderer;
+        [SerializeField]
+        private Renderer thisRenderer;
 
 		[SerializeField]
-		[HideInInspector]
 		private Rigidbody thisRigidbody;
 
 		[SerializeField]
-		[HideInInspector]
 		private BoxCollider thisCollider;
 
-		[SerializeField]
-		[HideInInspector]
-		private Transform defaultRootBone;
+        [SerializeField]
+        private Transform offhandIkTarget;
 
-		[SerializeField]
-		[HideInInspector]
-		private Transform[] defaultBones;
+        [SerializeField]
+        private Hitbox hitbox;
+
+        private Ammo loadedProjectile;
+
+        private Actor owner;
+
+        private float lastAttackTime = -1;
 
 #endregion
 
@@ -57,44 +57,143 @@ namespace JusticeFramework.Components {
 		
 		public int Damage {
 			get { return WeaponModel.damage; }
-		}
+        }
 
-#endregion
+        public EWeaponFireType FireType {
+            get { return WeaponModel.fireType; }
+        }
 
-		protected override void OnIntialize() {
-			if (thisRenderer == null) {
-				Debug.LogError($"Skinned mesh renderer on '{name}' has not been defined!");
-			} else {
-				defaultRootBone = thisRenderer.rootBone;
-				defaultBones = thisRenderer.bones;
-			}
-			
-			thisRigidbody = GetComponent<Rigidbody>();
-			thisCollider = GetComponent<BoxCollider>();
-		}
+        public EAmmoType AcceptedAmmo {
+            get { return WeaponModel.acceptedAmmo; }
+        }
 
-		public void Equip(IActor actor) {
-			SkinnedMeshRenderer actorRenderer = actor.Transform.GetComponentInChildren<SkinnedMeshRenderer>(true);
-			
-			transform.SetParent(actor.Transform);
+        public AnimationClip AttackAnimation {
+            get { return WeaponModel.attackAnimation; }
+        }
 
-			transform.localPosition = Vector3.zero;
+        public Renderer Renderer {
+            get { return thisRenderer; }
+        }
 
-			thisRigidbody.isKinematic = true;
-			thisCollider.enabled = false;
-			
-			thisRenderer.rootBone = actorRenderer.rootBone;
-			thisRenderer.bones = actorRenderer.bones;
-		}
+        public Rigidbody Rigidbody {
+            get { return thisRigidbody; }
+        }
 
-		public void Unequip(IActor actor) {
-			transform.parent = null;
+        public Collider Collider {
+            get { return thisCollider; }
+        }
 
-			thisRenderer.rootBone = defaultRootBone;
-			thisRenderer.bones = defaultBones;
+        public Transform OffhandIkTarget {
+            get { return offhandIkTarget; }
+        }
 
-			thisRigidbody.isKinematic = false;
-			thisCollider.enabled = true;
-		}
-	}
+        #endregion
+
+        protected override void OnIntialized() {
+            base.OnIntialized();
+
+            if (FireType == EWeaponFireType.Hitbox) {
+                hitbox.HitCollider.enabled = false;
+                hitbox.onHit += OnHit;
+            }
+        }
+
+        public void SetOwner(WorldObject actor) {
+            owner = actor as Actor;
+        }
+
+        public bool CanFire() {
+            return lastAttackTime == -1 || (Time.time - lastAttackTime) > AttackAnimation.length;
+        }
+
+        public void StartFire(IContainer ammoSupply = null) {
+            switch (FireType) {
+                case EWeaponFireType.Hitbox:
+                    hitbox.enabled = true;
+
+                    break;
+                case EWeaponFireType.Projectile:
+                    if (ammoSupply.TakeItem("TestArrow", 1)) {
+                        AmmoModel ammo = GameManager.AssetManager.GetById<AmmoModel>("TestArrow");
+                        GameObject go = Instantiate(ammo.prefab);
+
+                        loadedProjectile = go.GetComponent<Ammo>();
+
+                        if (loadedProjectile == null) {
+                            Destroy(go);
+                        } else {
+                            loadedProjectile.transform.SetParent(transform);
+                            loadedProjectile.transform.localPosition = Vector3.zero;
+                            loadedProjectile.transform.rotation = transform.rotation;
+
+                            Rigidbody projectileRigidbody = loadedProjectile.GetComponent<Rigidbody>();
+                            projectileRigidbody.isKinematic = true;
+                            projectileRigidbody.useGravity = false;
+                        }
+                    }
+
+                    break;
+            }
+        }
+
+        public void UpdateFire(IContainer ammoSupply = null) {
+
+        }
+
+        public void EndFire(Transform origin, IContainer ammoSupply = null) {
+            if (!CanFire()) {
+                return;
+            }
+
+            lastAttackTime = Time.time;
+
+            switch (FireType) {
+                case EWeaponFireType.Hitbox:
+                    hitbox.enabled = false;
+
+                    break;
+                case EWeaponFireType.Linear:
+                    RaycastHit hit;
+                    
+                    if (Physics.Raycast(origin.position, origin.forward, out hit, 10)) {
+                        Actor actor = hit.transform.GetComponent<Actor>();
+
+                        if (actor != null) {
+                            actor.Damage(owner, Damage);
+                        }
+                    }
+
+                    break;
+                case EWeaponFireType.Projectile:
+                    if (loadedProjectile != null) {
+                        FireProjectile(origin, loadedProjectile);
+                        loadedProjectile = null;
+                    }
+                    
+                    break;
+            }
+        }
+
+        private void FireProjectile(Transform origin, Ammo projectile) {
+            projectile.transform.SetParent(null);
+
+            projectile.OnFire();
+            projectile.onHit += OnHit;
+
+            Rigidbody projectileRigidbody = projectile.GetComponent<Rigidbody>();
+            projectileRigidbody.isKinematic = false;
+            projectileRigidbody.useGravity = true;
+            projectileRigidbody.AddForce(origin.forward * 25, ForceMode.Impulse);
+        }
+
+        private void OnHit(WorldObject hit) {
+            Actor actor = hit as Actor;
+
+            Debug.Log("Weapon - Hit: " + hit.name);
+
+            if (actor != null) {
+                actor.Damage(owner, Damage);
+            }
+        }
+    }
 }

@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using JusticeFramework.AI;
 using JusticeFramework.Console;
-using JusticeFramework.Data.Models;
-using JusticeFramework.Data.Collections;
-using JusticeFramework.Data;
-using JusticeFramework.Data.Events;
-using JusticeFramework.Data.Interfaces;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Collections;
+using JusticeFramework.Core;
+using JusticeFramework.Core.Events;
+using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Interfaces;
 using JusticeFramework.UI.Views;
 using JusticeFramework.Utility.Extensions;
 using UnityEngine;
+using JusticeFramework.Core.StatusEffects;
+using JusticeFramework.StatusEffects;
+using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Console;
 
 namespace JusticeFramework.Components {
 	public delegate void OnEnterCombat(Actor actorNowInCombat);
@@ -21,7 +25,7 @@ namespace JusticeFramework.Components {
 	/// This class houses all model and functions relating for actors (NPCs and Player)
 	/// </summary>
 	[Serializable]
-	public class Actor : Reference, IActor, IDamageable, IInventory {
+	public class Actor : WorldObject, IActor, IDamageable, IInventory {
 		public const int HEROIC_ATTACK_BUFFER = 3;
 		
 		public event OnCurrentHealthChanged onCurrentHealthChanged;
@@ -54,6 +58,8 @@ namespace JusticeFramework.Components {
 		/// </summary>
 		[SerializeField]
 		private Animator animator;
+
+        private EntityAnimator entityAnimator;
 		
 		/// <summary>
 		/// Equipment array storing all equipped items
@@ -66,7 +72,7 @@ namespace JusticeFramework.Components {
         /// </summary>
         [SerializeField]
         public SkinnedMeshRenderer meshRenderer;
-
+        
         /// <summary>
         /// The current health value of this actor
         /// </summary>
@@ -89,7 +95,7 @@ namespace JusticeFramework.Components {
 		/// A list of all NPCs currently attacking this target
 		/// </summary>
 		[SerializeField]
-		private List<Actor> threats;
+		private List<IActor> threats;
 
 		/// <summary>
 		/// The audio source component attached to this object
@@ -97,12 +103,36 @@ namespace JusticeFramework.Components {
 		[SerializeField]
 		private AudioSource audioSource;
 
+        [SerializeField]
+        private AnimationClip defaultAttackAnimation;
+
+        [SerializeField]
+        private AnimationClip replaceableAnimationClip;
+
 		/// <summary>
 		/// The rigidbody components attached to all pieces of the GameObject
 		/// </summary>
 		[SerializeField]
 		[HideInInspector]
 		private Rigidbody[] ragdollRigidbodies;
+
+        [SerializeField]
+        private Transform mainhandBone;
+
+        [SerializeField]
+        private Transform offhandBone;
+
+        /// <summary>
+        /// Game events to take place when this character dies
+        /// </summary>
+        [SerializeField]
+        private GameEvent[] onKill;
+
+        /// <summary>
+        /// List of status effects currently applied to this actor
+        /// </summary>
+        [SerializeField]
+        private List<StatusEffect> statusEffects;
 
 #endregion
 
@@ -121,7 +151,7 @@ namespace JusticeFramework.Components {
 			get { return IsDead ? EInteractionType.Loot : EInteractionType.Talk; }
 		}
 
-		public ItemList Inventory {
+		public Inventory Inventory {
 			get { return ActorModel.inventory; }
 		}
 		
@@ -223,7 +253,7 @@ namespace JusticeFramework.Components {
 			get { return isInCombat; }
 		}
 
-		public List<Actor> Threats {
+		public List<IActor> Threats {
 			get { return threats; }
 		}
 
@@ -266,23 +296,28 @@ namespace JusticeFramework.Components {
 
 #endregion
 
-		/// <inheritdoc cref="Reference" />
-		protected override void OnIntialize() {
-			animator = GetComponent<Animator>();
-			audioSource = GetComponent<AudioSource>();
-			
+		/// <inheritdoc cref="WorldObject" />
+		protected override void OnIntialized() {
+            entityAnimator = new EntityAnimator(animator);
 			ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
+            statusEffects = new List<StatusEffect>();
 
-			threats = new List<Actor>();
+			threats = new List<IActor>();
 			equipment = new IEquippable[Enum.GetNames(typeof(EEquipSlot)).Length];
 			
+            /*
 			Equip(GameManager.Spawn("TestHelm001") as IEquippable);
 			Equip(GameManager.Spawn("TestChestplate001") as IEquippable);
 			Equip(GameManager.Spawn("TestPlatelegs001") as IEquippable);
 			Equip(GameManager.Spawn("TestSword001") as IEquippable);
+            */
 
 			ExitCombat();
 		}
+
+        protected virtual void Update() {
+            ProcessStatusEffects(Time.deltaTime);
+        }
 
 		private void OnDrawGizmosSelected() {
 			// Draw detection radius
@@ -297,6 +332,7 @@ namespace JusticeFramework.Components {
 			Damage(null, currentHealth, true);
 		}
 		
+        [ConsoleCommand("dam", "Damages the yourself")]
 		public void Damage(Actor attacker, float damageAmount, bool ignoreDamageReduction = false) {
 			if (attacker != null) {
 				if (!isInCombat) {
@@ -320,6 +356,11 @@ namespace JusticeFramework.Components {
 				} else {
 					currentHealth = 0;
 					onDeath?.Invoke(this, attacker);
+
+                    foreach (GameEvent killEvent in onKill) {
+                        killEvent.Execute(this, attacker);
+                    }
+
 					ExitCombat();
 				}
 			}
@@ -373,7 +414,7 @@ namespace JusticeFramework.Components {
 
 #region Combat
 		
-		public void EnterCombat(Actor firstEnemy = null) {
+		public void EnterCombat(IActor firstEnemy = null) {
 			isInCombat = true;
 			threats.Clear();
 			
@@ -381,7 +422,7 @@ namespace JusticeFramework.Components {
 				threats.Add(firstEnemy);
 			}
 
-			animator.SetBool("InCombatStance", true);
+			animator?.SetBool("InCombatStance", true);
 			
 			OnReferenceStateChanged();
 			onEnterCombat?.Invoke(this);
@@ -392,7 +433,9 @@ namespace JusticeFramework.Components {
 			
 			threats.Clear();
 
-			animator.SetBool("InCombatStance", false);
+            if (animator != null) {
+                animator?.SetBool("InCombatStance", false);
+            }
 
 			OnReferenceStateChanged();
 			onExitCombat?.Invoke(this);
@@ -406,9 +449,30 @@ namespace JusticeFramework.Components {
 			return animator.IsPlaying(0, "UnarmedSwing") || animator.IsPlaying(0, "ArmedOnehandSwing");
 		}
 
-		public void Swing() {
-			animator.SetTrigger("SwingRight");
-		}
+        public void BeginAttack() {
+            IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
+            AnimationClip replaceClip = weapon?.AttackAnimation ?? defaultAttackAnimation;
+
+
+            if (weapon?.CanFire() ?? true) {
+                weapon?.StartFire(this);
+                entityAnimator.SetAnimation(replaceableAnimationClip.name, replaceClip);
+            }
+        }
+
+        public void UpdateAttack() {
+            IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
+            weapon?.UpdateFire(this);
+        }
+
+        public void EndAttack() {
+            IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
+
+            if (weapon?.CanFire() ?? true) {
+                weapon?.EndFire(Id.Equals("ActorPlayer") ? Camera.main.transform : transform, this);
+                animator.SetTrigger("SwingRight");
+            }
+        }
 
 		public bool IsScared(Actor target) {
 			bool result = false;
@@ -431,7 +495,7 @@ namespace JusticeFramework.Components {
 			return result;
 		}
 
-		public bool InInterestDistance(Reference target) {
+		public bool InInterestDistance(WorldObject target) {
 			return (Transform.position - target.Transform.position).sqrMagnitude <= Math.Pow(LoseInterestDistance, 2);
 		}
 
@@ -454,7 +518,7 @@ namespace JusticeFramework.Components {
 		[ConsoleCommand("giveme", "Gives the player the item with the given id and quantity")]
 		[ConsoleCommand("giveitem", "Gives the actor the item with the given id and quantity", ECommandTarget.LookAt)]
 		public void GiveItem(string id, int amount) {
-			ItemModel item = GameManager.AssetManager.GetEntityById<ItemModel>(id);
+			ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
 
 			if (item == null) {
 				return;
@@ -464,20 +528,27 @@ namespace JusticeFramework.Components {
 			onItemAdded?.Invoke(this, id, amount);
 		}
 		
-		public void TakeItem(string id, int amount) {
+		public bool TakeItem(string id, int amount) {
 			int removed = ActorModel.inventory.RemoveItem(id, amount);
 
 			if (removed != 0) {
 				onItemRemoved?.Invoke(this, id, removed);
 			}
-		}
-		
-		public void ActivateItem(string id) {
+
+            return removed != 0;
+        }
+
+        public int GetQuantity(string id) {
+            ItemListEntry entry = Inventory[id];
+            return entry?.count ?? 0;
+        }
+
+        public void ActivateItem(string id) {
 			if (string.IsNullOrEmpty(id) || !Inventory.HasItem(id)) {
 				return;
 			}
 
-			ItemModel itemModel = GameManager.AssetManager.GetEntityById<ItemModel>(id);
+			ItemModel itemModel = GameManager.AssetManager.GetById<ItemModel>(id);
 			
 			if (itemModel is ArmorModel || itemModel is WeaponModel) {
 				Inventory.RemoveItem(id, 1);
@@ -493,39 +564,182 @@ namespace JusticeFramework.Components {
 		}
 
 		public void Consume(ConsumableModel consumableModel) {
-			Heal(null, consumableModel.healthModifier);
+            if (consumableModel.statusEffects == null) {
+                return;
+            }
+            
+            foreach (StatusEffectModel model in consumableModel.statusEffects) {
+                StatusEffect effect;
+
+                switch (model.buffType) {
+                    case Core.EBuffType.Healing:
+                        effect = new HealingBuff(model, gameObject);
+                        break;
+                    case Core.EBuffType.Speed:
+                        effect = new SpeedBuff(model, gameObject);
+                        break;
+                    default:
+                        effect = null;
+                        break;
+                }
+
+                if (effect != null) {
+                    statusEffects.Add(effect);
+                }
+            }
 		}
 
+        /// <summary>
+        /// Attempts to equip the item to the actor
+        /// </summary>
+        /// <param name="item">The equippable item to attach to the actor</param>
+        /// <returns>Return true if the item is equipped, false otherwise</returns>
 		public bool Equip(IEquippable item) {
+            // If the item is empty, do nothing
 			if (item == null) {
 				return false;
 			}
 
-			item.Equip(this);
-				
-			equipment[(int)item.EquipSlot] = item;
+            // Make sure the object is not reacting to physics
+            item.Rigidbody.isKinematic = true;
+            item.Collider.enabled = false;
 
-			animator.SetBool("HasWeapon", equipment[(int)EEquipSlot.Mainhand] != null);
+            if (item is IArmor) { // If this is armor
+                IArmor armor = item as IArmor;
+
+                // Set the parent and override the bones with the actors bones
+                armor.Transform.SetParent(transform);
+                armor.SetBones(transform.GetComponentInChildren<SkinnedMeshRenderer>(true));
+
+                // If this is a head item and we are the player, make turn off its renderer
+                if (armor.EquipSlot == EEquipSlot.Head && Id == "Player") {
+                    armor.Renderer.enabled = false;
+                }
+            } else if (item is IWeapon) { // If this is a weapon
+                IWeapon weapon = item as IWeapon;
+
+                // Set the parent and reset the position and rotation to the actors hand
+                weapon.Transform.SetParent(mainhandBone);
+                weapon.Transform.localPosition = Vector3.zero;
+                weapon.Transform.rotation = mainhandBone.rotation;
+
+                // Provide an offhand IK target
+                if (weapon.OffhandIkTarget != null) {
+                    // TODO : Do some offhand IK stuff here
+                }
+            }
+
+            // Unequip other pieces and store this item
+            Unequip(item);
+            equipment[(int)item.EquipSlot] = item;
+
+            // Update the actor's animator
+            animator.SetBool("HasWeapon", equipment[(int)EEquipSlot.Mainhand] != null);
 
 			return true;
+        }
 
-		}
+        /// <summary>
+        /// Provides unequip functionality for a specific type of equippable
+        /// </summary>
+        /// <param name="equippable">The equippable to attempt to unequip</param>
+        protected bool Unequip(IEquippable equippable) {
+            IWeapon weapon = equippable as IWeapon;
+            bool unequipped = false;
 
-		public bool Unequip(EEquipSlot equipSlot) {
-			int index = (int)equipSlot;
+            // If this is a two handed weapon
+            if (weapon != null && weapon.WeaponType == EWeaponType.TwoHanded) {
+                // Make sure the mainhand is unequipped
+                if (equipment[(int)EEquipSlot.Mainhand] != null) {
+                    unequipped = Unequip(EEquipSlot.Mainhand);
+                }
 
-			if (equipment[index] == null) {
+                // Also make sure the offhand is unequipped
+                if (equipment[(int)EEquipSlot.Offhand] != null) {
+                    unequipped |= Unequip(EEquipSlot.Offhand);
+                }
+            } else {
+                // If this is any other type of item, just make sure its slot is unequipped
+                if (equipment[(int)equippable.EquipSlot] != null) {
+                    unequipped = Unequip(equippable.EquipSlot);
+                }
+            }
+
+            return unequipped;
+        }
+
+        /// <summary>
+        /// Unequips an item from the given equipment spot and either drops it or adds it to the actor's inventory
+        /// </summary>
+        /// <param name="equipSlot">The equipment slot to unequip from</param>
+        /// <param name="drop">Flag indicating if the item should be dropped</param>
+        /// <returns>Return true if an item was unequipped, false otherwise</returns>
+        public bool Unequip(EEquipSlot equipSlot, bool drop = false) {
+            IEquippable item = equipment[(int)equipSlot];
+
+            // If the item is null, do nothing
+			if (item == null) {
 				return false;
 			}
 
-			equipment[index].Unequip(this);
-			equipment[index] = null;
+            // Clean up the equipment slot
+            equipment[(int)equipSlot] = null;
+
+            if (item is IArmor) {
+                IArmor armor = item as IArmor;
+
+                // Reset the bones and make sure the armor is rendering
+                armor.ClearBones();
+                armor.Renderer.enabled = true;
+            } else if (item is IWeapon) {
+                IWeapon weapon = item as IWeapon;
+
+                // Provide IK movement for the actor's offhand if needed
+                if (weapon.OffhandIkTarget != null) {
+                    // TODO : Do some offhand IK stuff here
+                }
+            }
+
+            // If the item should be dropped
+            if (drop) {
+                // Reset the objects components
+                item.Rigidbody.isKinematic = false;
+                item.Collider.enabled = true;
+
+                // Unparent the object
+                item.Transform.SetParent(null);
+            } else {
+                // Add the item to the actor's inventory and get rid of the GameObject
+                GiveItem(item.Id, 1);
+                Destroy(item.Transform.gameObject);
+            }
+
+            // Update the actor's animator
 			animator.SetBool("HasWeapon", equipment[(int)EEquipSlot.Mainhand] != null);
 
 			return true;
-		}
-		
+        }
+
+        public IEquippable GetEquipment(EEquipSlot slot) {
+            return equipment[(int)slot];
+        }
 #endregion
+
+        protected void ProcessStatusEffects(float deltaTime) {
+            if (statusEffects == null) {
+                return;
+            }
+
+            for (int i = statusEffects.Count - 1; i >= 0; i--) {
+                if (!statusEffects[i].Tick(deltaTime)) {
+                    statusEffects.RemoveAt(i);
+                }
+            }
+        }
+
+        private void OnStatusEffectDisolved(StatusEffect effect) {
+            statusEffects.Remove(effect);
+        }
 
 		public override void Activate(object sender, ActivateEventArgs e) {
 			if (e?.Activator != null) {
