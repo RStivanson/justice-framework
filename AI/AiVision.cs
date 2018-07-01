@@ -41,12 +41,6 @@ namespace JusticeFramework.AI {
 		private int fieldOfViewAngle = 90;
 
         /// <summary>
-        /// Origin point for all LOS checks
-        /// </summary>
-        [SerializeField]
-        private Vector3 losOrigin;
-
-        /// <summary>
         /// Cached reference to this transform
         /// </summary>
         [SerializeField]
@@ -101,15 +95,6 @@ namespace JusticeFramework.AI {
 			// Draw detection radius
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireSphere(transform.position, scanRadius);
-
-			/*
-			Vector3 fovLeft = Quaternion.AngleAxis(-halfFieldOfViewAngle, transform.up) * transform.forward * scanRadius;
-			Vector3 fovRight = Quaternion.AngleAxis(halfFieldOfViewAngle, transform.up) * transform.forward * scanRadius;
-			
-			Gizmos.color = Color.blue;
-			Gizmos.DrawRay(transform.position, fovLeft);
-			Gizmos.DrawRay(transform.position, fovRight);
-			*/
 		}
 
         /// <summary>
@@ -141,15 +126,33 @@ namespace JusticeFramework.AI {
 			}
 		}
 		
+        /// <summary>
+        /// Queries for the closest entity of the given type
+        /// </summary>
+        /// <typeparam name="T">The type to look for</typeparam>
+        /// <returns>Returns the closest entity, or null if none exist</returns>
 		public T NearestQuery<T>() where T : WorldObject {
 			return NearestQuery<T>(null, float.MaxValue);
 		}
-		
-		public T NearestQuery<T>(float withinDistance) where T : WorldObject {
+
+        /// <summary>
+        /// Queries for the closest entity of the given type within the given distance
+        /// </summary>
+        /// <typeparam name="T">The type to look for</typeparam>
+        /// <param name="withinDistance">The minimum distance the entities must be in</param>
+        /// <returns>Returns the closest entity, or null if none exist</returns>
+        public T NearestQuery<T>(float withinDistance) where T : WorldObject {
 			return NearestQuery<T>(null, withinDistance);
 		}
 
-		public T NearestQuery<T>(Predicate<T> matchCondition, float withinDistance) where T : WorldObject {
+        /// <summary>
+        /// Queries for the closest entity of the given type within the given distance that matches the given condition.
+        /// </summary>
+        /// <typeparam name="T">The type to look for</typeparam>
+        /// <param name="matchCondition">A custom condition to match the entitie against. A null value will skip the condition.</param>
+        /// <param name="withinDistance">The minimum distance the entities must be in</param>
+        /// <returns>Returns the closest entity, or null if none exist</returns>
+        public T NearestQuery<T>(Predicate<T> matchCondition, float withinDistance) where T : WorldObject {
 			T closest = null;
 			float lastSqrDistance = float.MaxValue;
 			
@@ -162,21 +165,20 @@ namespace JusticeFramework.AI {
 				return null;
 			}
 
+            // For each nearby reference
 			foreach (WorldObject reference in referenceList) {
-				if (matchCondition != null && !matchCondition((T)reference)) {
-					continue;
-				}
+                // Checks the match condition
+                bool matchedCondition = matchCondition?.Invoke((T)reference) ?? true;
 
+                // Calculate the distance
 				float currentSqrDistance = (myTransform.position - reference.transform.position).sqrMagnitude;
 
-				if (currentSqrDistance >= lastSqrDistance) {
+                // If the reference didnt match the condition, not the closest, or not within the distance then do nothing
+				if (!matchedCondition || currentSqrDistance >= lastSqrDistance || currentSqrDistance >= withinDistance) {
 					continue;
 				}
 
-				if (currentSqrDistance >= withinDistance) {
-					continue;
-				}
-				
+                // Set the new found reference
 				closest = (T)reference;
 				lastSqrDistance = currentSqrDistance;
 			}
@@ -184,15 +186,36 @@ namespace JusticeFramework.AI {
 			return closest;
 		}
 
+        /// <summary>
+        /// Gets a list of nearby references
+        /// </summary>
+        /// <typeparam name="T">The type of reference to look for</typeparam>
+        /// <param name="sortedByClosest">Flag indicating if the list should be sorted by distance</param>
+        /// <returns>Returns a list of nearby references, or an empty array if none exist</returns>
 		public T[] NearbyQuery<T>(bool sortedByClosest = false) where T : WorldObject {
-			return NearbyQuery<T>(null, float.MaxValue, sortedByClosest);
+			return NearbyQuery<T>(null, -1, sortedByClosest);
 		}
-		
-		public T[] NearbyQuery<T>(float withinDistance, bool sortedByClosest = false) where T : WorldObject {
+
+        /// <summary>
+        /// Gets a list of nearby references within the given distance
+        /// </summary>
+        /// <typeparam name="T">The type of reference to look for</typeparam>
+        /// <param name="withinDistance">The minimum distance the entities must be in</param>
+        /// <param name="sortedByClosest">Flag indicating if the list should be sorted by distance</param>
+        /// <returns>Returns a list of nearby references within the distance, or an empty array if none exist</returns>
+        public T[] NearbyQuery<T>(float withinDistance, bool sortedByClosest = false) where T : WorldObject {
 			return NearbyQuery<T>(null, withinDistance, sortedByClosest);
 		}
-		
-		public T[] NearbyQuery<T>(Predicate<T> matchCondition, float withinDistance, bool sortedByClosest = false) where T : WorldObject {
+
+        /// <summary>
+        /// Gets a list of nearby references within the given distance
+        /// </summary>
+        /// <typeparam name="T">The type of reference to look for</typeparam>
+        /// <param name="matchCondition">A custom condition to match the entitie against. A null value will skip the condition.</param>
+        /// <param name="withinDistance">The minimum distance the entities must be in</param>
+        /// <param name="sortedByClosest">Flag indicating if the list should be sorted by distance</param>
+        /// <returns>Returns a list of nearby references within the distance and matches the condition, or an empty array if none exist</returns>
+        public T[] NearbyQuery<T>(Predicate<T> matchCondition, float withinDistance, bool sortedByClosest = false) where T : WorldObject {
 			List<T> nearbyList = new List<T>();
 			
 			// Search dictionary of type sorted references for the closest one
@@ -204,35 +227,52 @@ namespace JusticeFramework.AI {
 				return null;
 			}
 
-			foreach (WorldObject reference in referenceList) {
-				if (matchCondition != null && !matchCondition((T)reference)) {
-					continue;
-				}
+            // For each nearby reference
+            foreach (WorldObject reference in referenceList) {
+                // Checks the match condition
+                bool matchedCondition = matchCondition?.Invoke((T)reference) ?? true;
 
-				float currentSqrDistance = (myTransform.position - reference.transform.position).sqrMagnitude;
+                // If the distance is valid
+                if (withinDistance != -1) {
+                    // Calculate the distance
+                    float currentSqrDistance = (myTransform.position - reference.transform.position).sqrMagnitude;
 
-				if (currentSqrDistance >= withinDistance) {
-					continue;
-				}
+                    // If the distance is within the allotted distance
+                    if (currentSqrDistance >= withinDistance) {
+                        continue;
+                    }
+                }
 				
+                // Add the reference to the list
 				nearbyList.Add((T)reference);
 			}
 
+            // If the list should be sorted
 			if (sortedByClosest) {
+                // Sort the list
 				nearbyList.Sort(CompareWorldObjectDistance);
 			}
 
 			return nearbyList.ToArray();
 		}
 
+        /// <summary>
+        /// Compares two WorldObjects and determines the closest, used for sorting.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns>Returns -1 if the left object is closest, 1 if the right is the closest, else 0</returns>
 		private int CompareWorldObjectDistance(WorldObject left, WorldObject right) {
+            // Calculate the distances
 			float leftDistance = (left.Transform.position - myTransform.position).sqrMagnitude;
 			float rightDistance = (right.Transform.position - myTransform.position).sqrMagnitude;
 
+            // If the left is closest, return -1
 			if (leftDistance < rightDistance) {
 				return -1;
 			}
 			
+            // Return 1 is right is closest, else 0
 			return leftDistance > rightDistance ? 1 : 0;
 		}
 	}

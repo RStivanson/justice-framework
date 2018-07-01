@@ -23,6 +23,12 @@ namespace JusticeFramework.Components {
 		[SerializeField]
 		protected WorldObjectModel model;
 
+        /// <summary>
+        /// A source to play audio from
+        /// </summary>
+        [SerializeField]
+        protected AudioSource audioSource;
+
 #endregion
 		
 #region Properties
@@ -150,12 +156,11 @@ namespace JusticeFramework.Components {
         /// <summary>
         /// Plays a sound from the given audio source
         /// </summary>
-        /// <param name="source">The source from which the sound should be played</param>
         /// <param name="clip">The audio clip to play</param>
         /// <param name="volume">The volume to play the sound at</param>
-        protected void PlaySound(AudioSource source, AudioClip clip, float volume = 1) {
+        public void PlaySound(AudioClip clip, float volume = 1) {
             // TODO: GameSettings... GetVolume(volume, soundType)?
-            source.PlayOneShot(clip, volume);
+            audioSource?.PlayOneShot(clip, volume);
         }
 	}
 }

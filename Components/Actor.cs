@@ -42,18 +42,6 @@ namespace JusticeFramework.Components {
 #region Variables
 		
 		/// <summary>
-		/// The AI vision component
-		/// </summary>
-        [SerializeField]
-		private AiVision aiVision;
-
-        /// <summary>
-        /// The AI controller component
-        /// </summary>
-        [SerializeField]
-        private AiController aiController;
-		
-		/// <summary>
 		/// The attached animator component
 		/// </summary>
 		[SerializeField]
@@ -96,12 +84,6 @@ namespace JusticeFramework.Components {
 		/// </summary>
 		[SerializeField]
 		private List<IActor> threats;
-
-		/// <summary>
-		/// The audio source component attached to this object
-		/// </summary>
-		[SerializeField]
-		private AudioSource audioSource;
 
         [SerializeField]
         private AnimationClip defaultAttackAnimation;
@@ -320,6 +302,8 @@ namespace JusticeFramework.Components {
         }
 
 		private void OnDrawGizmosSelected() {
+            if (ActorModel == null) return;
+
 			// Draw detection radius
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireSphere(transform.position, LoseInterestDistance);
@@ -609,12 +593,7 @@ namespace JusticeFramework.Components {
 
                 // Set the parent and override the bones with the actors bones
                 armor.Transform.SetParent(transform);
-                armor.SetBones(transform.GetComponentInChildren<SkinnedMeshRenderer>(true));
-
-                // If this is a head item and we are the player, make turn off its renderer
-                if (armor.EquipSlot == EEquipSlot.Head && Id == "Player") {
-                    armor.Renderer.enabled = false;
-                }
+                armor.SetBones(meshRenderer);
             } else if (item is IWeapon) { // If this is a weapon
                 IWeapon weapon = item as IWeapon;
 
@@ -755,10 +734,6 @@ namespace JusticeFramework.Components {
 					view.SetTarget(this);
 				}
 			}
-		}
-		
-		public void PlaySound(AudioClip sound) {
-			audioSource.PlayOneShot(sound);
 		}
 		
 		public void SetRagdollActive(bool active) {
