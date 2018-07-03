@@ -67,8 +67,12 @@ namespace JusticeFramework.Components {
             get { return WeaponModel.acceptedAmmo; }
         }
 
-        public AnimationClip AttackAnimation {
-            get { return WeaponModel.attackAnimation; }
+        public AnimatorOverrideController FPOverrideController {
+            get { return WeaponModel.fpOverrideController; }
+        }
+
+        public AnimatorOverrideController TPOverrideController {
+            get { return WeaponModel.tpOverrideController; }
         }
 
         public Renderer Renderer {
@@ -103,7 +107,7 @@ namespace JusticeFramework.Components {
         }
 
         public bool CanFire() {
-            return lastAttackTime == -1 || (Time.time - lastAttackTime) > AttackAnimation.length;
+            return lastAttackTime == -1 || (Time.time - lastAttackTime) > 1;
         }
 
         public void StartFire(IContainer ammoSupply = null) {

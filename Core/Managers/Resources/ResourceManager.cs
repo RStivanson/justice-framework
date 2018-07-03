@@ -78,6 +78,10 @@ namespace JusticeFramework.Core.Managers.Resources {
             onProgressChanged?.Invoke(isDone, progress, message);
         }
 
+        public T[] GetAll() {
+            return resources;
+        }
+
 		public T GetById(string id) {
 			T resource;
 			resourcesById.TryGetValue(id, out resource);

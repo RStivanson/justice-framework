@@ -22,9 +22,14 @@ namespace JusticeFramework.Core.Interfaces {
         Transform OffhandIkTarget { get; }
 
         /// <summary>
-        /// Animation used when the weapon is used to attack
+        /// An override controller used for play FP animations
         /// </summary>
-        AnimationClip AttackAnimation { get; }
+        AnimatorOverrideController FPOverrideController { get; }
+
+        /// <summary>
+        /// An override controller used for play TP animations
+        /// </summary>
+        AnimatorOverrideController TPOverrideController { get; }
 
         /// <summary>
         /// The firing motion used by this weapon
@@ -36,6 +41,10 @@ namespace JusticeFramework.Core.Interfaces {
         /// </summary>
         EAmmoType AcceptedAmmo { get; }
 
+        /// <summary>
+        /// Determines if this weapon can fire right now
+        /// </summary>
+        /// <returns>Returns true if the weapon is ready to fire, false otherwise</returns>
         bool CanFire();
 
         /// <summary>

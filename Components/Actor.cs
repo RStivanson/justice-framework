@@ -41,18 +41,16 @@ namespace JusticeFramework.Components {
 
 #region Variables
 		
-		/// <summary>
-		/// The attached animator component
-		/// </summary>
-		[SerializeField]
-		private Animator animator;
+        /// <summary>
+        /// Entity animator that manages the first person rig
+        /// </summary>
+        [SerializeField]
+        private ActorAnimator actorAnimator;
 
-        private EntityAnimator entityAnimator;
-		
-		/// <summary>
-		/// Equipment array storing all equipped items
-		/// </summary>
-		[SerializeField]
+        /// <summary>
+        /// Equipment array storing all equipped items
+        /// </summary>
+        [SerializeField]
 		private IEquippable[] equipment;
 
         /// <summary>
@@ -280,7 +278,6 @@ namespace JusticeFramework.Components {
 
 		/// <inheritdoc cref="WorldObject" />
 		protected override void OnIntialized() {
-            entityAnimator = new EntityAnimator(animator);
 			ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
             statusEffects = new List<StatusEffect>();
 
@@ -406,9 +403,9 @@ namespace JusticeFramework.Components {
 				threats.Add(firstEnemy);
 			}
 
-			animator?.SetBool("InCombatStance", true);
-			
-			OnReferenceStateChanged();
+            actorAnimator.SetBool(Constants.IS_IN_COMBAT_PARAM, true);
+
+            OnReferenceStateChanged();
 			onEnterCombat?.Invoke(this);
 		}
 
@@ -417,30 +414,17 @@ namespace JusticeFramework.Components {
 			
 			threats.Clear();
 
-            if (animator != null) {
-                animator?.SetBool("InCombatStance", false);
-            }
+            actorAnimator.SetBool(Constants.IS_IN_COMBAT_PARAM, false);
 
-			OnReferenceStateChanged();
+            OnReferenceStateChanged();
 			onExitCombat?.Invoke(this);
 		}
 		
-		public bool IsLeftSwinging() {
-			return animator.IsPlaying(1, "UnarmedSwing") || animator.IsPlaying(1, "ArmedOnehandSwing");
-		}
-
-		public bool IsRightSwinging() {
-			return animator.IsPlaying(0, "UnarmedSwing") || animator.IsPlaying(0, "ArmedOnehandSwing");
-		}
-
         public void BeginAttack() {
             IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
-            AnimationClip replaceClip = weapon?.AttackAnimation ?? defaultAttackAnimation;
-
 
             if (weapon?.CanFire() ?? true) {
                 weapon?.StartFire(this);
-                entityAnimator.SetAnimation(replaceableAnimationClip.name, replaceClip);
             }
         }
 
@@ -454,7 +438,7 @@ namespace JusticeFramework.Components {
 
             if (weapon?.CanFire() ?? true) {
                 weapon?.EndFire(Id.Equals("ActorPlayer") ? Camera.main.transform : transform, this);
-                animator.SetTrigger("SwingRight");
+                actorAnimator.SetTrigger(Constants.ATTACK_PARAM);
             }
         }
 
@@ -612,10 +596,16 @@ namespace JusticeFramework.Components {
             Unequip(item);
             equipment[(int)item.EquipSlot] = item;
 
-            // Update the actor's animator
-            animator.SetBool("HasWeapon", equipment[(int)EEquipSlot.Mainhand] != null);
+            if (item.EquipSlot == EEquipSlot.Mainhand && item is IWeapon) {
+                IWeapon weapon = item as IWeapon;
+                
+                //AnimationClip replaceWith = weapon?.AttackAnimation;
+                //entityAnimator.SetAnimation(replaceableAnimationClip.name, replaceWith);
 
-			return true;
+                actorAnimator.SetOverrideController(weapon.FPOverrideController, weapon.TPOverrideController);
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -692,9 +682,6 @@ namespace JusticeFramework.Components {
                 GiveItem(item.Id, 1);
                 Destroy(item.Transform.gameObject);
             }
-
-            // Update the actor's animator
-			animator.SetBool("HasWeapon", equipment[(int)EEquipSlot.Mainhand] != null);
 
 			return true;
         }

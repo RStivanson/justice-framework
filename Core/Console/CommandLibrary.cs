@@ -448,8 +448,15 @@ namespace JusticeFramework.Core.Console {
 #region Command Management
 
 		private void LoadCommands() {
-			registeredCommands = new Dictionary<string, List<Command>>();
-			RegisterCommandsFromAssembly(Assembly.GetExecutingAssembly());
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            registeredCommands = new Dictionary<string, List<Command>>();
+
+            foreach (Assembly assembly in assemblies) {
+                if (assembly.FullName.StartsWith("Assembly-CSharp") || assembly.FullName.StartsWith("JusticeFramework")) {
+                    RegisterCommandsFromAssembly(assembly);
+                }
+            }
 		}
 		
 		private void RegisterCommandsFromAssembly(Assembly assembly) {

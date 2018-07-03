@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using JusticeFramework.Assets.JusticeFramework.Utility.Extensions;
+using JusticeFramework.Utility.Extensions;
 using JusticeFramework.Components;
 using JusticeFramework.Utility.Extensions;
 using UnityEngine;

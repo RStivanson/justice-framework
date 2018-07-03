@@ -6,9 +6,9 @@ namespace JusticeFramework.AI.BehaviourTree.Nodes.Actions {
 		protected override ENodeStatus OnTick(TickState tick) {
 			AiController controller = tick.blackboard.Get<AiController>("controller");
 
-			if (!controller.Actor.IsRightSwinging()) {
-				//controller.Actor.Swing();
-			}
+			//if (!controller.Actor.IsRightSwinging()) {
+			//	  controller.Actor.Swing();
+			//}
 
 			return ENodeStatus.Success;
 		}

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JusticeFramework.Assets.JusticeFramework.Utility.Extensions {
+namespace JusticeFramework.Utility.Extensions {
     /// <summary>
     /// A collection of extension methods that extend the functionality of dictionaries
     /// </summary>

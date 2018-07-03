@@ -31,12 +31,17 @@ namespace JusticeFramework.Core.Managers {
 		
 		[SerializeField]
 		protected static DialogueManager dialogueManager;
-		
-		[SerializeField]
-		protected static QuestManager questManager;
-        public QuestManager questM;
-		
-		[SerializeField]
+
+        [SerializeField]
+        protected static QuestManager questManager;
+
+        [SerializeField]
+        protected static RecipeManager recipeManager;
+
+        [SerializeField]
+        protected static SettingsManager settingsManager;
+
+        [SerializeField]
 		protected CommandLibrary commandLibrary;
 		
 		[SerializeField]
@@ -68,7 +73,7 @@ namespace JusticeFramework.Core.Managers {
 		}
 		
 		public static bool IsPaused {
-			get { return Instance.isPaused; }
+			get { return Instance?.isPaused ?? false; }
 
 			private set {
 				if (Instance.isPaused == value) {
@@ -94,13 +99,21 @@ namespace JusticeFramework.Core.Managers {
 
 		public static DialogueManager DialogueManager {
 			get { return dialogueManager; }
-		}
-		
-		public static QuestManager QuestManager {
-			get { return questManager; }
-		}
-		
-		public DateTime GameTime {
+        }
+
+        public static QuestManager QuestManager {
+            get { return questManager; }
+        }
+
+        public static RecipeManager RecipeManager {
+            get { return recipeManager; }
+        }
+
+        public static SettingsManager SettingsManager {
+            get { return settingsManager; }
+        }
+
+        public DateTime GameTime {
 			get { return gameTime; }
 		}
 
@@ -118,6 +131,8 @@ namespace JusticeFramework.Core.Managers {
 		private void Awake() {
             if (gameManager != null) {
                 Debug.LogError($"GameManager - There can only be one game manager active at once, destroying self. (object name: {name})");
+                Destroy(gameObject);
+                return;
             }
 
 			gameManager = this;
@@ -125,12 +140,16 @@ namespace JusticeFramework.Core.Managers {
 			assetManager = new AssetManager();
             dialogueManager = new DialogueManager();
             questManager = new QuestManager();
+            recipeManager = new RecipeManager();
+            settingsManager = new SettingsManager();
 
             assetManager.LoadResources();
             dialogueManager.LoadResources();
 			questManager.LoadResources();
-			
-			CommandLibrary = new CommandLibrary();
+            recipeManager.LoadResources();
+            settingsManager.LoadResources();
+
+            CommandLibrary = new CommandLibrary();
 
             OnInitialized();
 		}

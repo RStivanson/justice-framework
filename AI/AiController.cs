@@ -1,6 +1,7 @@
 ﻿using JusticeFramework.AI.BehaviourTree.Nodes.Actions;
 using JusticeFramework.AI.BehaviourTree.Nodes.Conditions;
 using JusticeFramework.Components;
+using JusticeFramework.Core;
 using JusticeFramework.Core.AI;
 using JusticeFramework.Core.AI.BehaviourTree;
 using JusticeFramework.Core.AI.BehaviourTree.Builder;
@@ -86,7 +87,7 @@ namespace JusticeFramework.AI {
 			}
 
             if (animator != null) {
-                animator?.SetBool("Walking", agent.hasPath);
+                animator?.SetBool(Constants.IS_WALKING_PARAM, agent.hasPath);
             }
 		}
 

@@ -24,6 +24,16 @@ namespace JusticeFramework.Core.Models {
         public AnimationClip attackAnimation;
 
         /// <summary>
+        /// An override controller used for play FP animations
+        /// </summary>
+        public AnimatorOverrideController fpOverrideController;
+
+        /// <summary>
+        /// An override controller used for play TP animations
+        /// </summary>
+        public AnimatorOverrideController tpOverrideController;
+
+        /// <summary>
         /// The firing motion used by this weapon
         /// </summary>
         public EWeaponFireType fireType;

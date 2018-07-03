@@ -5,19 +5,15 @@ using UnityEngine;
 namespace JusticeFramework.Core.Controllers {
 	[Serializable]
 	[DisallowMultipleComponent()]
-	[RequireComponent(typeof(CharacterController))]
-	[RequireComponent(typeof(Animator))]
 	public class InputController : Controller {
 		[SerializeField]
-		[HideInInspector]
 		private CharacterController characterController = null;
 
 		[SerializeField]
-		private Vector3 velocity = Vector3.zero;
-		
-		[SerializeField]
-		[HideInInspector]
 		private Animator animator;
+
+		[SerializeField]
+		private Vector3 velocity = Vector3.zero;
 
 		[Header("Camera")]
 		[SerializeField]
@@ -138,9 +134,6 @@ namespace JusticeFramework.Core.Controllers {
 		}
 		
 		private void Start() {
-			animator = GetComponent<Animator>();
-			characterController = GetComponent<CharacterController>();
-
 			GameManager.Instance.OnGamePause += OnGamePause;
 		}
 
@@ -247,10 +240,10 @@ namespace JusticeFramework.Core.Controllers {
 
 			switch (State) {
 				case EMotorState.WALKING:
-					animator.SetBool("Walking", true);
+					animator.SetBool(Constants.IS_WALKING_PARAM, true);
 					break;
 				case EMotorState.IDLE:
-					animator.SetBool("Walking", false);
+					animator.SetBool(Constants.IS_WALKING_PARAM, false);
 					break;
 			}
 

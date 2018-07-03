@@ -61,6 +61,13 @@ public class Game : GameManager {
             }
         }
 
+        if (Input.GetKeyDown(KeyCode.F)) {
+            if (IsPlaying && UiManager.UI.Peek() is HudView) {
+                CraftingView crafting = UiManager.UI.OpenWindow<CraftingView>();
+                crafting.View(Player);
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             if (UiManager.UI.Peek().NotType<ConsoleView>()) {
                 ConsoleView view = UiManager.UI.OpenWindow<ConsoleView>();

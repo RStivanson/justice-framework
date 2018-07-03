@@ -4,8 +4,10 @@ using JusticeFramework.Components;
 using JusticeFramework.Core;
 using JusticeFramework.Core.Factions;
 using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Models.Crafting;
 using JusticeFramework.Core.Models.Dialogue;
 using JusticeFramework.Core.Models.Quest;
+using JusticeFramework.Core.Models.Settings;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -70,40 +72,16 @@ namespace JusticeFramework.Editor.Tools {
 			return asset;
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Merchant Inventory")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Merchant Inventory")]
-        public static void CreateMerchantInventory() {
-            CreateScriptableObject<MerchantInventory>();
-        }
-
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Status Effect")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Status Effect")]
-        public static void CreateStatusEffect() {
-            CreateScriptableObject<StatusEffectModel>();
-        }
-
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Faction")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Faction")]
-        public static void CreateFaction() {
-            CreateScriptableObject<Faction>();
-        }
-
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Conversation")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Conversation")]
-		public static void CreateConversation() {
-			CreateScriptableObject<Conversation>();
-		}
-		
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Tools/Create Quest")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Tools/Create Quest")]
-		public static void CreateQuest() {
-			CreateScriptableObject<Quest>();
-        }
-
         [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
         [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
         public static void CreateActivatorData() {
             CreateScriptableObject<ActivatorModel>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
+        public static void CreateActorData() {
+            CreateScriptableObject<ActorModel>();
         }
 
         [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Ammo")]
@@ -111,12 +89,6 @@ namespace JusticeFramework.Editor.Tools {
         public static void CreateAmmoData() {
             CreateScriptableObject<AmmoModel>();
         }
-
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
-		public static void CreateActorData() {
-			CreateScriptableObject<ActorModel>();
-		}
 
 		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Armor")]
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Armor")]
@@ -134,9 +106,15 @@ namespace JusticeFramework.Editor.Tools {
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Consumable")]
 		public static void CreateConsumableData() {
 			CreateScriptableObject<ConsumableModel>();
-		}
+        }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Chest")]
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Conversation")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Conversation")]
+        public static void CreateConversation() {
+            CreateScriptableObject<Conversation>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Chest")]
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Chest")]
 		public static void CreateChestData() {
 			CreateScriptableObject<ChestModel>();
@@ -146,6 +124,12 @@ namespace JusticeFramework.Editor.Tools {
 		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Door")]
 		public static void CreateDoorData() {
 			CreateScriptableObject<DoorModel>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Faction")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Faction")]
+        public static void CreateFaction() {
+            CreateScriptableObject<Faction>();
         }
 
         [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
@@ -158,6 +142,36 @@ namespace JusticeFramework.Editor.Tools {
         [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Item")]
         public static void CreateItemData() {
             CreateScriptableObject<ItemModel>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Merchant Inventory")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Merchant Inventory")]
+        public static void CreateMerchantInventory() {
+            CreateScriptableObject<MerchantInventory>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Quest")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Quest")]
+        public static void CreateQuest() {
+            CreateScriptableObject<Quest>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Recipe")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Recipe")]
+        public static void CreateRecipeData() {
+            CreateScriptableObject<Recipe>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Setting")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Setting")]
+        public static void CreateSetting() {
+            CreateScriptableObject<Setting>();
+        }
+
+        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Status Effect")]
+        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Status Effect")]
+        public static void CreateStatusEffect() {
+            CreateScriptableObject<StatusEffectModel>();
         }
 
         [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Weapon")]

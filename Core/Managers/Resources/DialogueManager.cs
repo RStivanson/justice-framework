@@ -1,5 +1,5 @@
-﻿using JusticeFramework.Assets.JusticeFramework.Utility.Extensions;
-using JusticeFramework.Core.Models.Dialogue;
+﻿using JusticeFramework.Core.Models.Dialogue;
+using JusticeFramework.Utility.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

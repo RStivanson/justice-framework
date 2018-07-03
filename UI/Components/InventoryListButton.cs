@@ -11,7 +11,6 @@ namespace JusticeFramework.UI.Components {
 	/// Basic model container script attached to each button in the inventory screen list
 	/// </summary>
 	[Serializable]
-	[RequireComponent(typeof(Button))]
 	public class InventoryListButton : MonoBehaviour {
 		/// <summary>
 		/// The main button script on this object
