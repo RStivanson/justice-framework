@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace JusticeFramework.Editor.Inspectors {
+namespace JusticeFramework.Editor.Drawers {
     [CustomPropertyDrawer(typeof(Condition))]
     public class ConditionDrawer : PropertyDrawer {
         private const float PropertyBuffer = 5;
