@@ -87,7 +87,7 @@ namespace JusticeFramework.AI {
 			}
 
             if (animator != null) {
-                animator?.SetBool(Constants.IS_WALKING_PARAM, agent.hasPath);
+                animator?.SetBool(SystemConstants.AnimatorIsWalkingParam, agent.hasPath);
             }
 		}
 

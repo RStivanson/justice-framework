@@ -4,7 +4,7 @@ using JusticeFramework.Core.Interfaces;
 
 namespace JusticeFramework.Core.UI.Components {
 	[Serializable]
-	[AddComponentMenu("UGS/UI/Progress Bar")]
+	[AddComponentMenu("Justice Framework/UI/Progress Bar")]
 	public class ProgressBar : Window, IProgressBar {
 		[SerializeField]
 		[Range(0, 1)]

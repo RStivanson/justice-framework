@@ -36,20 +36,29 @@ namespace JusticeFramework.Core.Managers.Resources {
 
         public abstract void LoadResources();
 
-		protected void LoadResources(string path) {
+		protected void LoadResources(string path, bool clone = false) {
 			if (initialized) {
 				return;
 			}
 
-			initialized = true;
 
-			resources = UnityEngine.Resources.LoadAll<T>(path);
+            T[] loadedResources = UnityEngine.Resources.LoadAll<T>(path);
+
+            if (clone) {
+                for (int i = 0; i < loadedResources.Length; i++) {
+                    loadedResources[i] = UnityEngine.Object.Instantiate(loadedResources[i]);
+                }
+            }
+
+            resources = loadedResources;
 			resourcesById.Clear();
 
             OnPostProcessStart();
 
             PostProcessResources();
-		}
+
+            initialized = true;
+        }
 
         protected virtual void OnPostProcessStart() {
         }

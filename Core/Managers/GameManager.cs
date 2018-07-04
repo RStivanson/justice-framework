@@ -65,7 +65,7 @@ namespace JusticeFramework.Core.Managers {
                 }
 
 				if (Instance.player == null) {
-					Instance.player = Spawn("ActorPlayer", Vector3.zero, Quaternion.identity) as IActor;
+					Instance.player = Spawn(SystemConstants.AssetDataPlayerId, Vector3.zero, Quaternion.identity) as IActor;
 				}
 
 				return Instance.player;
@@ -193,8 +193,8 @@ namespace JusticeFramework.Core.Managers {
 			});
 		}
 		
-		[ConsoleCommand("tele", "Teleports the reference to the specified coordinates")]
-		private static void TeleportReference(IWorldObject reference, Vector3 position) {
+		[ConsoleCommand("tele", "Teleports the world object to the specified coordinates")]
+		private static void TeleportWorldObject(IWorldObject reference, Vector3 position) {
 			reference.Transform.position = position;
 		}
 
@@ -250,8 +250,8 @@ namespace JusticeFramework.Core.Managers {
 		[ConsoleCommand("spawnatplayer", "Spawns a new copy of the specified asset next to the player")]
 		private static void SpawnAtPlayer(string id) {
 			Transform playerTransform = Player.Transform;
-			Vector3 spawnPos = playerTransform.position + (playerTransform.forward * 2.0f);
-			spawnPos.y += 1.75f;
+			Vector3 spawnPos = playerTransform.position + (playerTransform.forward * settingsManager.GetFloat(SystemConstants.SettingItemDropSpawnY));
+			spawnPos.y += settingsManager.GetFloat(SystemConstants.SettingItemDropSpawnForward);
 
 			Spawn(id, spawnPos);
 		}
@@ -260,6 +260,12 @@ namespace JusticeFramework.Core.Managers {
 		
 #region Scene Management
 
+        /// <summary>
+        /// Loads a specific scene
+        /// </summary>
+        /// <param name="sceneName">The name of the scene to load</param>
+        /// <param name="onLoadComplete">Callback to be called when the scene has finished loading</param>
+        /// <param name="showLoadScreen">Flag indicating if the loading screen should be shown</param>
 		protected static void LoadLevel(string sceneName, UnityAction onLoadComplete = null, bool showLoadScreen = true) {
 			// Close all open windows and all open scenes
 			UiManager.UI.CloseAllWindows();
@@ -288,13 +294,28 @@ namespace JusticeFramework.Core.Managers {
 			}
 		}
 
+        /// <summary>
+        /// Called when a level has finished loading
+        /// </summary>
         protected virtual void OnLevelLoaded() {
         }
 
-		protected static void UnloadAllLevels(string mainSceneName = "MainScene") {
+        /// <summary>
+        /// Unloads all scenes except for the main scene
+        /// </summary>
+        /// <param name="mainSceneName">Main scene with the game manager instance</param>
+		protected static void UnloadAllLevels(string mainSceneName = null) {
+            // If the provided scene is empty or null
+            if (string.IsNullOrEmpty(mainSceneName)) {
+                // Get the default setting from the setting manager
+                mainSceneName = settingsManager.GetString(SystemConstants.SettingSceneMainScene);
+            }
+
+            // For each loaded scene
 			for (int i = SceneManager.sceneCount - 1; i > 0; i--) {
 				Scene scene = SceneManager.GetSceneAt(i);
 
+                // If this scene is not the main scene, unload it
 				if (!scene.name.Equals(mainSceneName)) {
 					SceneManager.UnloadSceneAsync(scene);
 				}

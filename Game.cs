@@ -1,4 +1,5 @@
 ﻿using JusticeFramework.Components;
+using JusticeFramework.Core;
 using JusticeFramework.Core.AI.BehaviourTree;
 using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.Managers;
@@ -15,7 +16,7 @@ public class Game : GameManager {
 	public AudioClip ambientMusic;
 	
 	protected override void OnInitialized() {
-		SceneManager.LoadScene("MainMenu", LoadSceneMode.Additive);
+		SceneManager.LoadScene(SettingsManager.GetString(SystemConstants.SettingSceneMainMenu), LoadSceneMode.Additive);
 		UiManager.UI.OpenWindow<MainMenuView>();
 	}
 
@@ -43,7 +44,7 @@ public class Game : GameManager {
 
         if (Input.GetKeyDown(KeyCode.U)) {
             Actor player = Player as Actor;
-            player.Unequip(JusticeFramework.Core.EEquipSlot.Mainhand);
+            player.Unequip(EEquipSlot.Mainhand);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape)) {
@@ -71,7 +72,7 @@ public class Game : GameManager {
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             if (UiManager.UI.Peek().NotType<ConsoleView>()) {
                 ConsoleView view = UiManager.UI.OpenWindow<ConsoleView>();
-                view.SetCommandLibrary(GameManager.CommandLibrary);
+                view.SetCommandLibrary(CommandLibrary);
             }
         }
 

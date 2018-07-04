@@ -31,6 +31,8 @@ namespace JusticeFramework.Core.Managers {
 		private void Awake() {
             if (uiManager != null) {
                 Debug.LogError($"UIManager - There can only be one UI manager active at once, destroying self. (object name: {name})");
+                Destroy(gameObject);
+                return;
             }
 
 			uiManager = this;

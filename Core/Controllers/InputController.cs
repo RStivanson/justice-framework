@@ -162,8 +162,8 @@ namespace JusticeFramework.Core.Controllers {
 				return;
 			}
 
-			float yRot = Input.GetAxis("Mouse X") * XSensitivity;
-			float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
+			float yRot = Input.GetAxis(SystemConstants.InputMouseX) * XSensitivity;
+			float xRot = Input.GetAxis(SystemConstants.InputMouseY) * YSensitivity;
 
 			m_LookAngle += yRot;
 			m_TiltAngle -= xRot;
@@ -234,16 +234,16 @@ namespace JusticeFramework.Core.Controllers {
 		}
 
 		private Vector3 UpdateMovement() {
-			Vector3 moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, UnityEngine.Input.GetAxis("Vertical"));
+			Vector3 moveDirection = new Vector3(Input.GetAxis(SystemConstants.InputHorizontal), 0, Input.GetAxis(SystemConstants.InputVertical));
 
 			UpdateState(moveDirection, Input.GetKey(KeyCode.LeftShift), Input.GetKeyDown(KeyCode.LeftAlt), !characterController.isGrounded);
 
 			switch (State) {
 				case EMotorState.WALKING:
-					animator.SetBool(Constants.IS_WALKING_PARAM, true);
+					animator.SetBool(SystemConstants.AnimatorIsWalkingParam, true);
 					break;
 				case EMotorState.IDLE:
-					animator.SetBool(Constants.IS_WALKING_PARAM, false);
+					animator.SetBool(SystemConstants.AnimatorIsWalkingParam, false);
 					break;
 			}
 

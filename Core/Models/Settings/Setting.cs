@@ -34,6 +34,7 @@ namespace JusticeFramework.Core.Models.Settings {
         /// </summary>
         public float FloatValue {
             get { return floatValue; }
+            set { floatValue = value; }
         }
 
         /// <summary>
@@ -41,6 +42,7 @@ namespace JusticeFramework.Core.Models.Settings {
         /// </summary>
         public string StringValue {
             get { return stringValue; }
+            set { stringValue = value; }
         }
 
         /// <summary>

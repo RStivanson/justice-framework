@@ -33,14 +33,14 @@ namespace JusticeFramework.Core.Controllers {
 			zoomDelta = Input.mouseScrollDelta.y * zoomSpeed * Time.deltaTime * (Input.GetKey(KeyCode.LeftShift) ? zoomModifier : 1);
 
 			if (Input.GetMouseButton(UNITY_DRAG_MOVE_MOUSE_BUTTON)) {
-				xMoveDelta = -Input.GetAxis("Mouse X") * moveSpeed * Time.deltaTime;
-				yMoveDelta = -Input.GetAxis("Mouse Y") * moveSpeed * Time.deltaTime;
+				xMoveDelta = -Input.GetAxis(SystemConstants.InputMouseX) * moveSpeed * Time.deltaTime;
+				yMoveDelta = -Input.GetAxis(SystemConstants.InputMouseY) * moveSpeed * Time.deltaTime;
 				
 				transform.position += transform.right * xMoveDelta;
 				transform.position += transform.up * yMoveDelta;
 			} else if (Input.GetMouseButton(UNITY_ROTATE_MOUSE_BUTTON)) {
- 				x += Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
-				y -= Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
+ 				x += Input.GetAxis(SystemConstants.InputMouseX) * rotateSpeed * Time.deltaTime;
+				y -= Input.GetAxis(SystemConstants.InputMouseY) * rotateSpeed * Time.deltaTime;
 
 				Quaternion rotation = Quaternion.Euler(y, x, 0);
 

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using JusticeFramework.AI;
-using JusticeFramework.Console;
 using JusticeFramework.Core.Models;
 using JusticeFramework.Core.Collections;
 using JusticeFramework.Core;
@@ -9,7 +7,6 @@ using JusticeFramework.Core.Events;
 using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Interfaces;
 using JusticeFramework.UI.Views;
-using JusticeFramework.Utility.Extensions;
 using UnityEngine;
 using JusticeFramework.Core.StatusEffects;
 using JusticeFramework.StatusEffects;
@@ -403,7 +400,7 @@ namespace JusticeFramework.Components {
 				threats.Add(firstEnemy);
 			}
 
-            actorAnimator.SetBool(Constants.IS_IN_COMBAT_PARAM, true);
+            actorAnimator.SetBool(SystemConstants.AnimatorIsInCombatParam, true);
 
             OnReferenceStateChanged();
 			onEnterCombat?.Invoke(this);
@@ -414,7 +411,7 @@ namespace JusticeFramework.Components {
 			
 			threats.Clear();
 
-            actorAnimator.SetBool(Constants.IS_IN_COMBAT_PARAM, false);
+            actorAnimator.SetBool(SystemConstants.AnimatorIsInCombatParam, false);
 
             OnReferenceStateChanged();
 			onExitCombat?.Invoke(this);
@@ -437,8 +434,8 @@ namespace JusticeFramework.Components {
             IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
 
             if (weapon?.CanFire() ?? true) {
-                weapon?.EndFire(Id.Equals("ActorPlayer") ? Camera.main.transform : transform, this);
-                actorAnimator.SetTrigger(Constants.ATTACK_PARAM);
+                weapon?.EndFire(Id.Equals(SystemConstants.AssetDataPlayerId) ? Camera.main.transform : transform, this);
+                actorAnimator.SetTrigger(SystemConstants.AnimatorAttackParam);
             }
         }
 
@@ -507,8 +504,7 @@ namespace JusticeFramework.Components {
         }
 
         public int GetQuantity(string id) {
-            ItemListEntry entry = Inventory[id];
-            return entry?.count ?? 0;
+            return Inventory[id]?.count ?? 0;
         }
 
         public void ActivateItem(string id) {

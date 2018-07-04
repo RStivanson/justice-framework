@@ -1,18 +1,11 @@
 ﻿using JusticeFramework.Core.Models.Settings;
 using UnityEditor;
 using UnityEngine;
+using System.Reflection;
 
 namespace JusticeFramework.Editor.Inspectors {
     [CustomEditor(typeof(Setting))]
     public class SettingInspector : UnityEditor.Editor {
-        SerializedProperty floatValueProp;
-        SerializedProperty stringValueProp;
-
-        private void OnEnable() {
-            floatValueProp = serializedObject.FindProperty("floatValue");
-            stringValueProp = serializedObject.FindProperty("stringValue");
-        }
-
         public override void OnInspectorGUI() {
             Setting setting = (Setting)target;
 
@@ -24,8 +17,10 @@ namespace JusticeFramework.Editor.Inspectors {
             EditorGUILayout.IntField("Hased Id", setting.hashedId);
             GUI.enabled = true;
 
-            EditorGUILayout.PropertyField(floatValueProp, new GUIContent("Float Value"));
-            EditorGUILayout.PropertyField(stringValueProp, new GUIContent("String Value"));
+            setting.FloatValue = EditorGUILayout.FloatField("Float Value", setting.FloatValue);
+            setting.StringValue = EditorGUILayout.TextField("String Value", setting.StringValue);
+
+            setting.GetType().InvokeMember("OnValidate", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic, null, setting, null);
         }
     }
 }

@@ -13,15 +13,32 @@ using UnityEngine;
 namespace JusticeFramework.Core.Console {
     [Serializable]
 	public class CommandLibrary {
-		private const string RESERVED_SELF = "self";
-		private const string RESERVED_PLAYER = "player";
-		private const string RESERVED_TARGET = "target";
-		private const string RESERVED_VECTOR2_ZERO = "vector2.zero";
-		private const string RESERVED_VECTOR3_ZERO = "vector3.zero";
-		private const string RESERVED_VECTOR4_ZERO = "vector3.zero";
-		private const string RESERVED_QUATERNION_IDENTITY = "quaternion.identity";
+		private const string ReservedSelf = "self";
+		private const string ReservedPlayer = "player";
+        private const string ReservedTarget = "target";
+        private const string ReservedLookAt = "lookat";
+        private const string ReservedRaycastHit = "hit";
+        private const string ReservedZero = "zero";
+        private const string ReservedOne = "one";
+        private const string ReservedVector2Zero = "vector2.zero";
+        private const string ReservedVector3Zero = "vector3.zero";
+		private const string ReservedVector4Zero = "vector4.zero";
+        private const string ReservedIdentity = "identity";
+		private const string ReservedQuaternionIdentity = "quaternion.identity";
 
-		[SerializeField]
+        private const string ReservedReferenceModifierForward = "forward";
+        private const string ReservedReferenceModifierBackward = "backward";
+        private const string ReservedReferenceModifierUp = "up";
+        private const string ReservedReferenceModifierDown = "down";
+        private const string ReservedReferenceModifierLeft = "left";
+        private const string ReservedReferenceModifierRight = "right";
+        private const string ReservedReferenceModifierId = "id";
+        private const string ReservedReferenceModifierGameObjectName = "name";
+        private const string ReservedReferenceModifierDisplayName = "displayname";
+
+        private const float RaycastDistance = 50.0f;
+
+        [SerializeField]
 		private static Dictionary<string, List<Command>> registeredCommands;
 
 		[SerializeField]
@@ -67,13 +84,18 @@ namespace JusticeFramework.Core.Console {
 		private void DefineKeywords() {
 			keywordHandlers = new Dictionary<string, Func<ParameterInfo, string, object>>();
 
-			keywordHandlers.Add("self", SelfKeywordHandler);
-			keywordHandlers.Add("player", SelfKeywordHandler);
-			keywordHandlers.Add("target", TargetKeywordHandler);
-			keywordHandlers.Add("lookat", TargetKeywordHandler);
-			keywordHandlers.Add("zero", ZeroKeywordHandler);
-			keywordHandlers.Add("one", OneKeywordHandler);
-			keywordHandlers.Add("identity", IdentityKeywordHandler);
+            keywordHandlers.Add(ReservedSelf, SelfKeywordHandler);
+			keywordHandlers.Add(ReservedPlayer, SelfKeywordHandler);
+			keywordHandlers.Add(ReservedTarget, TargetKeywordHandler);
+			keywordHandlers.Add(ReservedLookAt, TargetKeywordHandler);
+            keywordHandlers.Add(ReservedRaycastHit, RaycastHitKeywordHandler);
+            keywordHandlers.Add(ReservedZero, ZeroKeywordHandler);
+            keywordHandlers.Add(ReservedOne, OneKeywordHandler);
+            keywordHandlers.Add(ReservedVector2Zero, Vector2ZeroKeywordHandler);
+            keywordHandlers.Add(ReservedVector3Zero, Vector3ZeroKeywordHandler);
+            keywordHandlers.Add(ReservedVector4Zero, Vector4ZeroKeywordHandler);
+            keywordHandlers.Add(ReservedIdentity, IdentityKeywordHandler);
+            keywordHandlers.Add(ReservedQuaternionIdentity, IdentityKeywordHandler);
 		}
 
 		private bool IsKeyword(string data) {
@@ -100,23 +122,23 @@ namespace JusticeFramework.Core.Console {
 			object result = null;
 
 			if (reference != null) {
-				if (modifier.Equals("forward")) {
+				if (modifier.Equals(ReservedReferenceModifierForward)) {
 					result = reference.Transform.forward;
-				} else if (modifier.Equals("backward")) {
+				} else if (modifier.Equals(ReservedReferenceModifierBackward)) {
 					result = -reference.Transform.forward;
-				} else if (modifier.Equals("up")) {
+				} else if (modifier.Equals(ReservedReferenceModifierUp)) {
 					result = reference.Transform.up;
-				} else if (modifier.Equals("down")) {
+				} else if (modifier.Equals(ReservedReferenceModifierDown)) {
 					result = -reference.Transform.up;
-				} else if (modifier.Equals("right")) {
+				} else if (modifier.Equals(ReservedReferenceModifierRight)) {
 					result = reference.Transform.right;
-				} else if (modifier.Equals("left")) {
+				} else if (modifier.Equals(ReservedReferenceModifierLeft)) {
 					result = -reference.Transform.right;
-				} else if (modifier.Equals("id")) {
+				} else if (modifier.Equals(ReservedReferenceModifierId)) {
 					result = reference.Id;
-				} else if (modifier.Equals("name")) {
+				} else if (modifier.Equals(ReservedReferenceModifierGameObjectName)) {
 					result = reference.Transform.name;
-				} else if (modifier.Equals("displayname")) {
+				} else if (modifier.Equals(ReservedReferenceModifierDisplayName)) {
 					result = reference.DisplayName;
 				}
 			}
@@ -186,11 +208,32 @@ namespace JusticeFramework.Core.Console {
 			return result;
 		}
 
-		private object IdentityKeywordHandler(ParameterInfo parameterInfo, string data) {
-			return Quaternion.identity;
-		}
+        private object RaycastHitKeywordHandler(ParameterInfo parameterInfo, string data) {
+            Transform mainCamera = Camera.main.transform;
+            RaycastHit hit;
 
-		private object VectorKeywordHandler(ParameterInfo parameterInfo, string data) {
+            Physics.Raycast(mainCamera.position, mainCamera.forward, out hit, RaycastDistance);
+
+            return hit.transform;
+        }
+
+        private object Vector2ZeroKeywordHandler(ParameterInfo parameterInfo, string data) {
+            return Vector2.zero;
+        }
+
+        private object Vector3ZeroKeywordHandler(ParameterInfo parameterInfo, string data) {
+            return Vector3.zero;
+        }
+
+        private object Vector4ZeroKeywordHandler(ParameterInfo parameterInfo, string data) {
+            return Vector4.zero;
+        }
+
+        private object IdentityKeywordHandler(ParameterInfo parameterInfo, string data) {
+            return Quaternion.identity;
+        }
+
+        private object VectorTypeHandler(ParameterInfo parameterInfo, string data) {
 			object result = null;
 			
 			if (!data.Equals(string.Empty)) {
@@ -247,7 +290,7 @@ namespace JusticeFramework.Core.Console {
 		}
 		
 		private string RemoveCasing(string data) {
-			return data.Substring(1, data.Length - 2);;
+			return data.Substring(1, data.Length - 2);
 		}
 		
 #endregion
@@ -361,14 +404,12 @@ namespace JusticeFramework.Core.Console {
 						throw new MissingArgumentException(parameterInfos.Length, parameters.Length - 1, null);
 					}
 				} else {
-					//parameterObjects[i] = ConvertParameterToObject(parameterInfos[i], parameters[parameterIndex]);
-
 					// If the given parameter is a reserved keyword
 					if (IsKeyword(parameters[parameterIndex])) {
 						// handle the keyword
 						parameterObjects[i] = HandleKeyword(parameterInfos[i], parameters[parameterIndex]);
 					} else if (IsParenthesized(parameters[parameterIndex])) {
-						parameterObjects[i] = VectorKeywordHandler(parameterInfos[i], RemoveCasing(parameters[parameterIndex]));
+						parameterObjects[i] = VectorTypeHandler(parameterInfos[i], RemoveCasing(parameters[parameterIndex]));
 					} else {
 						string data = parameters[parameterIndex];
 
@@ -385,64 +426,6 @@ namespace JusticeFramework.Core.Console {
 			return parameterObjects;
 		}
 
-		private object ConvertParameterToObject(ParameterInfo info, string parameter) {
-			object result;
-
-			if (parameter.ToLower().ToLower().Equals(RESERVED_SELF)) {
-				result = GameManager.Player;
-			} else if (parameter.ToLower().ToLower().Equals(RESERVED_TARGET)) {
-				result = interactionController?.CurrentTarget;
-			} else if (parameter.ToLower().ToLower().Equals(RESERVED_VECTOR2_ZERO)) {
-				result = Vector2.zero;
-			} else if (parameter.ToLower().ToLower().Equals(RESERVED_VECTOR3_ZERO)) {
-				result = Vector3.zero;
-			} else if (parameter.ToLower().ToLower().Equals(RESERVED_QUATERNION_IDENTITY)) {
-				result = Quaternion.identity;
-			} else if (info.ParameterType == typeof(Vector2)) {
-				string[] split = parameter.Split(',');
-				
-				result = new Vector2( 
-					float.Parse(split[0]),
-					float.Parse(split[1])
-				);
-				
-			} else if (info.ParameterType == typeof(Vector3)) {
-				string[] split = parameter.Split(',');
-				
-				result = new Vector3( 
-					float.Parse(split[0]),
-					float.Parse(split[1]),
-					float.Parse(split[2])
-				);
-				
-			} else if (info.ParameterType == typeof(Vector4)) {
-				string[] split = parameter.Split(',');
-				
-				result = new Vector4( 
-					float.Parse(split[0]),
-					float.Parse(split[1]),
-					float.Parse(split[2]),
-					float.Parse(split[3])
-				);
-				
-			} else if (info.ParameterType == typeof(Quaternion)) {
-				string[] split = parameter.Split(',');
-				
-				result = new Quaternion( 
-					float.Parse(split[0]),
-					float.Parse(split[1]),
-					float.Parse(split[2]),
-					float.Parse(split[3])
-				);
-				
-			} else {
-				// Convert the parameter to the specified type
-				result = TypeDescriptor.GetConverter(info.ParameterType).ConvertFrom(parameter);
-			}
-
-			return result;
-		}
-		
 #endregion
 
 #region Command Management
