@@ -195,7 +195,13 @@ namespace JusticeFramework.Core.Managers {
 		
 		[ConsoleCommand("tele", "Teleports the world object to the specified coordinates")]
 		private static void TeleportWorldObject(IWorldObject reference, Vector3 position) {
-			reference.Transform.position = position;
+            TeleportTransform(reference.Transform, position);
+		}
+        
+		
+		[ConsoleCommand("tele", "Teleports the transform to the specified coordinates")]
+		private static void TeleportTransform(Transform transform, Vector3 position) {
+			transform.position = position;
 		}
 
 #endregion
