@@ -18,6 +18,8 @@ namespace JusticeFramework.AI.BehaviourTree.Nodes.Actions {
 			if (controller.Agent.remainingDistance > controller.Agent.stoppingDistance) {
 				return ENodeStatus.Running;
 			}
+
+            controller.Agent.ResetPath();
 			
 			return ENodeStatus.Success;
 		}

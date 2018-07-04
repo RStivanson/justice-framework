@@ -77,7 +77,7 @@ namespace JusticeFramework.AI {
 			}
 
 			if (!GameManager.IsPaused) {
-				//tree?.Tick(tickState);
+				tree?.Tick(tickState);
 				//tickState.debug = true;
 				//setList[setList.Count - 1]?.Tick(tickState);
 			}
