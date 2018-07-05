@@ -7,6 +7,7 @@ using JusticeFramework.Core.Managers.Resources;
 using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.Console;
 using JusticeFramework.Core.UI.Views;
+using JusticeFramework.Core.Models.Settings;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -37,10 +38,7 @@ namespace JusticeFramework.Core.Managers {
 
         [SerializeField]
         protected static RecipeManager recipeManager;
-
-        [SerializeField]
-        protected static SettingsManager settingsManager;
-
+        
         [SerializeField]
 		protected CommandLibrary commandLibrary;
 		
@@ -49,6 +47,9 @@ namespace JusticeFramework.Core.Managers {
 
 		[SerializeField]
 		protected bool isPaused;
+
+        [SerializeField]
+        protected AudioSource ambientAudioSource;
 		
 #endregion
 
@@ -108,14 +109,14 @@ namespace JusticeFramework.Core.Managers {
         public static RecipeManager RecipeManager {
             get { return recipeManager; }
         }
-
-        public static SettingsManager SettingsManager {
-            get { return settingsManager; }
-        }
-
+        
         public DateTime GameTime {
 			get { return gameTime; }
 		}
+
+        public static AudioSource AmbientSource {
+            get { return Instance.ambientAudioSource; }
+        }
 
 		public static CommandLibrary CommandLibrary {
 			get { return Instance.commandLibrary; }
@@ -126,28 +127,29 @@ namespace JusticeFramework.Core.Managers {
 			get; protected set;
 		}
 
-#endregion
-
-		private void Awake() {
+        #endregion
+        
+        private void Awake() {
             if (gameManager != null) {
                 Debug.LogError($"GameManager - There can only be one game manager active at once, destroying self. (object name: {name})");
                 Destroy(gameObject);
                 return;
             }
-
+            
 			gameManager = this;
+
+            SystemSettings.Load(SystemConstants.SavePath, SystemConstants.SettingsFileName, true);
+            SystemSettings.ApplySettings();
 			
 			assetManager = new AssetManager();
             dialogueManager = new DialogueManager();
             questManager = new QuestManager();
             recipeManager = new RecipeManager();
-            settingsManager = new SettingsManager();
 
             assetManager.LoadResources();
             dialogueManager.LoadResources();
 			questManager.LoadResources();
             recipeManager.LoadResources();
-            settingsManager.LoadResources();
 
             CommandLibrary = new CommandLibrary();
 
@@ -256,8 +258,8 @@ namespace JusticeFramework.Core.Managers {
 		[ConsoleCommand("spawnatplayer", "Spawns a new copy of the specified asset next to the player")]
 		private static void SpawnAtPlayer(string id) {
 			Transform playerTransform = Player.Transform;
-			Vector3 spawnPos = playerTransform.position + (playerTransform.forward * settingsManager.GetFloat(SystemConstants.SettingItemDropSpawnY));
-			spawnPos.y += settingsManager.GetFloat(SystemConstants.SettingItemDropSpawnForward);
+			Vector3 spawnPos = playerTransform.position + (playerTransform.forward * 2f);
+			spawnPos.y += 1;
 
 			Spawn(id, spawnPos);
 		}
@@ -314,7 +316,7 @@ namespace JusticeFramework.Core.Managers {
             // If the provided scene is empty or null
             if (string.IsNullOrEmpty(mainSceneName)) {
                 // Get the default setting from the setting manager
-                mainSceneName = settingsManager.GetString(SystemConstants.SettingSceneMainScene);
+                mainSceneName = SystemConstants.SettingMainScene;
             }
 
             // For each loaded scene

@@ -1,7 +1,6 @@
 ﻿using JusticeFramework.AI.BehaviourTree.Nodes.Actions;
 using JusticeFramework.AI.BehaviourTree.Nodes.Conditions;
 using JusticeFramework.Components;
-using JusticeFramework.Core;
 using JusticeFramework.Core.AI;
 using JusticeFramework.Core.AI.BehaviourTree;
 using JusticeFramework.Core.AI.BehaviourTree.Builder;
@@ -11,6 +10,7 @@ using JusticeFramework.Core.AI.BehaviourTree.Nodes.Decorators;
 using JusticeFramework.Core.AI.BehaviourTree.Nodes.Leafs;
 using JusticeFramework.Core.Controllers;
 using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models.Settings;
 using System;
 using System.Collections;
 using UnityEngine;

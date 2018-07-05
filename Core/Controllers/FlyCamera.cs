@@ -1,8 +1,9 @@
-﻿using System;
+﻿using JusticeFramework.Core.Models.Settings;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Core.Controllers {
-	[Serializable]
+    [Serializable]
 	public class FlyCamera : MonoBehaviour {
 		private const int UNITY_ROTATE_MOUSE_BUTTON = 1;
 		private const int UNITY_DRAG_MOVE_MOUSE_BUTTON = 2;

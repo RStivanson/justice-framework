@@ -1,9 +1,10 @@
-﻿using System;
-using JusticeFramework.Core.Managers;
+﻿using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models.Settings;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Core.Controllers {
-	[Serializable]
+    [Serializable]
 	[DisallowMultipleComponent()]
 	public class InputController : Controller {
 		[SerializeField]

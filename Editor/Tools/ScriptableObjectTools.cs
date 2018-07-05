@@ -165,7 +165,7 @@ namespace JusticeFramework.Editor.Tools {
         [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Setting")]
         [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Setting")]
         public static void CreateSetting() {
-            CreateScriptableObject<Setting>();
+            CreateScriptableObject<GameSetting>();
         }
 
         [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Status Effect")]

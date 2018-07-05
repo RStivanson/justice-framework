@@ -4,10 +4,10 @@ using UnityEngine;
 using System.Reflection;
 
 namespace JusticeFramework.Editor.Inspectors {
-    [CustomEditor(typeof(Setting))]
+    [CustomEditor(typeof(GameSetting))]
     public class SettingInspector : UnityEditor.Editor {
         public override void OnInspectorGUI() {
-            Setting setting = (Setting)target;
+            GameSetting setting = (GameSetting)target;
 
             GUI.enabled = !setting.IsSystemSetting;
             setting.id = EditorGUILayout.TextField("Id", setting.id);

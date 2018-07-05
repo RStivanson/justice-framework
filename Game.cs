@@ -3,6 +3,7 @@ using JusticeFramework.Core;
 using JusticeFramework.Core.AI.BehaviourTree;
 using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models.Settings;
 using JusticeFramework.UI.Views;
 using JusticeFramework.Utility.Extensions;
 using System;
@@ -16,21 +17,27 @@ public class Game : GameManager {
 	public AudioClip ambientMusic;
 	
 	protected override void OnInitialized() {
-		SceneManager.LoadScene(SettingsManager.GetString(SystemConstants.SettingSceneMainMenu), LoadSceneMode.Additive);
+		SceneManager.LoadScene(SystemConstants.SettingMainMenuScene, LoadSceneMode.Additive);
 		UiManager.UI.OpenWindow<MainMenuView>();
 	}
 
 	private void Update() {
-		if (!IsPlaying) {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (IsPlaying) {
+                if (UiManager.UI.Peek() is HudView) {
+                    UiManager.UI.OpenWindow<SystemMenuView>();
+                } else {
+                    UiManager.UI.CloseTop();
+                }
+            } else {
+                if (!(UiManager.UI.Peek() is MainMenuView)) {
+                    UiManager.UI.CloseTop();
+                }
+            }
+        }
+
+        if (!IsPlaying) {
 			return;
-		}
-
-		if (Input.GetKeyDown(KeyCode.H)) {
-			QualitySettings.vSyncCount = QualitySettings.vSyncCount == 0 ? 1 : 0;
-		}
-
-		if (Input.GetKeyDown(KeyCode.J)) {
-			Application.targetFrameRate = Application.targetFrameRate == 60 ? 0 : 60;
 		}
 
 		if (Input.GetKeyDown(KeyCode.K)) {
@@ -47,23 +54,15 @@ public class Game : GameManager {
             player.Unequip(EEquipSlot.Mainhand);
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            if (IsPlaying && UiManager.UI.Peek() is HudView) {
-                UiManager.UI.OpenWindow<SystemMenuView>();
-            } else {
-                UiManager.UI.CloseTop();
-            }
-        }
-
         if (Input.GetKeyDown(KeyCode.Tab)) {
-            if (IsPlaying && UiManager.UI.Peek() is HudView) {
+            if (UiManager.UI.Peek() is HudView) {
                 ContainerView view = UiManager.UI.OpenWindow<ContainerView>();
                 view.View(Player, null);
             }
         }
 
         if (Input.GetKeyDown(KeyCode.F)) {
-            if (IsPlaying && UiManager.UI.Peek() is HudView) {
+            if (UiManager.UI.Peek() is HudView) {
                 CraftingView crafting = UiManager.UI.OpenWindow<CraftingView>();
                 crafting.View(Player);
             }
@@ -99,8 +98,8 @@ public class Game : GameManager {
         playerTrans.gameObject.SetActive(true);
         playerTrans.position = new Vector3(-719.5f, 50, -53.25f);
 
-        GetComponent<AudioSource>().clip = ambientMusic;
-		GetComponent<AudioSource>().Play();
+        ambientAudioSource.clip = ambientMusic;
+        ambientAudioSource.Play();
 		CommandLibrary.SetInteractionController(playerTrans.GetComponent<IInteractionController>());
 		
 		Unpause();

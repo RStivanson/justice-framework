@@ -1,4 +1,6 @@
-﻿namespace JusticeFramework.Core {
+﻿using UnityEngine;
+
+namespace JusticeFramework.Core.Models.Settings {
     public static class SystemConstants {
         public const string AnimatorIdleState = "Idle";
         public const string AnimatorCombatIdleState = "CombatIdle";
@@ -15,9 +17,10 @@
         public const string InputHorizontal = "Horizontal";
         public const string InputVertical = "Vertical";
 
-        public const string SettingItemDropSpawnY = "ItemDropSpawnY";
-        public const string SettingItemDropSpawnForward = "ItemDropSpawnForward";
-        public const string SettingSceneMainMenu = "SceneMainMenu";
-        public const string SettingSceneMainScene = "SceneMainScene";
+        public static readonly string SavePath = Application.persistentDataPath;
+        public const string SettingsFileName = "settings.json";
+
+        public const string SettingMainMenuScene = "MainMenu";
+        public const string SettingMainScene = "MainScene";
     }
 }

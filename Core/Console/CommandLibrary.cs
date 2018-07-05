@@ -13,28 +13,28 @@ using UnityEngine;
 namespace JusticeFramework.Core.Console {
     [Serializable]
 	public class CommandLibrary {
-		private const string ReservedSelf = "self";
-		private const string ReservedPlayer = "player";
-        private const string ReservedTarget = "target";
-        private const string ReservedLookAt = "lookat";
-        private const string ReservedRaycastHit = "hit";
-        private const string ReservedZero = "zero";
-        private const string ReservedOne = "one";
-        private const string ReservedVector2Zero = "vector2.zero";
-        private const string ReservedVector3Zero = "vector3.zero";
-		private const string ReservedVector4Zero = "vector4.zero";
-        private const string ReservedIdentity = "identity";
-		private const string ReservedQuaternionIdentity = "quaternion.identity";
+		private const string KeywordSelf = "self";
+		private const string KeywordPlayer = "player";
+        private const string KeywordTarget = "target";
+        private const string KeywordLookAt = "lookat";
+        private const string KeywordRaycastHit = "hit";
+        private const string KeywordZero = "zero";
+        private const string KeywordOne = "one";
+        private const string KeywordVector2Zero = "vector2.zero";
+        private const string KeywordVector3Zero = "vector3.zero";
+		private const string KeywordVector4Zero = "vector4.zero";
+        private const string KeywordIdentity = "identity";
+		private const string KeywordQuaternionIdentity = "quaternion.identity";
 
-        private const string ReservedReferenceModifierForward = "forward";
-        private const string ReservedReferenceModifierBackward = "backward";
-        private const string ReservedReferenceModifierUp = "up";
-        private const string ReservedReferenceModifierDown = "down";
-        private const string ReservedReferenceModifierLeft = "left";
-        private const string ReservedReferenceModifierRight = "right";
-        private const string ReservedReferenceModifierId = "id";
-        private const string ReservedReferenceModifierGameObjectName = "name";
-        private const string ReservedReferenceModifierDisplayName = "displayname";
+        private const string ModifierWorldObjectForward = "forward";
+        private const string ModifierWorldObjectBackward = "backward";
+        private const string ModifierWorldObjectUp = "up";
+        private const string ModifierWorldObjectDown = "down";
+        private const string ModifierWorldObjectLeft = "left";
+        private const string ModifierWorldObjectRight = "right";
+        private const string ModifierWorldObjectId = "id";
+        private const string ModifierWorldObjectName = "name";
+        private const string ModifierWorldObjectDisplayName = "displayname";
 
         private const float RaycastDistance = 50.0f;
 
@@ -84,18 +84,18 @@ namespace JusticeFramework.Core.Console {
 		private void DefineKeywords() {
 			keywordHandlers = new Dictionary<string, Func<ParameterInfo, string, object>>();
 
-            keywordHandlers.Add(ReservedSelf, SelfKeywordHandler);
-			keywordHandlers.Add(ReservedPlayer, SelfKeywordHandler);
-			keywordHandlers.Add(ReservedTarget, TargetKeywordHandler);
-			keywordHandlers.Add(ReservedLookAt, TargetKeywordHandler);
-            keywordHandlers.Add(ReservedRaycastHit, RaycastHitKeywordHandler);
-            keywordHandlers.Add(ReservedZero, ZeroKeywordHandler);
-            keywordHandlers.Add(ReservedOne, OneKeywordHandler);
-            keywordHandlers.Add(ReservedVector2Zero, Vector2ZeroKeywordHandler);
-            keywordHandlers.Add(ReservedVector3Zero, Vector3ZeroKeywordHandler);
-            keywordHandlers.Add(ReservedVector4Zero, Vector4ZeroKeywordHandler);
-            keywordHandlers.Add(ReservedIdentity, IdentityKeywordHandler);
-            keywordHandlers.Add(ReservedQuaternionIdentity, IdentityKeywordHandler);
+            keywordHandlers.Add(KeywordSelf, SelfKeywordHandler);
+			keywordHandlers.Add(KeywordPlayer, SelfKeywordHandler);
+			keywordHandlers.Add(KeywordTarget, TargetKeywordHandler);
+			keywordHandlers.Add(KeywordLookAt, TargetKeywordHandler);
+            keywordHandlers.Add(KeywordRaycastHit, RaycastHitKeywordHandler);
+            keywordHandlers.Add(KeywordZero, ZeroKeywordHandler);
+            keywordHandlers.Add(KeywordOne, OneKeywordHandler);
+            keywordHandlers.Add(KeywordVector2Zero, Vector2ZeroKeywordHandler);
+            keywordHandlers.Add(KeywordVector3Zero, Vector3ZeroKeywordHandler);
+            keywordHandlers.Add(KeywordVector4Zero, Vector4ZeroKeywordHandler);
+            keywordHandlers.Add(KeywordIdentity, IdentityKeywordHandler);
+            keywordHandlers.Add(KeywordQuaternionIdentity, IdentityKeywordHandler);
 		}
 
 		private bool IsKeyword(string data) {
@@ -122,23 +122,23 @@ namespace JusticeFramework.Core.Console {
 			object result = null;
 
 			if (reference != null) {
-				if (modifier.Equals(ReservedReferenceModifierForward)) {
+				if (modifier.Equals(ModifierWorldObjectForward)) {
 					result = reference.Transform.forward;
-				} else if (modifier.Equals(ReservedReferenceModifierBackward)) {
+				} else if (modifier.Equals(ModifierWorldObjectBackward)) {
 					result = -reference.Transform.forward;
-				} else if (modifier.Equals(ReservedReferenceModifierUp)) {
+				} else if (modifier.Equals(ModifierWorldObjectUp)) {
 					result = reference.Transform.up;
-				} else if (modifier.Equals(ReservedReferenceModifierDown)) {
+				} else if (modifier.Equals(ModifierWorldObjectDown)) {
 					result = -reference.Transform.up;
-				} else if (modifier.Equals(ReservedReferenceModifierRight)) {
+				} else if (modifier.Equals(ModifierWorldObjectRight)) {
 					result = reference.Transform.right;
-				} else if (modifier.Equals(ReservedReferenceModifierLeft)) {
+				} else if (modifier.Equals(ModifierWorldObjectLeft)) {
 					result = -reference.Transform.right;
-				} else if (modifier.Equals(ReservedReferenceModifierId)) {
+				} else if (modifier.Equals(ModifierWorldObjectId)) {
 					result = reference.Id;
-				} else if (modifier.Equals(ReservedReferenceModifierGameObjectName)) {
+				} else if (modifier.Equals(ModifierWorldObjectName)) {
 					result = reference.Transform.name;
-				} else if (modifier.Equals(ReservedReferenceModifierDisplayName)) {
+				} else if (modifier.Equals(ModifierWorldObjectDisplayName)) {
 					result = reference.DisplayName;
 				}
 			}

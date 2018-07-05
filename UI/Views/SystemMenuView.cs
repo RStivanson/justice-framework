@@ -17,6 +17,10 @@ namespace JusticeFramework.UI.Views {
 		public void ResumeGame() {
 			Close();
 		}
+
+        public void OpenSettings() {
+            UiManager.UI.OpenWindow<SettingsView>();
+        }
 	
 		public void ExitGame() {
 			GameManager.ExitGame();

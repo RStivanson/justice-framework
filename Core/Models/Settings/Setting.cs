@@ -9,7 +9,7 @@ namespace JusticeFramework.Core.Models.Settings {
     /// Data class that holds information pertaining to a game setting
     /// </summary>
     [Serializable]
-    public class Setting : EntityModel {
+    public class GameSetting : EntityModel {
         /// <summary>
         /// Floating numeric value represented by this setting
         /// </summary>
@@ -66,7 +66,7 @@ namespace JusticeFramework.Core.Models.Settings {
         /// <param name="menuCommand"></param>
         [MenuItem("CONTEXT/Setting/Toggle System Setting Flag")]
         public static void SetAsSystemSetting(MenuCommand menuCommand) {
-            Setting setting = menuCommand.context as Setting;
+            GameSetting setting = menuCommand.context as GameSetting;
 
             if (setting != null) {
                 setting.isSystemSetting = !setting.isSystemSetting;

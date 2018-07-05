@@ -3,6 +3,7 @@ using JusticeFramework.Core.Console;
 using JusticeFramework.Core.Events;
 using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Models.Settings;
 using JusticeFramework.Utility.Extensions;
 using System;
 using UnityEngine;
@@ -158,9 +159,8 @@ namespace JusticeFramework.Components {
         /// </summary>
         /// <param name="clip">The audio clip to play</param>
         /// <param name="volume">The volume to play the sound at</param>
-        public void PlaySound(AudioClip clip, float volume = 1) {
-            // TODO: GameSettings... GetVolume(volume, soundType)?
-            audioSource?.PlayOneShot(clip, volume);
+        public void PlaySound(AudioClip clip, EAudioType audioType, float volume = 1) {
+            audioSource?.PlayOneShot(clip, SystemSettings.GetScaledVolume(volume, audioType));
         }
 	}
 }

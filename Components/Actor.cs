@@ -1,20 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using JusticeFramework.Core.Models;
+﻿using JusticeFramework.Core;
 using JusticeFramework.Core.Collections;
-using JusticeFramework.Core;
+using JusticeFramework.Core.Console;
 using JusticeFramework.Core.Events;
 using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Interfaces;
-using JusticeFramework.UI.Views;
-using UnityEngine;
-using JusticeFramework.Core.StatusEffects;
-using JusticeFramework.StatusEffects;
 using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Console;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.Models.Settings;
+using JusticeFramework.Core.StatusEffects;
+using JusticeFramework.Interfaces;
+using JusticeFramework.StatusEffects;
+using JusticeFramework.UI.Views;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace JusticeFramework.Components {
-	public delegate void OnEnterCombat(Actor actorNowInCombat);
+    public delegate void OnEnterCombat(Actor actorNowInCombat);
 	public delegate void OnExitCombat(Actor actorNoLongerInCombat);
 	public delegate void OnLevelUp(Actor leveledUp, int newLevel);
 
@@ -271,6 +272,10 @@ namespace JusticeFramework.Components {
 			}
 		}
 
+        public bool IsPlayer {
+            get { return Id.Equals(SystemConstants.AssetDataPlayerId); }
+        }
+
 #endregion
 
 		/// <inheritdoc cref="WorldObject" />
@@ -434,7 +439,7 @@ namespace JusticeFramework.Components {
             IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
 
             if (weapon?.CanFire() ?? true) {
-                weapon?.EndFire(Id.Equals(SystemConstants.AssetDataPlayerId) ? Camera.main.transform : transform, this);
+                weapon?.EndFire(IsPlayer ? Camera.main.transform : transform, this);
                 actorAnimator.SetTrigger(SystemConstants.AnimatorAttackParam);
             }
         }

@@ -1,4 +1,5 @@
 ﻿using JusticeFramework.Components;
+using JusticeFramework.Core;
 using JusticeFramework.Core.Managers;
 using JusticeFramework.Core.Models.Dialogue;
 using JusticeFramework.Core.UI;
@@ -13,7 +14,7 @@ using UnityEngine.UI;
 namespace JusticeFramework.UI.Views {
     [Serializable]
 	public class DialogueView : Window {
-		private const float VOICEOVER_TIME_BUFFER = 0.25f;
+		private const float VoiceoverTimeBuffer = 0.25f;
 
 		[SerializeField]
 		private Text npcText;
@@ -107,8 +108,8 @@ namespace JusticeFramework.UI.Views {
 
 			float switchTime = 3;
 			if (response.Voiceover != null) {
-				switchTime = response.Voiceover.length + VOICEOVER_TIME_BUFFER;
-				currentTarget.PlaySound(response.Voiceover);
+				switchTime = response.Voiceover.length + VoiceoverTimeBuffer;
+				currentTarget.PlaySound(response.Voiceover, EAudioType.Dialogue);
 			}
 
 			npcText.text = response.ResponseText;
