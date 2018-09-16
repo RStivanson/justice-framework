@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace JusticeFramework.Core.Collections {
-    public delegate void OnInventoryItemAdded(Inventory inventory, string id, int quantity);
-    public delegate void OnInventoryItemRemoved(Inventory inventory, string id, int quantity);
+    public delegate void OnInventoryItemAction(Inventory inventory, string id, int quantity);
 
     /// <summary>
     /// A collection of game items
@@ -14,23 +13,23 @@ namespace JusticeFramework.Core.Collections {
         /// <summary>
         /// Event called when an item is added to the inventory
         /// </summary>
-        public event OnInventoryItemAdded onItemAdded;
+        public event OnInventoryItemAction onItemAdded;
         
         /// <summary>
         /// Event called when an item is removed from the inventory
         /// </summary>
-        public event OnInventoryItemRemoved onItemRemoved;
+        public event OnInventoryItemAction onItemRemoved;
 
 		/// <summary>
 		/// The contents of the item list
 		/// </summary>
 		[SerializeField]
-		private List<ItemListEntry> contents;
+		private List<InventoryEntry> contents;
 
 		/// <summary>
 		/// Gets the contents of the item list
 		/// </summary>
-		public List<ItemListEntry> Contents {
+		public List<InventoryEntry> Contents {
 			get { return contents; }
 		}
 
@@ -42,25 +41,30 @@ namespace JusticeFramework.Core.Collections {
 		}
 
 		/// <summary>
-		/// Gets the item with the specified ID
+		/// Gets the item with the specified Id
 		/// </summary>
 		/// <param name="id">The ID to search for</param>
-		public ItemListEntry this[string id] {
-			get { return Contents.Find(x => x.id.Equals(id)); }
+		public InventoryEntry this[string id] {
+			get {
+                int index = IndexOf(id);
+                return index != -1 ? contents[index] : null;
+            }
 		}
 
 		/// <summary>
 		/// Gets the items at the specified index
 		/// </summary>
 		/// <param name="key">The index to get the item at</param>
-		public ItemListEntry this[int key] {
+		public InventoryEntry this[int key] {
 			get { return Contents[key]; }
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the the item list
 		/// </summary>
-		public Inventory() : this(null) { }
+		public Inventory() {
+            contents = new List<InventoryEntry>();
+        }
 
 		/// <summary>
 		/// Initializes a new instance of the item list with the same data as the passed
@@ -76,115 +80,133 @@ namespace JusticeFramework.Core.Collections {
 		/// </summary>
 		/// <param name="id">The ID of the item</param>
 		/// <param name="amount">The quantity of the item</param>
-		/// <param name="weight">The indiviual item weight</param>
-		public void AddItem(string id, int amount, float weight) {
+		public void Add(string id, int amount) {
 			// If the amount is 0 or negative, do nothing
-			if (id == null || amount <= 0) {
+			if (amount <= 0) {
 				return;
 			}
 
-			// Try to get the item from the contents
-			ItemListEntry entry = contents.Find(x => x.id.Equals(id));
+            // Get the index of the item already stored
+            int itemIndex = IndexOf(id);
 
-			// If an item entry was found then merge the quantities
-			if (entry != null) {
-				entry.count += amount;
-			} else {
-				// Else add a new item
-				contents.Add(new ItemListEntry(id, amount, weight));
-			}
+            // If the item exists
+            if (itemIndex != -1) {
+                // Add to its stack
+                contents[itemIndex].Stack.Add(amount);
+            } else {
+                // Create a new entry
+                contents.Add(new InventoryEntry(id, amount));
+            }
 
+            // Invoke item added event
             onItemAdded?.Invoke(this, id, amount);
         }
 
 		/// <summary>
 		/// Removes a item from the item list
 		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="amount"></param>
-		/// <returns></returns>
-		public int RemoveItem(string id, int amount) {
-			int removed = 0;
-
+		/// <param name="id">The item Id to remove from the list</param>
+		/// <param name="amount">The amount of the item to remove</param>
+		/// <returns>Returns the amount remaining from the original remove amount</returns>
+		public int Remove(string id, int amount) {
+			int remaining = amount;
+            InventoryEntry entry;
+            
 			// For each item starting at the end of the list (To avoid dealing with incorrect
 			// indexing when an item is removed) while we have not run out of items and the
 			// amount of items to remove is still greater than zero
-			for (int i = contents.Count - 1; i >= 0 && amount > 0; --i) {
+			for (int i = contents.Count - 1; i >= 0 && remaining > 0; --i) {
+                entry = contents[i];
+
 				// If this is not an item we are looking for, go to the next one
-				if (!contents[i].id.Equals(id)) {
+				if (!entry.Id.Equals(id)) {
 					continue;
 				}
 
-				// If the count of the item is greater than the amount we want to remove
-				if (contents[i].count >= amount) {
-					// Remove the amount from the item and update the return and remaining
-					// amount fields
-					contents[i].count -= amount;
-					removed += amount;
-					amount = 0;
-				} else {
-					// Remove the amount of the current entry from the remaining amount and add
-					// it to the amount removed return value
-					amount -= contents[i].count;
-					removed += contents[i].count;
-					
-					// Ensure the items entry is at zero 
-					contents[i].count = 0;
-				}
-
+                // Remove the from the items stack and update the remaining by the amount removed
+                remaining = entry.Stack.Remove(remaining);
+                
 				// The item has no more in it's stack, remove it from the list
-				if (contents[i].count == 0) {
+				if (entry.IsEmpty) {
 					contents.RemoveAt(i);
 				}
 			}
 
-            onItemRemoved?.Invoke(this, id, removed);
+            // Invoke item removed event
+            onItemRemoved?.Invoke(this, id, amount - remaining);
 
-			return removed;
+			return remaining;
 		}
 
         /// <summary>
-        /// Calculates the current weight stored in the inventory
+        /// Determines if the list contains the given item and that item has a quantity greater than zero
         /// </summary>
-        /// <returns>Returns the weight of all items in the inventory</returns>
-        public float GetTotalWeight() {
-            float weight = 0;
-
-            // Get the weight from each item
-            foreach (ItemListEntry item in contents) {
-                weight += item.TotalStackWeight;
-            }
-
-            return weight;
+        /// <param name="id">The Id of the item to look for</param>
+        /// <returns>Returns true if the item list has the given Id with a non zero quantity, false otherwise</returns>
+		public bool Contains(string id) {
+            return Contains(id, 1);
         }
 
         /// <summary>
-        /// Determines if the list contains the given item
+        /// Determines if the list contains the given item and that item has a quantity greater than the specified quantity
         /// </summary>
-        /// <param name="id">The Id of the item to search for</param>
-        /// <returns>Returns true if the item list has the given Id, false otherwise</returns>
-		public bool HasItem(string id) {
-			return this[id] != null;
-		}
-		
-		/// <summary>
-		/// Deep copies the given item list
-		/// </summary>
-		/// <param name="itemList">The item list to copy data from</param>
-		private void CopyList(Inventory itemList) {
-			contents = new List<ItemListEntry>();
+        /// <param name="id">The Id of the item to look for</param>
+        /// <returns>Returns true if the item list has the given Id with at least the given quantity, false otherwise</returns>
+		public bool Contains(string id, int minimumQuantity) {
+            int index = IndexOf(id);
+            return index != -1 && contents[index].Stack.Quantity >= minimumQuantity;
+        }
 
-			if (itemList == null) {
+        /// <summary>
+        /// Gets the quantity of the item in the inventory
+        /// </summary>
+        /// <param name="id">The Id of the item to look for</param>
+        /// <returns>Returns the quantity of the item in the inventory, or 0 if the item is not in the inventory</returns>
+        public int GetQuantity(string id) {
+            int itemIndex = IndexOf(id);
+            return itemIndex != -1 ? contents[itemIndex].Stack.Quantity : 0;
+        }
+
+        /// <summary>
+        /// Gets the index of an item in the inventory
+        /// </summary>
+        /// <param name="id">The Id of the item to look for</param>
+        /// <returns>Returns the index of the item, -1 if it isn't found</returns>
+        private int IndexOf(string id) {
+            int index = -1;
+
+            // For each item in the list
+            for (int i = 0; i < contents.Count && index == -1; i++) {
+                // If the Ids match, get the index
+                if (contents[i].Id.Equals(id)) {
+                    index = i;
+                }
+            }
+
+            return index;
+        }
+
+		/// <summary>
+		/// Deep copies the given inventories contents
+		/// </summary>
+		/// <param name="inventory">The inventory to copy data from</param>
+		private void CopyList(Inventory inventory) {
+			contents = new List<InventoryEntry>();
+            
+            // If the list we got is invalid, do nothing
+			if (inventory == null) {
 				return;
 			}
 			
             // Copy each entry to this list
-			foreach (ItemListEntry entry in itemList.Contents) {
-				if (entry.count <= 0){
+			foreach (InventoryEntry entry in inventory.Contents) {
+                // If the entry is empty, don't add it
+				if (entry.IsEmpty){
 					continue;
 				}
 
-				contents.Add(new ItemListEntry(entry));
+                // Add a copy of the entry to our contents
+				contents.Add(new InventoryEntry(entry));
 			}
 		}
 	}

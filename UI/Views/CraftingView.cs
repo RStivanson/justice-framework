@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using JusticeFramework.Core.UI;
 using JusticeFramework.Core.Managers;
 using JusticeFramework.Core.Models.Crafting;
+using JusticeFramework.Core.Collections;
 
 namespace JusticeFramework.UI.Views {
     [Serializable]
@@ -38,8 +39,8 @@ namespace JusticeFramework.UI.Views {
                 return;
             }
 
-            if (Input.GetKeyDown(CRAFT_KEY_CODE) && HasIngredients(ingredientContainer, selectedRecipe)) {
-                OnCraftingRecipeActivated(ingredientContainer, selectedRecipe);
+            if (Input.GetKeyDown(CRAFT_KEY_CODE)) {
+                OnItemActivated(GameManager.Player, ingredientContainer, selectedRecipe);
             }
         }
 
@@ -59,31 +60,52 @@ namespace JusticeFramework.UI.Views {
             }
         }
 
+        public void OnItemActivated(IContainer target, IContainer source, Recipe recipe) {
+            if (CraftRecipe(target.Inventory, source.Inventory, recipe)) {
+                // Update ingredient display?
+            }
+        }
+
         #endregion
 
-        private bool HasIngredients(IContainer ingredientContainer, Recipe recipe) {
+        #region Crafting Functions
+
+        private bool CraftRecipe(Inventory target, Inventory source, Recipe recipe) {
+            bool crafted = false;
+
+            if (HasIngredients(source, recipe)) {
+                target.Add(recipe.Result.Ingredient.id, recipe.Result.Quantity);
+                RemoveIngredients(source, recipe);
+                crafted = true;
+            }
+
+            return crafted;
+        }
+
+        private bool HasIngredients(Inventory source, Recipe recipe) {
             bool hasIngredients = true;
-            int containerQuantity;
 
             foreach (RecipeItem recipeItem in recipe.Ingredients) {
-                containerQuantity = ingredientContainer.GetQuantity(recipeItem.Ingredient.id);
-                hasIngredients = hasIngredients && containerQuantity >= recipeItem.Quantity;
+                hasIngredients &= source.Contains(recipeItem.Ingredient.id, recipeItem.Quantity);
             }
 
             return hasIngredients;
         }
 
-        public static void OnCraftingRecipeActivated(IContainer container, Recipe recipe) {
+        private void RemoveIngredients(Inventory source, Recipe recipe) {
             foreach (RecipeItem recipeItem in recipe.Ingredients) {
-                container.TakeItem(recipeItem.Ingredient.id, recipeItem.Quantity);
+                source.Remove(recipeItem.Ingredient.id, recipeItem.Quantity);
             }
-
-            container.GiveItem(recipe.Result.Ingredient.id, recipe.Result.Quantity);
         }
 
+        #endregion
+
+        #region UI Functions
+
         private void RefreshRecipeList() {
+            Recipe[] recipes = GameManager.RecipeManager.Resources;
             bool entryFound = false;
-            Recipe[] recipes = GameManager.RecipeManager.GetAll();
+
             recipeContainer.DestroyAllChildren();
 
             for (int i = 0; i < recipes.Length; ++i) {
@@ -94,14 +116,14 @@ namespace JusticeFramework.UI.Views {
                     continue;
                 }
 
-                if (selectedRecipe != null && ReferenceEquals(recipe, selectedRecipe)) {
-                    OnRecipeSelected(index, recipe);
-                    entryFound = true;
-                }
-
                 AddButton(recipeContainer, recipe, delegate {
                     OnRecipeSelected(index, recipe);
                 });
+
+                if (!entryFound && selectedRecipe != null && ReferenceEquals(recipe, selectedRecipe)) {
+                    OnRecipeSelected(index, recipe);
+                    entryFound = true;
+                }
             }
 
             if (!entryFound) {
@@ -119,22 +141,23 @@ namespace JusticeFramework.UI.Views {
         }
 
         private void ClearSelectedItem() {
-            selectedRecipeIndex = -1;
             selectedRecipe = null;
 
             selectedRecipeNameLabel.text = string.Empty;
-            selectedRecipeDescrLabel.enabled = false;
+            selectedRecipeDescrLabel.text = string.Empty;
         }
 
-        public void View(IContainer ingredientContainer) {
-            if (ingredientContainer == null) {
+        #endregion
+
+        public void View(IContainer container) {
+            if (container == null) {
+                Debug.Log($"Ingredient container is NULL");
                 return;
             }
 
-            this.ingredientContainer = ingredientContainer;
+            ingredientContainer = container;
 
             RefreshRecipeList();
-
             ClearSelectedItem();
             Show();
         }

@@ -117,7 +117,11 @@ namespace JusticeFramework.Components {
 
                     break;
                 case EWeaponFireType.Projectile:
-                    if (ammoSupply.TakeItem("TestArrow", 1)) {
+                    string testArrowId = "TestArrow";
+
+                    if (ammoSupply.Inventory.Contains(testArrowId, 1)) {
+                        ammoSupply.Inventory.Remove(testArrowId, 1);
+
                         AmmoModel ammo = GameManager.AssetManager.GetById<AmmoModel>("TestArrow");
                         GameObject go = Instantiate(ammo.prefab);
 
@@ -192,8 +196,6 @@ namespace JusticeFramework.Components {
 
         private void OnHit(WorldObject hit) {
             Actor actor = hit as Actor;
-
-            Debug.Log("Weapon - Hit: " + hit.name);
 
             if (actor != null) {
                 actor.Damage(owner, Damage);

@@ -237,31 +237,31 @@ namespace JusticeFramework.Core.Managers {
 		[ConsoleCommand("spawn", "Spawns a new copy of the specified asset with the given position and rotation")]
 		public static IWorldObject Spawn(string id, Vector3 position, Quaternion rotation) {
 			return Spawn(assetManager.GetById(id), position, rotation);
-		}
-		
-		public static IWorldObject Spawn(WorldObjectModel worldObjectModel, Vector3 position, Quaternion rotation) {
-			if (worldObjectModel != null) {
-				GameObject obj = Instantiate(worldObjectModel.prefab, position, rotation);
+        }
 
-				if (obj != null) {
+        public static IWorldObject Spawn(WorldObjectModel worldObjectModel, Vector3 position, Quaternion rotation) {
+            if (worldObjectModel != null) {
+                GameObject obj = Instantiate(worldObjectModel.prefab, position, rotation);
+
+                if (obj != null) {
                     IWorldObject reference = obj.GetComponent<IWorldObject>();
 
-					reference.SetData(worldObjectModel, true);
+                    reference.SetData(worldObjectModel, true);
 
-					return reference;
-				}
-			}
+                    return reference;
+                }
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		[ConsoleCommand("spawnatplayer", "Spawns a new copy of the specified asset next to the player")]
-		private static void SpawnAtPlayer(string id) {
+        [ConsoleCommand("spawnatplayer", "Spawns a new copy of the specified asset next to the player")]
+		public static IWorldObject SpawnAtPlayer(string id) {
 			Transform playerTransform = Player.Transform;
 			Vector3 spawnPos = playerTransform.position + (playerTransform.forward * 2f);
 			spawnPos.y += 1;
 
-			Spawn(id, spawnPos);
+			return Spawn(id, spawnPos);
 		}
 
 #endregion

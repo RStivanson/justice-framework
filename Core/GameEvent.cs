@@ -67,7 +67,7 @@ namespace JusticeFramework.Core {
         /// </summary>
         /// <param name="target">The actor to target</param>
         private void ProcessGiveItem(IActor target) {
-            target.GiveItem(itemId, itemQuantity);
+            target.Inventory.Add(itemId, itemQuantity);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace JusticeFramework.Core {
         /// </summary>
         /// <param name="target">The actor to target</param>
         private void ProcessTakeItem(IActor target) {
-            target.TakeItem(itemId, itemQuantity);
+            target.Inventory.Remove(itemId, itemQuantity);
         }
 
         /// <summary>

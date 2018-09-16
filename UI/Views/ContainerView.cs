@@ -1,26 +1,44 @@
-﻿using System;
-using JusticeFramework.Components;
+﻿using JusticeFramework.Components;
 using JusticeFramework.Core.Collections;
-using JusticeFramework.Core.Models;
 using JusticeFramework.Core.Interfaces;
+using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models;
+using JusticeFramework.Core.UI;
 using JusticeFramework.UI.Components;
 using JusticeFramework.Utility.Extensions;
+using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
-using JusticeFramework.Core.UI;
-using JusticeFramework.Core.Managers;
 
 namespace JusticeFramework.UI.Views {
+    public delegate void OnContainerAction(ContainerView.ContainerItem item);
+
     [Serializable]
     public class ContainerView : Window {
+        public class ContainerItem {
+            public IContainer Owner { get; private set; }
+
+            public ItemModel Model { get; private set; }
+
+            public Stack Stack { get; private set; }
+
+            public bool IsEquipped { get; private set; }
+
+            public ContainerItem(IContainer owner, ItemModel model, Stack stack, bool isEquipped) {
+                Owner = owner;
+                Model = model;
+                Stack = stack;
+                IsEquipped = isEquipped;
+            }
+        }
+
         private enum EContainerTabs {
             Player,
             Target            
         }
 
-        private const KeyCode TRANSFER_KEY_CODE = KeyCode.R;
-        private const KeyCode ACTIVATE_KEY_CODE = KeyCode.E;
+        private const KeyCode TransferKeyCode = KeyCode.R;
+        private const KeyCode ActivateKeyCode = KeyCode.E;
 
         [SerializeField]
         private Text selectedItemNameLabel;
@@ -43,35 +61,34 @@ namespace JusticeFramework.UI.Views {
         private EContainerTabs currentTab = EContainerTabs.Player;
         private IContainer firstContainer;
         private IContainer secondContainer;
-        private int selectedItemIndex;
-        private ItemModel selectedItemModel;
-        private ItemListEntry selectedItemEntry;
+        private bool showEquippedItems;
+        private ContainerItem selectedItem;
 
-#region Unity Events
+        #region Unity Events
 
         private void Update() {
             // If we do not have any item selected, return
-            if (selectedItemModel == null) {
+            if (selectedItem == null) {
                 return;
             }
 
             switch (currentTab) {
                 case EContainerTabs.Player:
-                    if (secondContainer != null && Input.GetKeyDown(TRANSFER_KEY_CODE)) {
-                        TransferItem(firstContainer, secondContainer, selectedItemModel.id, firstContainer.Inventory[selectedItemIndex].count);
+                    if (secondContainer != null && Input.GetKeyDown(TransferKeyCode)) {
+                        TransferItem(selectedItem, secondContainer);
                         UpdateItemList(firstContainer, playerItemContainer);
                         UpdateItemList(secondContainer, targetItemContainer);
                     }
 
-                    if (Input.GetKeyDown(ACTIVATE_KEY_CODE)) {
-                        OnContainerViewItemActivated(firstContainer, selectedItemModel, 1);
+                    if (Input.GetKeyDown(ActivateKeyCode)) {
+                        ActivateItem(selectedItem, secondContainer);
                         UpdateItemList(firstContainer, playerItemContainer);
                     }
 
                     break;
                 case EContainerTabs.Target:
-                    if (Input.GetKeyDown(TRANSFER_KEY_CODE)) {
-                        TransferItem(secondContainer, firstContainer, selectedItemModel.id, secondContainer.Inventory[selectedItemIndex].count);
+                    if (Input.GetKeyDown(TransferKeyCode)) {
+                        TransferItem(selectedItem, firstContainer);
                         UpdateItemList(firstContainer, playerItemContainer);
                         UpdateItemList(secondContainer, targetItemContainer);
                     }
@@ -80,133 +97,203 @@ namespace JusticeFramework.UI.Views {
             }
         }
 
-#endregion
+        #endregion
 
-#region Event Callbacks
+        #region Event Callbacks
 
-        private void OnItemSelected(int index, IContainer owner, ItemListEntry entry, ItemModel item) {
-            // Setup item info
-            selectedItemIndex = index;
-            selectedItemModel = item;
-            selectedItemEntry = entry;
+        protected virtual void OnItemSelected(ContainerItem item) {
+            selectedItem = item;
+            currentTab = ReferenceEquals(item.Owner, secondContainer) ? EContainerTabs.Target : EContainerTabs.Player;
 
-            currentTab = (owner == secondContainer) ? EContainerTabs.Target : EContainerTabs.Player;
+            UpdateDescriptionFields(item);
+        }
 
-            string itemName = selectedItemModel.displayName;
+        #endregion
 
-            if (selectedItemModel.isStackable) {
-                itemName = $"{itemName} (x{owner.Inventory[index].count})";
+        #region UI Functions
+
+        protected virtual void UpdateDescriptionFields(ContainerItem itemData) {
+            selectedItemNameLabel.text = itemData.Model.displayName;
+
+            if (itemData.Stack.Quantity > 1) {
+                selectedItemNameLabel.text += $" (x{itemData.Stack.Quantity})";
             }
-            
-            selectedItemNameLabel.text = itemName;
 
-            ConsumableModel consumable = selectedItemModel as ConsumableModel;
+            if (itemData.IsEquipped) {
+                selectedItemNameLabel.text += $" (E)";
+            }
 
-            if (consumable != null) {
-                selectedItemDescrLabel.enabled = true;
+            // TODO: Overhaul: IHasStatusEffects?
+            selectedItemDescrLabel.enabled = false;
+
+            if (itemData.Model is ConsumableModel) {
+                ConsumableModel consumable = (ConsumableModel)itemData.Model;
                 selectedItemDescrLabel.text = "Effects:\n";
 
-                foreach (StatusEffectModel model in consumable.statusEffects) {
-                    selectedItemDescrLabel.text += $"\t\t{model.buffType.ToString()}\n";
+                foreach (StatusEffectModel statusEffectModel in consumable.statusEffects) {
+                    selectedItemDescrLabel.text += $"\t\t{statusEffectModel.buffType.ToString()}\n";
                 }
-            } else {
-                selectedItemDescrLabel.enabled = false;
+
+                selectedItemDescrLabel.enabled = true;
             }
         }
 
-#endregion
+        #endregion
 
-        public void TransferItem(IContainer owner, IContainer target, string id, int quantity) {
-            if (string.IsNullOrEmpty(id)) {
+        #region Container Functions
+
+        /// <summary>
+        /// Transfers an item between the owning and target container
+        /// </summary>
+        /// <param name="owner">The item's owning container</param>
+        /// <param name="targetContainer">The item's target container</param>
+        /// <param name="model">The model data for the item</param>
+        /// <param name="stack">The stack data for the item</param>
+        /// <param name="isEquipped">Flag indicating if this item is currently equipped</param>
+        protected virtual void TransferItem(ContainerItem itemData, IContainer targetContainer) {
+            // If the item can't be transfered, do nothing
+            if (!CanTransferItem(itemData, targetContainer)) {
                 return;
             }
-					
-            // If there is a target for the item
-            if (target != null) {
-                // Transfer the item
-                target.GiveItem(id, quantity);
-                owner.TakeItem(id, quantity);
-            } else { // If there is no target, then drop the item
-                owner.TakeItem(id, quantity);
-                GameManager.Spawn(id, transform.position + transform.forward * 5, Quaternion.identity);
-            }
-        }
-        
-        public static void OnContainerViewItemActivated(IContainer owner, ItemModel itemModel, int quantity) {
-            if (owner is Actor) {
-                Actor actor = (Actor)owner;
 
-                if (itemModel is ConsumableModel) {
-                    actor.Consume((ConsumableModel)itemModel);
-                    actor.TakeItem(itemModel.id, 1);
-                } else if (itemModel is EquippableModel) {
-                    actor.Equip(GameManager.Spawn(itemModel.id, GameManager.Player.Transform.position, Quaternion.identity) as IEquippable);
-                    actor.TakeItem(itemModel.id, quantity);
+            if (targetContainer != null) {
+                targetContainer.Inventory.Add(itemData.Model.id, itemData.Stack.Quantity);
+                itemData.Owner.Inventory.Remove(itemData.Model.id, itemData.Stack.Quantity);
+            } else {
+                // Remove and spawn the item
+                itemData.Owner.Inventory.Remove(itemData.Model.id, itemData.Stack.Quantity);
+                IItem item = GameManager.SpawnAtPlayer(itemData.Model.id) as IItem;
+
+                // If the object is an item and it exists
+                if (item != null) {
+                    // Update its stack amount
+                    item.StackAmount = itemData.Stack.Quantity;
                 }
             }
+
+            OnItemTransfered(itemData, targetContainer);
         }
-        
-        private void UpdateItemList(IContainer container, Transform itemListContainer) {
-            bool entryFound = false;
-            itemListContainer.DestroyAllChildren();
+
+        /// <summary>
+        /// Determines if the item is able to be transfered between containers
+        /// </summary>
+        /// <param name="owner">The item's owning container</param>
+        /// <param name="targetContainer">The item's target container</param>
+        /// <param name="model">The model data for the item</param>
+        /// <param name="stack">The stack data for the item</param>
+        /// <param name="isEquipped">Flag indicating if this item is currently equipped</param>
+        /// <returns>Returns true if the item can be transfered, false toherwise</returns>
+        protected virtual bool CanTransferItem(ContainerItem itemData, IContainer targetContainer) {
+            return !itemData.IsEquipped;
+        }
+
+        /// <summary>
+        /// Event method called when an item is transferred between containers
+        /// </summary>
+        /// <param name="owner">The item's owning container</param>
+        /// <param name="targetContainer">The item's target container</param>
+        /// <param name="model">The model data for the item</param>
+        /// <param name="stack">The stack data for the item</param>
+        /// <param name="isEquipped">Flag indicating if this item is currently equipped</param>
+        protected virtual void OnItemTransfered(ContainerItem itemData, IContainer targetContainer) {
+        }
+
+        protected virtual void ActivateItem(ContainerItem itemData, IContainer targetContainer) {
+            if (itemData.Owner.NotType<Actor>()) {
+                return;
+            }
+
+            Actor actor = (Actor)itemData.Owner;
+
+            if (itemData.Model is ConsumableModel) {
+                ConsumableModel consumable = (ConsumableModel)itemData.Model;
+
+                actor.Inventory.Remove(itemData.Model.id, 1);
+                actor.Consume(consumable);
+            } else if (itemData.Model is EquippableModel) {
+                EquippableModel equippable = (EquippableModel)itemData.Model;
+
+                if (itemData.IsEquipped) {
+                    Actor.Unequip(actor, actor.Inventory, equippable.equipSlot);
+                } else {
+                    Actor.Equip(actor, actor.Inventory, equippable.id);
+                }
+            }
+
+            OnItemActivated(itemData, targetContainer);
+        }
+
+
+        /// <summary>
+        /// Determines if the item is able to be activated by the owner
+        /// </summary>
+        /// <param name="owner">The item's owning container</param>
+        /// <param name="targetContainer">The item's target container</param>
+        /// <param name="model">The model data for the item</param>
+        /// <param name="stack">The stack data for the item</param>
+        /// <param name="isEquipped">Flag indicating if this item is currently equipped</param>
+        /// <returns>Returns true if the item can be transfered, false toherwise</returns>
+        protected virtual bool CanActivateItem(ContainerItem itemData, IContainer targetContainer) {
+            return targetContainer == null;
+        }
+
+        protected virtual void OnItemActivated(ContainerItem itemData, IContainer targetContainer) {
+        }
+
+        #endregion
+
+        #region UI Functions
+
+        private void UpdateItemList(IContainer container, Transform listContainer) {
+            listContainer.DestroyAllChildren();
 
             for (int i = 0; i < container.Inventory.Count; ++i) {
-                int index = i;
-                ItemListEntry entry = container.Inventory[i];
-                ItemModel item = GameManager.AssetManager.GetById<ItemModel>(entry.id);
+                InventoryEntry entry = container.Inventory[i];
+                ItemModel model = GameManager.AssetManager.GetById<ItemModel>(entry.Id);
 
-                if (item == null) {
+                if (model == null) {
                     continue;
                 }
 
-                if (selectedItemEntry != null && ReferenceEquals(entry, selectedItemEntry)) {
-                    OnItemSelected(index, container, entry, item);
-                    entryFound = true;
-                }
-                
-                if (container.Inventory[i].count > 1 && !item.isStackable) {
-                    for (int k = 0; k < container.Inventory[i].count; ++k) {
-                        AddButton(itemListContainer, container.Inventory[i], item, delegate {
-                            OnItemSelected(index, container, entry, item);
-                        });
-                    }
-                } else {
-                    AddButton(itemListContainer, container.Inventory[i], item, delegate {
-                        OnItemSelected(index, container, entry, item);
-                    });
-                }
-            }
-
-            if (!entryFound) {
-                ClearSelectedItem();
+                CreateListButton(listContainer, container, model, entry.Stack, false);
             }
         }
-        
-        private void AddButton(Transform container, ItemListEntry item, ItemModel model, UnityAction callback) {
+
+        private void CreateListButton(Transform listContainer, IContainer owner, ItemModel model, Stack stack, bool isEquipped) {
+            if (stack.Quantity > 1 && !model.isStackable) {
+                for (int i = 0; i < stack.Quantity; i++) {
+                    AddButton(listContainer, owner, model, stack, isEquipped);
+                }
+            } else {
+                AddButton(listContainer, owner, model, stack, isEquipped);
+            }
+        }
+
+        private void AddButton(Transform container, IContainer owner, ItemModel model, Stack stack, bool isEquipped) {
             GameObject spawnedObject = Instantiate(itemButtonPrefab);
-            
-            spawnedObject.GetComponent<Button>().onClick.AddListener(callback);
-            spawnedObject.GetComponent<InventoryListButton>().SetItem(item, model);
-            
+
+            spawnedObject.GetComponent<ContainerListButton>().SetItem(new ContainerItem(owner, model, stack, isEquipped), OnItemSelected);
+
             spawnedObject.transform.SetParent(container, false);
         }
 
         private void ClearSelectedItem() {
-            selectedItemIndex = -1;
-            selectedItemModel = null;
-            selectedItemEntry = null;
+            selectedItem = null;
 
             selectedItemNameLabel.text = string.Empty;
             selectedItemDescrLabel.enabled = false;
         }
 
-        public void View(IContainer first, IContainer second) {
+        #endregion
+
+        public void View(IContainer first, IContainer second, bool showEquipped = false) {
             if (first == null) {
                 return;
             }
 
             firstContainer = first;
             secondContainer = second;
+            showEquippedItems = showEquipped;
 
             UpdateItemList(first, playerItemContainer);
 
@@ -216,7 +303,6 @@ namespace JusticeFramework.UI.Views {
             }
             
             ClearSelectedItem();
-
             Show();
         }
     }

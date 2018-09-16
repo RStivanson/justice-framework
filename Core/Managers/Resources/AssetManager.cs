@@ -20,11 +20,11 @@ namespace JusticeFramework.Core.Managers.Resources {
             LoadResources(DataPath);
         }
 
-        protected override void OnPostProcessStart() {
+        protected override void OnPreProcess() {
             assetsByType.Clear();
         }
 
-        protected override void OnResourcePostProcessed(WorldObjectModel model) {
+        protected override void OnResourceProcessed(WorldObjectModel model) {
             assetsByType.AddToList(model.GetType(), model);
         }
 

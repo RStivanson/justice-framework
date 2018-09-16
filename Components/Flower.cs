@@ -64,7 +64,7 @@ namespace JusticeFramework.Components {
 		}
 
 		public void Harvest(IContainer container) {
-			container.GiveItem(FlowerModel.harvestData.id, FlowerModel.harvestData.quantity);
+			container.Inventory.Add(FlowerModel.harvestData.id, FlowerModel.harvestData.quantity);
 			
 			canHarvest = false;
 			respawnTimer = 0;

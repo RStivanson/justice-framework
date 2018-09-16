@@ -7,8 +7,10 @@ public class test : MonoBehaviour {
 
     public Actor actor;
 
+    public string testEquip = "TestSword";
+
     private void Start() {
-        actor.Equip(GameManager.Spawn("TestSword") as IEquippable);
+        Actor.Equip(actor, GameManager.Spawn(testEquip) as IEquippable);
     }
 
     private void Update() {

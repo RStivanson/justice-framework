@@ -24,12 +24,12 @@ namespace JusticeFramework.Core.Managers.Resources {
             LoadResources(DataPath);
         }
 
-        protected override void OnPostProcessStart() {
+        protected override void OnPreProcess() {
             factionDialogueByTargetId.Clear();
             dialogueByTargetId.Clear();
         }
 
-        protected override void OnResourcePostProcessed(Conversation conversation) {
+        protected override void OnResourceProcessed(Conversation conversation) {
             if (conversation.isFactionDialogue) {
                 factionDialogueByTargetId.AddToList(conversation.targetId, conversation);
             } else {

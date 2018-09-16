@@ -25,6 +25,11 @@ namespace JusticeFramework.Core.Interfaces {
 		/// The maximum amount of this item that can be contained in a stack
 		/// </summary>
 		int MaxStackAmount { get; }
+
+        /// <summary>
+        /// The current amount of items in this stack
+        /// </summary>
+        int StackAmount { get; set; }
 		
 		/// <summary>
 		/// The sound played when this item is picked up

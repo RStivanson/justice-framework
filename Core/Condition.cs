@@ -64,7 +64,7 @@ namespace JusticeFramework.Core {
                     }
 
                     if (container != null) {
-                        result = Compare(container.GetQuantity(stringValue));
+                        result = Compare(container.Inventory.GetQuantity(stringValue));
                     }
                     break;
                 case EConditionMethod.GetQuestStage:

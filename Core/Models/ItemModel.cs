@@ -11,7 +11,7 @@ namespace JusticeFramework.Core.Models {
 		/// <summary>
 		/// The maximum amount of items that can be contained in a stack
 		/// </summary>
-		public const int MAX_STACK_AMOUNT = 999;
+		public const int MaxStackAmount = 999;
 
 		/// <summary>
 		/// The weight of the item. Affects encumberance.

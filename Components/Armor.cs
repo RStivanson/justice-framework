@@ -1,17 +1,15 @@
-﻿using System;
-using JusticeFramework.Core.Models;
-using JusticeFramework.Core;
+﻿using JusticeFramework.Core;
 using JusticeFramework.Core.Events;
 using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Interfaces;
-using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Models;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
-	[Serializable]
+    [Serializable]
 	[RequireComponent(typeof(Rigidbody))]
 	[RequireComponent(typeof(BoxCollider))]
-	public class Armor : Item, IArmor {
+	public class Armor : Item, IArmor, IRigged {
 		public event OnItemEquipped OnItemEquipped;
 		public event OnItemUnequipped OnItemUnequipped;
 		

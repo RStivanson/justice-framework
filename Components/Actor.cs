@@ -23,7 +23,7 @@ namespace JusticeFramework.Components {
 	/// This class houses all model and functions relating for actors (NPCs and Player)
 	/// </summary>
 	[Serializable]
-	public class Actor : WorldObject, IActor, IDamageable, IInventory {
+	public class Actor : WorldObject, IActor, IDamageable {
 		public const int HEROIC_ATTACK_BUFFER = 3;
 		
 		public event OnCurrentHealthChanged onCurrentHealthChanged;
@@ -43,13 +43,13 @@ namespace JusticeFramework.Components {
         /// Entity animator that manages the first person rig
         /// </summary>
         [SerializeField]
-        private ActorAnimator actorAnimator;
+        private PerspectiveAnimator actorAnimator;
 
         /// <summary>
-        /// Equipment array storing all equipped items
+        /// Reference storing all the actors equipment
         /// </summary>
         [SerializeField]
-		private IEquippable[] equipment;
+		private Equipment equipment;
 
         /// <summary>
         /// SkinnedMeshRenderer attached to the Body mesh
@@ -80,12 +80,6 @@ namespace JusticeFramework.Components {
 		/// </summary>
 		[SerializeField]
 		private List<IActor> threats;
-
-        [SerializeField]
-        private AnimationClip defaultAttackAnimation;
-
-        [SerializeField]
-        private AnimationClip replaceableAnimationClip;
 
 		/// <summary>
 		/// The rigidbody components attached to all pieces of the GameObject
@@ -133,6 +127,10 @@ namespace JusticeFramework.Components {
 			get { return ActorModel.inventory; }
 		}
 		
+        public Equipment Equipment {
+            get { return equipment; }
+        }
+
 		/// <summary>
 		/// The base health of this actor
 		/// </summary>
@@ -241,10 +239,10 @@ namespace JusticeFramework.Components {
 		public int TotalArmor {
 			get {
 				int totalArmorRating = 0;
-				Armor temp;
+				IArmor temp;
 
-				for (int i = 0; i < (int)EEquipSlot.Waist; ++i) {
-					temp = equipment[i] as Armor;
+				for (EEquipSlot slot = EEquipSlot.Head; slot < EEquipSlot.Waist; slot++) {
+					temp = equipment.Get<IArmor>(slot);
 
 					if (temp != null) {
 						totalArmorRating += temp.ArmorRating;
@@ -267,8 +265,8 @@ namespace JusticeFramework.Components {
 		/// </summary>
 		public int TotalDamage {
 			get {
-				Weapon weapon = equipment[(int)EEquipSlot.Mainhand] as Weapon;
-				return weapon != null ? weapon.Damage : 5;
+                IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
+                return weapon != null ? weapon.Damage : 5;
 			}
 		}
 
@@ -284,8 +282,7 @@ namespace JusticeFramework.Components {
             statusEffects = new List<StatusEffect>();
 
 			threats = new List<IActor>();
-			equipment = new IEquippable[Enum.GetNames(typeof(EEquipSlot)).Length];
-			
+
             /*
 			Equip(GameManager.Spawn("TestHelm001") as IEquippable);
 			Equip(GameManager.Spawn("TestChestplate001") as IEquippable);
@@ -423,7 +420,7 @@ namespace JusticeFramework.Components {
 		}
 		
         public void BeginAttack() {
-            IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
+            IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
 
             if (weapon?.CanFire() ?? true) {
                 weapon?.StartFire(this);
@@ -431,12 +428,12 @@ namespace JusticeFramework.Components {
         }
 
         public void UpdateAttack() {
-            IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
+            IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
             weapon?.UpdateFire(this);
         }
 
         public void EndAttack() {
-            IWeapon weapon = GetEquipment(EEquipSlot.Mainhand) as IWeapon;
+            IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
 
             if (weapon?.CanFire() ?? true) {
                 weapon?.EndFire(IsPlayer ? Camera.main.transform : transform, this);
@@ -485,49 +482,39 @@ namespace JusticeFramework.Components {
 
 #region Items and Inventory
 		
+        /// <summary>
+        /// Adds the given item to the actor's inventory
+        /// </summary>
+        /// <param name="id">The Id of the item to add</param>
+        /// <param name="amount">The quantity of item to add</param>
 		[ConsoleCommand("giveme", "Gives the player the item with the given id and quantity")]
 		[ConsoleCommand("giveitem", "Gives the actor the item with the given id and quantity", ECommandTarget.LookAt)]
-		public void GiveItem(string id, int amount) {
-			ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
+		private void GiveItem(string id, int amount) {
+            // If the item doesn't exist, don't add it
+			if (!GameManager.AssetManager.Contains<ItemModel>(id)) {
+                return;
+            }
 
-			if (item == null) {
-				return;
-			}
-
-			ActorModel.inventory.AddItem(id, amount, item.weight);
-			onItemAdded?.Invoke(this, id, amount);
+            // Add the item to the inventory
+            Inventory.Add(id, amount);
 		}
 		
-		public bool TakeItem(string id, int amount) {
-			int removed = ActorModel.inventory.RemoveItem(id, amount);
-
-			if (removed != 0) {
-				onItemRemoved?.Invoke(this, id, removed);
-			}
-
-            return removed != 0;
-        }
-
-        public int GetQuantity(string id) {
-            return Inventory[id]?.count ?? 0;
-        }
-
         public void ActivateItem(string id) {
-			if (string.IsNullOrEmpty(id) || !Inventory.HasItem(id)) {
+			if (!Inventory.Contains(id)) {
 				return;
 			}
 
 			ItemModel itemModel = GameManager.AssetManager.GetById<ItemModel>(id);
 			
-			if (itemModel is ArmorModel || itemModel is WeaponModel) {
-				Inventory.RemoveItem(id, 1);
+			if (itemModel is EquippableModel) {
+				Inventory.Remove(id, 1);
 				IEquippable item = GameManager.Spawn(itemModel, Vector3.zero, Quaternion.identity) as IEquippable;
 
 				if (item != null) {
-					Equip(item);
+                    equipment.Equip(item, mainhandBone, actorAnimator, meshRenderer);
 				}
 			} else if (itemModel is ConsumableModel) {
-				Inventory.RemoveItem(itemModel.id, 1);
+				Inventory.Remove(itemModel.id, 1);
 				Consume((ConsumableModel)itemModel);
 			}
 		}
@@ -558,139 +545,35 @@ namespace JusticeFramework.Components {
             }
 		}
 
-        /// <summary>
-        /// Attempts to equip the item to the actor
-        /// </summary>
-        /// <param name="item">The equippable item to attach to the actor</param>
-        /// <returns>Return true if the item is equipped, false otherwise</returns>
-		public bool Equip(IEquippable item) {
-            // If the item is empty, do nothing
-			if (item == null) {
-				return false;
-			}
-
-            // Make sure the object is not reacting to physics
-            item.Rigidbody.isKinematic = true;
-            item.Collider.enabled = false;
-
-            if (item is IArmor) { // If this is armor
-                IArmor armor = item as IArmor;
-
-                // Set the parent and override the bones with the actors bones
-                armor.Transform.SetParent(transform);
-                armor.SetBones(meshRenderer);
-            } else if (item is IWeapon) { // If this is a weapon
-                IWeapon weapon = item as IWeapon;
-
-                // Set the parent and reset the position and rotation to the actors hand
-                weapon.Transform.SetParent(mainhandBone);
-                weapon.Transform.localPosition = Vector3.zero;
-                weapon.Transform.rotation = mainhandBone.rotation;
-
-                // Provide an offhand IK target
-                if (weapon.OffhandIkTarget != null) {
-                    // TODO : Do some offhand IK stuff here
-                }
+        public static bool Equip(Actor target, Inventory inventory, string id) {
+            if (!inventory.Contains(id)) {
+                return false;
             }
 
-            // Unequip other pieces and store this item
-            Unequip(item);
-            equipment[(int)item.EquipSlot] = item;
+            inventory.Remove(id, 1);
 
-            if (item.EquipSlot == EEquipSlot.Mainhand && item is IWeapon) {
-                IWeapon weapon = item as IWeapon;
-                
-                //AnimationClip replaceWith = weapon?.AttackAnimation;
-                //entityAnimator.SetAnimation(replaceableAnimationClip.name, replaceWith);
+            return Equip(target, GameManager.SpawnAtPlayer(id) as IEquippable);
+        }
 
-                actorAnimator.SetOverrideController(weapon.FPOverrideController, weapon.TPOverrideController);
+        public static bool Equip(Actor target, IEquippable equippable) {
+            equippable = target.Equipment.Equip(equippable, target.mainhandBone, target.actorAnimator, target.meshRenderer);
+
+            if (equippable != null) {
+                target.Inventory.Add(equippable.Id, equippable.StackAmount);
             }
 
             return true;
         }
 
-        /// <summary>
-        /// Provides unequip functionality for a specific type of equippable
-        /// </summary>
-        /// <param name="equippable">The equippable to attempt to unequip</param>
-        protected bool Unequip(IEquippable equippable) {
-            IWeapon weapon = equippable as IWeapon;
-            bool unequipped = false;
+        public static void Unequip(Actor target, Inventory inventory, EEquipSlot slot) {
+            IEquippable equippable = target.Equipment.Unequip(slot);
 
-            // If this is a two handed weapon
-            if (weapon != null && weapon.WeaponType == EWeaponType.TwoHanded) {
-                // Make sure the mainhand is unequipped
-                if (equipment[(int)EEquipSlot.Mainhand] != null) {
-                    unequipped = Unequip(EEquipSlot.Mainhand);
-                }
-
-                // Also make sure the offhand is unequipped
-                if (equipment[(int)EEquipSlot.Offhand] != null) {
-                    unequipped |= Unequip(EEquipSlot.Offhand);
-                }
-            } else {
-                // If this is any other type of item, just make sure its slot is unequipped
-                if (equipment[(int)equippable.EquipSlot] != null) {
-                    unequipped = Unequip(equippable.EquipSlot);
-                }
+            if (equippable != null) {
+                inventory.Add(equippable.Id, equippable.StackAmount);
             }
-
-            return unequipped;
         }
 
-        /// <summary>
-        /// Unequips an item from the given equipment spot and either drops it or adds it to the actor's inventory
-        /// </summary>
-        /// <param name="equipSlot">The equipment slot to unequip from</param>
-        /// <param name="drop">Flag indicating if the item should be dropped</param>
-        /// <returns>Return true if an item was unequipped, false otherwise</returns>
-        public bool Unequip(EEquipSlot equipSlot, bool drop = false) {
-            IEquippable item = equipment[(int)equipSlot];
-
-            // If the item is null, do nothing
-			if (item == null) {
-				return false;
-			}
-
-            // Clean up the equipment slot
-            equipment[(int)equipSlot] = null;
-
-            if (item is IArmor) {
-                IArmor armor = item as IArmor;
-
-                // Reset the bones and make sure the armor is rendering
-                armor.ClearBones();
-                armor.Renderer.enabled = true;
-            } else if (item is IWeapon) {
-                IWeapon weapon = item as IWeapon;
-
-                // Provide IK movement for the actor's offhand if needed
-                if (weapon.OffhandIkTarget != null) {
-                    // TODO : Do some offhand IK stuff here
-                }
-            }
-
-            // If the item should be dropped
-            if (drop) {
-                // Reset the objects components
-                item.Rigidbody.isKinematic = false;
-                item.Collider.enabled = true;
-
-                // Unparent the object
-                item.Transform.SetParent(null);
-            } else {
-                // Add the item to the actor's inventory and get rid of the GameObject
-                GiveItem(item.Id, 1);
-                Destroy(item.Transform.gameObject);
-            }
-
-			return true;
-        }
-
-        public IEquippable GetEquipment(EEquipSlot slot) {
-            return equipment[(int)slot];
-        }
-#endregion
+        #endregion
 
         protected void ProcessStatusEffects(float deltaTime) {
             if (statusEffects == null) {

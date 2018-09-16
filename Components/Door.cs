@@ -137,8 +137,8 @@ namespace JusticeFramework.Components {
                 if (hasKey && e.ActivatedBy != null) {
                     IContainer container = e.ActivatedBy as IContainer;
 
-                    if (container != null && container.GetQuantity(keyId) > 0) {
-                        container.TakeItem(keyId, 1);
+                    if (container != null && container.Inventory.Contains(keyId)) {
+                        container.Inventory.Remove(keyId, 1);
                         Unlock();
                     } else {
                         Debug.Log("Door - Missing key : " + keyId);

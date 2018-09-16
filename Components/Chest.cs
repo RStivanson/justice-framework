@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace JusticeFramework.Components {
     [Serializable]
-	public class Chest : WorldObject, IChest, IInventory, IInteractable, ILockable {
+	public class Chest : WorldObject, IChest, IContainer, IInteractable, ILockable {
 		public event OnItemAdded onItemAdded;
 		public event OnItemRemoved onItemRemoved;
 
@@ -79,32 +79,14 @@ namespace JusticeFramework.Components {
 #endregion
 
 		[ConsoleCommand("giveitem", "Gives the chest the item with the given id and quantity", ECommandTarget.LookAt)]
-		public void GiveItem(string id, int amount) {
-			ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
-
-			if (item == null) {
+		private void GiveItem(string id, int amount) {
+			if (!GameManager.AssetManager.Contains<ItemModel>(id)) {
 				return;
 			}
 
-			Inventory.AddItem(id, amount, item.weight);
-			onItemAdded?.Invoke(this, id, amount);
+			Inventory.Add(id, amount);
 		}
 		
-		public bool TakeItem(string id, int amount) {
-			int removed = Inventory.RemoveItem(id, amount);
-
-			if (removed != 0) {
-				onItemRemoved?.Invoke(this, id, removed);
-			}
-
-            return removed != 0;
-		}
-
-        public int GetQuantity(string id) {
-            ItemListEntry entry = Inventory[id];
-            return entry?.count ?? 0;
-        }
-
         public void ActivateItem(string id) {
 			Debug.Log($"Container cannot activate items. (name: {name}, id: {id})");
 		}

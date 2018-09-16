@@ -2,9 +2,9 @@
 using System;
 using UnityEngine;
 
-namespace JusticeFramework {
+namespace JusticeFramework.Core {
     [Serializable]
-    public class ActorAnimator {
+    public class PerspectiveAnimator {
         [SerializeField]
         private Animator firstPersonAnimator;
 

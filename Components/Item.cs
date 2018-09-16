@@ -8,6 +8,9 @@ using UnityEngine;
 namespace JusticeFramework.Components {
     [Serializable]
 	public class Item : WorldObject, IItem {
+        [SerializeField]
+        private int stackAmount;
+
 #region Properties
 
 		private ItemModel ItemModel {
@@ -31,8 +34,21 @@ namespace JusticeFramework.Components {
 		}
 		
 		public int MaxStackAmount {
-			get { return ItemModel.MAX_STACK_AMOUNT; }
+			get { return ItemModel.MaxStackAmount; }
 		}
+
+        public int StackAmount {
+            get { return stackAmount; }
+            set {
+                if (value > ItemModel.MaxStackAmount) {
+                    stackAmount = ItemModel.MaxStackAmount;
+                } else if (!IsStackable) {
+                    stackAmount = 1;
+                } else {
+                    stackAmount = value;
+                }
+            }
+        }
 		
 		public AudioClip PickupSound {
 			get { return ItemModel.pickupSound; }
@@ -51,7 +67,7 @@ namespace JusticeFramework.Components {
 
 			if (e?.ActivatedBy is IContainer) {
 				IContainer container = (IContainer)e?.ActivatedBy;
-				container.GiveItem(ItemModel.id, 1);
+				container.Inventory.Add(ItemModel.id, StackAmount);
 				Destroy(gameObject);
 			}
 		}

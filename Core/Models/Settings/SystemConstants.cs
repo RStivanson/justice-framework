@@ -12,11 +12,13 @@ namespace JusticeFramework.Core.Models.Settings {
 
         public const string AssetDataPlayerId = "ActorPlayer";
 
+        public const string ItemCurrencyId = "gold";
+
         public const string InputMouseX = "Mouse X";
         public const string InputMouseY = "Mouse Y";
         public const string InputHorizontal = "Horizontal";
         public const string InputVertical = "Vertical";
-
+        
         public static readonly string SavePath = Application.persistentDataPath;
         public const string SettingsFileName = "settings.json";
 

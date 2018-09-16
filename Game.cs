@@ -51,7 +51,7 @@ public class Game : GameManager {
 
         if (Input.GetKeyDown(KeyCode.U)) {
             Actor player = Player as Actor;
-            player.Unequip(EEquipSlot.Mainhand);
+            Actor.Unequip(player, player.Inventory, EEquipSlot.Mainhand);
         }
 
         if (Input.GetKeyDown(KeyCode.Tab)) {

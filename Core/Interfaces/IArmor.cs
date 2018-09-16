@@ -10,16 +10,5 @@ namespace JusticeFramework.Core.Interfaces {
 		/// The defense rating of this armor piece
 		/// </summary>
 		int ArmorRating { get; }
-
-        /// <summary>
-        /// Sets the bones of the object to the given renderer's bones
-        /// </summary>
-        /// <param name="renderer">The renderer to set the bones to</param>
-        void SetBones(SkinnedMeshRenderer renderer);
-
-        /// <summary>
-        /// Resets the objects bones to its original bones
-        /// </summary>
-        void ClearBones();
     }
 }
