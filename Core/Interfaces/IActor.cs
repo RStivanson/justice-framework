@@ -33,7 +33,7 @@
 		/// Flag indicating if this actor id dead
 		/// </summary>
 		bool IsDead { get; }
-		
+
 		/// <summary>
 		/// The amount of confidence that this actor has in battle
 		/// </summary>

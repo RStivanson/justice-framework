@@ -22,12 +22,23 @@ namespace JusticeFramework.UI.Views {
 
             public Stack Stack { get; private set; }
 
+            public IEquippable EquippedItem { get; private set; }
+
             public bool IsEquipped { get; private set; }
 
             public ContainerItem(IContainer owner, ItemModel model, Stack stack, bool isEquipped) {
                 Owner = owner;
                 Model = model;
                 Stack = stack;
+                EquippedItem = null;
+                IsEquipped = isEquipped;
+            }
+
+            public ContainerItem(IContainer owner, IEquippable equippedItem, bool isEquipped) {
+                Owner = owner;
+                Model = null;
+                Stack = null;
+                EquippedItem = equippedItem;
                 IsEquipped = isEquipped;
             }
         }
@@ -59,9 +70,10 @@ namespace JusticeFramework.UI.Views {
         private GameObject targetItemListPanel;
         
         private EContainerTabs currentTab = EContainerTabs.Player;
-        private IContainer firstContainer;
-        private IContainer secondContainer;
-        private bool showEquippedItems;
+        private IContainer sourceContainer;
+        private IContainer targetContainer;
+        private EContainerViewMask sourceItemMask;
+        private EContainerViewMask targetItemMask;
         private ContainerItem selectedItem;
 
         #region Unity Events
@@ -74,23 +86,23 @@ namespace JusticeFramework.UI.Views {
 
             switch (currentTab) {
                 case EContainerTabs.Player:
-                    if (secondContainer != null && Input.GetKeyDown(TransferKeyCode)) {
-                        TransferItem(selectedItem, secondContainer);
-                        UpdateItemList(firstContainer, playerItemContainer);
-                        UpdateItemList(secondContainer, targetItemContainer);
+                    if (targetContainer != null && Input.GetKeyDown(TransferKeyCode)) {
+                        TransferItem(selectedItem, targetContainer);
+                        UpdateItemList(sourceContainer, sourceItemMask, playerItemContainer);
+                        UpdateItemList(targetContainer, targetItemMask, targetItemContainer);
                     }
 
                     if (Input.GetKeyDown(ActivateKeyCode)) {
-                        ActivateItem(selectedItem, secondContainer);
-                        UpdateItemList(firstContainer, playerItemContainer);
+                        ActivateItem(selectedItem, targetContainer);
+                        UpdateItemList(sourceContainer, sourceItemMask, playerItemContainer);
                     }
 
                     break;
                 case EContainerTabs.Target:
                     if (Input.GetKeyDown(TransferKeyCode)) {
-                        TransferItem(selectedItem, firstContainer);
-                        UpdateItemList(firstContainer, playerItemContainer);
-                        UpdateItemList(secondContainer, targetItemContainer);
+                        TransferItem(selectedItem, sourceContainer);
+                        UpdateItemList(sourceContainer, sourceItemMask, playerItemContainer);
+                        UpdateItemList(targetContainer, targetItemMask, targetItemContainer);
                     }
 
                     break;
@@ -103,7 +115,7 @@ namespace JusticeFramework.UI.Views {
 
         protected virtual void OnItemSelected(ContainerItem item) {
             selectedItem = item;
-            currentTab = ReferenceEquals(item.Owner, secondContainer) ? EContainerTabs.Target : EContainerTabs.Player;
+            currentTab = ReferenceEquals(item.Owner, targetContainer) ? EContainerTabs.Target : EContainerTabs.Player;
 
             UpdateDescriptionFields(item);
         }
@@ -113,28 +125,40 @@ namespace JusticeFramework.UI.Views {
         #region UI Functions
 
         protected virtual void UpdateDescriptionFields(ContainerItem itemData) {
-            selectedItemNameLabel.text = itemData.Model.displayName;
+            if (itemData.Model != null) {
+                selectedItemNameLabel.text = itemData.Model.displayName;
 
-            if (itemData.Stack.Quantity > 1) {
-                selectedItemNameLabel.text += $" (x{itemData.Stack.Quantity})";
-            }
-
-            if (itemData.IsEquipped) {
-                selectedItemNameLabel.text += $" (E)";
-            }
-
-            // TODO: Overhaul: IHasStatusEffects?
-            selectedItemDescrLabel.enabled = false;
-
-            if (itemData.Model is ConsumableModel) {
-                ConsumableModel consumable = (ConsumableModel)itemData.Model;
-                selectedItemDescrLabel.text = "Effects:\n";
-
-                foreach (StatusEffectModel statusEffectModel in consumable.statusEffects) {
-                    selectedItemDescrLabel.text += $"\t\t{statusEffectModel.buffType.ToString()}\n";
+                if (itemData.Stack.Quantity > 1) {
+                    selectedItemNameLabel.text += $" (x{itemData.Stack.Quantity})";
                 }
 
-                selectedItemDescrLabel.enabled = true;
+                if (itemData.IsEquipped) {
+                    selectedItemNameLabel.text += $" (E)";
+                }
+
+                // TODO: Overhaul: IHasStatusEffects?
+                selectedItemDescrLabel.enabled = false;
+
+                if (itemData.Model is ConsumableModel) {
+                    ConsumableModel consumable = (ConsumableModel)itemData.Model;
+                    selectedItemDescrLabel.text = "Effects:\n";
+
+                    foreach (StatusEffectModel statusEffectModel in consumable.statusEffects) {
+                        selectedItemDescrLabel.text += $"\t\t{statusEffectModel.buffType.ToString()}\n";
+                    }
+
+                    selectedItemDescrLabel.enabled = true;
+                }
+            } else {
+                selectedItemNameLabel.text = itemData.EquippedItem.DisplayName;
+
+                if (itemData.EquippedItem.StackAmount > 1) {
+                    selectedItemNameLabel.text += $" (x{itemData.Stack.Quantity})";
+                }
+
+                selectedItemNameLabel.text += $" (E)";
+
+                selectedItemDescrLabel.enabled = false;
             }
         }
 
@@ -205,18 +229,17 @@ namespace JusticeFramework.UI.Views {
 
             Actor actor = (Actor)itemData.Owner;
 
-            if (itemData.Model is ConsumableModel) {
-                ConsumableModel consumable = (ConsumableModel)itemData.Model;
+            if (itemData.IsEquipped) {
+                Actor.Unequip(actor, actor.Inventory, itemData.EquippedItem.EquipSlot);
+            } else {
+                if (itemData.Model is ConsumableModel) {
+                    ConsumableModel consumable = (ConsumableModel)itemData.Model;
 
-                actor.Inventory.Remove(itemData.Model.id, 1);
-                actor.Consume(consumable);
-            } else if (itemData.Model is EquippableModel) {
-                EquippableModel equippable = (EquippableModel)itemData.Model;
-
-                if (itemData.IsEquipped) {
-                    Actor.Unequip(actor, actor.Inventory, equippable.equipSlot);
-                } else {
-                    Actor.Equip(actor, actor.Inventory, equippable.id);
+                    actor.Inventory.Remove(itemData.Model.id, 1);
+                    actor.Consume(consumable);
+                } else if (itemData.Model is EquippableModel) {
+                    EquippableModel equippable = (EquippableModel)itemData.Model;
+                    Actor.Equip(actor, actor.Inventory, equippable.id, itemData.Stack.Quantity);
                 }
             }
 
@@ -244,35 +267,66 @@ namespace JusticeFramework.UI.Views {
 
         #region UI Functions
 
-        private void UpdateItemList(IContainer container, Transform listContainer) {
+        private void UpdateItemList(IContainer container, EContainerViewMask itemMask, Transform listContainer) {
             listContainer.DestroyAllChildren();
 
-            for (int i = 0; i < container.Inventory.Count; ++i) {
-                InventoryEntry entry = container.Inventory[i];
-                ItemModel model = GameManager.AssetManager.GetById<ItemModel>(entry.Id);
+            if (itemMask.HasFlag(EContainerViewMask.All) || itemMask.HasFlag(EContainerViewMask.Equipped)) {
+                if (container.IsType<Actor>()) {
+                    Actor actor = (Actor)container;
+                    IEquippable item;
 
-                if (model == null) {
-                    continue;
+                    for (int i = 0; i < actor.Equipment.Items.Length; i++) {
+                        item = actor.Equipment.Items[i].EquippedObject;
+
+                        if (item == null) {
+                            continue;
+                        }
+
+                        CreateListButton(listContainer, container, item);
+                    }
                 }
+            }
 
-                CreateListButton(listContainer, container, model, entry.Stack, false);
+            if (itemMask.HasFlag(EContainerViewMask.All) || itemMask.HasFlag(EContainerViewMask.Items)) {
+                for (int i = 0; i < container.Inventory.Count; ++i) {
+                    InventoryEntry entry = container.Inventory[i];
+                    ItemModel model = GameManager.AssetManager.GetById<ItemModel>(entry.Id);
+
+                    if (model == null) {
+                        continue;
+                    }
+
+                    CreateListButton(listContainer, container, model, entry.Stack);
+                }
             }
         }
-
-        private void CreateListButton(Transform listContainer, IContainer owner, ItemModel model, Stack stack, bool isEquipped) {
+       
+        private void CreateListButton(Transform listContainer, IContainer owner, ItemModel model, Stack stack) {
             if (stack.Quantity > 1 && !model.isStackable) {
                 for (int i = 0; i < stack.Quantity; i++) {
-                    AddButton(listContainer, owner, model, stack, isEquipped);
+                    AddButton(listContainer, owner, model, stack);
                 }
             } else {
-                AddButton(listContainer, owner, model, stack, isEquipped);
+                AddButton(listContainer, owner, model, stack);
             }
         }
 
-        private void AddButton(Transform container, IContainer owner, ItemModel model, Stack stack, bool isEquipped) {
+        private void CreateListButton(Transform listContainer, IContainer owner, IEquippable equippable) {
+            AddButton(listContainer, owner, equippable);
+        }
+
+        private void AddButton(Transform container, IContainer owner, ItemModel model, Stack stack) {
             GameObject spawnedObject = Instantiate(itemButtonPrefab);
 
-            spawnedObject.GetComponent<ContainerListButton>().SetItem(new ContainerItem(owner, model, stack, isEquipped), OnItemSelected);
+            spawnedObject.GetComponent<ContainerListButton>().SetItem(new ContainerItem(owner, model, stack, false), OnItemSelected);
+
+            spawnedObject.transform.SetParent(container, false);
+        }
+
+        private void AddButton(Transform container, IContainer owner, IEquippable equippable) {
+            GameObject spawnedObject = Instantiate(itemButtonPrefab);
+
+            spawnedObject.GetComponent<ContainerListButton>().SetItem(new ContainerItem(owner, equippable, true), OnItemSelected);
 
             spawnedObject.transform.SetParent(container, false);
         }
@@ -286,20 +340,21 @@ namespace JusticeFramework.UI.Views {
 
         #endregion
 
-        public void View(IContainer first, IContainer second, bool showEquipped = false) {
-            if (first == null) {
+        public void View(IContainer source, IContainer target, EContainerViewMask sourceMask = EContainerViewMask.All, EContainerViewMask targetMask = EContainerViewMask.All) {
+            if (source == null) {
                 return;
             }
 
-            firstContainer = first;
-            secondContainer = second;
-            showEquippedItems = showEquipped;
+            sourceContainer = source;
+            sourceItemMask = sourceMask;
+            targetContainer = target;
+            targetItemMask = targetMask;
 
-            UpdateItemList(first, playerItemContainer);
+            UpdateItemList(source, sourceItemMask, playerItemContainer);
 
-            if (second != null) {
+            if (target != null) {
                 targetItemListPanel?.SetActive(true);
-                UpdateItemList(second, targetItemContainer);
+                UpdateItemList(target, targetItemMask, targetItemContainer);
             }
             
             ClearSelectedItem();

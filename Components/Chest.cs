@@ -114,7 +114,7 @@ namespace JusticeFramework.Components {
 			} else if (ReferenceEquals(GameManager.Player, e?.ActivatedBy)) {
 				if (!IsLocked) {
 					ContainerView view = UiManager.UI.OpenWindow<ContainerView>();
-					view.View(e?.ActivatedBy as Actor, this);
+					view.View(e?.ActivatedBy as Actor, this, targetMask: EContainerViewMask.Items);
 				} else {
 					Debug.Log("This needs picklocked");
 				}

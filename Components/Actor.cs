@@ -545,14 +545,17 @@ namespace JusticeFramework.Components {
             }
 		}
 
-        public static bool Equip(Actor target, Inventory inventory, string id) {
+        public static bool Equip(Actor target, Inventory inventory, string id, int quantity = 1) {
             if (!inventory.Contains(id)) {
                 return false;
             }
 
-            inventory.Remove(id, 1);
+            inventory.Remove(id, quantity);
 
-            return Equip(target, GameManager.SpawnAtPlayer(id) as IEquippable);
+            IEquippable equippable = GameManager.SpawnAtPlayer(id) as IEquippable;
+            equippable.StackAmount = quantity;
+
+            return Equip(target, equippable);
         }
 
         public static bool Equip(Actor target, IEquippable equippable) {
@@ -568,8 +571,9 @@ namespace JusticeFramework.Components {
         public static void Unequip(Actor target, Inventory inventory, EEquipSlot slot) {
             IEquippable equippable = target.Equipment.Unequip(slot);
 
-            if (equippable != null) {
+            if (equippable != null && inventory != null) {
                 inventory.Add(equippable.Id, equippable.StackAmount);
+                Destroy(equippable.Transform.gameObject);
             }
         }
 

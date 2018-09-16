@@ -68,21 +68,34 @@ namespace JusticeFramework.UI.Components {
 		/// Refreshes the text components with the stored model's values
 		/// </summary>
 		private void RefreshFields() {
-            if (containerItem.Model == null) {
-                itemNameText.text = "Missing item model data...";
+            if (containerItem.Model == null && containerItem.EquippedItem == null) {
+                itemNameText.text = "Missing item data...";
             } else {
-                itemNameText.text = containerItem.Model.displayName;
+                if (containerItem.Model != null) {
+                    itemNameText.text = containerItem.Model.displayName;
 
-                if (containerItem.Stack.Quantity > 1) {
-                    itemNameText.text += $" ({containerItem.Stack.Quantity})";
-                }
+                    if (containerItem.Stack.Quantity > 1) {
+                        itemNameText.text += $" ({containerItem.Stack.Quantity})";
+                    }
 
-                if (containerItem.IsEquipped) {
+                    if (containerItem.IsEquipped) {
+                        itemNameText.text += " (E)";
+                    }
+
+                    itemWeightText.text = containerItem.Model.weight.ToString();
+                    itemValueText.text = containerItem.Model.value.ToString();
+                } else {
+                    itemNameText.text = containerItem.EquippedItem.DisplayName;
+
+                    if (containerItem.EquippedItem.StackAmount > 1) {
+                        itemNameText.text += $" ({containerItem.EquippedItem.StackAmount})";
+                    }
+
                     itemNameText.text += " (E)";
-                }
 
-                itemWeightText.text = containerItem.Model.weight.ToString();
-                itemValueText.text = containerItem.Model.value.ToString();
+                    itemWeightText.text = containerItem.EquippedItem.Weight.ToString();
+                    itemValueText.text = containerItem.EquippedItem.Value.ToString();
+                }
             }
 		}
 	}

@@ -12,7 +12,7 @@ namespace JusticeFramework.Core.Models.Settings {
 
         public const string AssetDataPlayerId = "ActorPlayer";
 
-        public const string ItemCurrencyId = "gold";
+        public const string ItemCurrencyId = "ItemGold";
 
         public const string InputMouseX = "Mouse X";
         public const string InputMouseY = "Mouse Y";

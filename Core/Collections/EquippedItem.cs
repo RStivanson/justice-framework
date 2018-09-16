@@ -15,10 +15,23 @@ namespace JusticeFramework.Core.Collections {
         private IEquippable equippedItem;
 
         /// <summary>
+        /// A reference to the item's parent's animator
+        /// </summary>
+        [SerializeField]
+        private PerspectiveAnimator animator;
+
+        /// <summary>
         /// Gets the item model for the equipped item
         /// </summary>
         public IEquippable EquippedObject {
             get { return equippedItem; }
+        }
+
+        /// <summary>
+        /// Gets the item's parent's animator
+        /// </summary>
+        public PerspectiveAnimator Animator {
+            get { return animator; }
         }
 
         /// <summary>
@@ -39,8 +52,9 @@ namespace JusticeFramework.Core.Collections {
         /// Constructs a new equipment item
         /// </summary>
         /// <param name="item">The item to store</param>
-        public EquippedItem(IEquippable item) {
+        public EquippedItem(IEquippable item, PerspectiveAnimator animator) {
             equippedItem = item;
+            this.animator = animator;
         }
     }
 }

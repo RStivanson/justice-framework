@@ -14,6 +14,10 @@ namespace JusticeFramework.Core.Collections {
         [SerializeField]
         private EquippedItem[] equipment;
 
+        public EquippedItem[] Items {
+            get { return equipment; }
+        }
+
         /// <summary>
         /// Gets the equipped item using the equip slot
         /// </summary>
@@ -83,7 +87,7 @@ namespace JusticeFramework.Core.Collections {
             }
 
             // Unequip other pieces and store this item
-            return SwapEquippedItem(item);
+            return SwapEquippedItem(item, animator);
         }
 
         /// <summary>
@@ -93,29 +97,33 @@ namespace JusticeFramework.Core.Collections {
         /// <returns>Returns the item unequipped, or null if nothing was unequipped</returns>
         public IEquippable Unequip(EEquipSlot slot) {
             int index = (int)slot;
-            IEquippable unequippedItem = equipment[index]?.EquippedObject ?? null;
-            equipment[index] = null;
+            EquippedItem equipItem = equipment[index];
+            equipment[index] = new EquippedItem(null, null);
 
             // If the item isn't null
-            if (unequippedItem != null) {
+            if (equipItem.EquippedObject != null) {
                 // If this is a rigged item
-                if (unequippedItem is IRigged) {
-                    IRigged riggedItem = unequippedItem as IRigged;
+                if (equipItem.EquippedObject is IRigged) {
+                    IRigged riggedItem = equipItem.EquippedObject as IRigged;
 
                     // Clear the overriden rig bones
                     riggedItem.ClearBones();
                 }
 
+                if (equipItem.EquippedObject is IWeapon) {
+                    equipItem.Animator?.ResetOverrideControllers();
+                }
+
                 // Reset physics and rendering data
-                unequippedItem.Rigidbody.isKinematic = false;
-                unequippedItem.Collider.enabled = true;
-                unequippedItem.Renderer.enabled = true;
+                equipItem.EquippedObject.Rigidbody.isKinematic = false;
+                equipItem.EquippedObject.Collider.enabled = true;
+                equipItem.EquippedObject.Renderer.enabled = true;
 
                 // Clear the items parent
-                unequippedItem.Transform.SetParent(null);
+                equipItem.EquippedObject.Transform.SetParent(null);
             }
 
-            return unequippedItem;
+            return equipItem.EquippedObject;
         }
 
         /// <summary>
@@ -123,9 +131,9 @@ namespace JusticeFramework.Core.Collections {
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        private IEquippable SwapEquippedItem(IEquippable item) {
+        private IEquippable SwapEquippedItem(IEquippable item, PerspectiveAnimator animator) {
             IEquippable unequipped = Unequip(item.EquipSlot);
-            equipment[(int)item.EquipSlot] = new EquippedItem(item);
+            equipment[(int)item.EquipSlot] = new EquippedItem(item, animator);
             
             return unequipped;
         }

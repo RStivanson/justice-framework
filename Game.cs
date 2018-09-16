@@ -1,4 +1,5 @@
-﻿using JusticeFramework.Components;
+﻿using JusticeFramework;
+using JusticeFramework.Components;
 using JusticeFramework.Core;
 using JusticeFramework.Core.AI.BehaviourTree;
 using JusticeFramework.Core.Interfaces;
@@ -57,7 +58,7 @@ public class Game : GameManager {
         if (Input.GetKeyDown(KeyCode.Tab)) {
             if (UiManager.UI.Peek() is HudView) {
                 ContainerView view = UiManager.UI.OpenWindow<ContainerView>();
-                view.View(Player, null);
+                view.View(Player, null, targetMask: EContainerViewMask.Items);
             }
         }
 
