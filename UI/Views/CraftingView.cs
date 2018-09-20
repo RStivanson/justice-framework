@@ -13,7 +13,7 @@ using JusticeFramework.Core.Collections;
 namespace JusticeFramework.UI.Views {
     [Serializable]
     public class CraftingView : Window {
-        private const KeyCode CRAFT_KEY_CODE = KeyCode.E;
+        private const KeyCode CraftKeyCode = KeyCode.E;
 
         [SerializeField]
         private Text selectedRecipeNameLabel;
@@ -39,7 +39,7 @@ namespace JusticeFramework.UI.Views {
                 return;
             }
 
-            if (Input.GetKeyDown(CRAFT_KEY_CODE)) {
+            if (Input.GetKeyDown(CraftKeyCode)) {
                 OnItemActivated(GameManager.Player, ingredientContainer, selectedRecipe);
             }
         }

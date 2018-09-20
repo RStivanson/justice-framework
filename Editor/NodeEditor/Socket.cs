@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JusticeFramework.Editor.NodeEditor {
 	public class Socket {
-		protected const int OFFSET = 3;
+		protected const int Offset = 3;
 	
 		public Rect rect;
 		public Node node;
@@ -44,7 +44,7 @@ namespace JusticeFramework.Editor.NodeEditor {
 	
 		public virtual void Draw(GraphState state, float y) {
 			rect.y = y - rect.height * 0.5f;
-			rect.x = node.rect.x + node.rect.width - OFFSET;
+			rect.x = node.rect.x + node.rect.width - Offset;
 
 			Color def = GUI.color;
 			if (connectedPoint != null) {
@@ -53,7 +53,7 @@ namespace JusticeFramework.Editor.NodeEditor {
 			
 			switch (type) {
 				case ESocketType.Input:
-					rect.x = node.rect.x - rect.width + OFFSET;
+					rect.x = node.rect.x - rect.width + Offset;
 				
 					if (GUI.Button(rect, GUIContent.none, style) && state != null) {
 						if (state.selectedOutput != null) {
@@ -66,7 +66,7 @@ namespace JusticeFramework.Editor.NodeEditor {
 				
 					break;
 				case ESocketType.Output:
-					rect.x = node.rect.x + node.rect.width - OFFSET;
+					rect.x = node.rect.x + node.rect.width - Offset;
 				
 					if (GUI.Button(rect, GUIContent.none, style) && state != null) {
 						if (state.selectedInput != null) {

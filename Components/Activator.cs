@@ -18,7 +18,7 @@ namespace JusticeFramework.Components {
 		/// <summary>
 		/// Event called when the activator's state changes
 		/// </summary>
-		public event OnActivationStateChanged OnActivated;
+		public event OnActivationStateChanged onActivated;
 
 #region Variables
 		
@@ -102,7 +102,7 @@ namespace JusticeFramework.Components {
 
 			// Send out a state changed event
 			OnReferenceStateChanged();
-			OnActivated?.Invoke(this, sender, isOn);
+			onActivated?.Invoke(this, sender, isOn);
 		}
 	}
 }

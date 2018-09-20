@@ -7,9 +7,9 @@ namespace JusticeFramework.Editor.NodeEditor {
     public delegate void OnNodeDelete(Node node);
 
     public class Node {
-        public event OnNodeDelete OnDelete;
+        public event OnNodeDelete onDelete;
     
-        public const int HEAD_HEIGHT = 20;
+        public const int HeadHeight = 20;
     
         public Rect rect;
         public string title;
@@ -61,15 +61,15 @@ namespace JusticeFramework.Editor.NodeEditor {
         
             // Draw the header
             Rect headerRect = rect;
-            headerRect.height = HEAD_HEIGHT;
+            headerRect.height = HeadHeight;
 		
             GUI.Box(headerRect, GUIContent.none, GUI.skin.box);
             GUI.Label(headerRect, "Node");
 
             // Draw the node body
             Rect bodyRect = rect;
-            bodyRect.y += HEAD_HEIGHT;
-            bodyRect.height -= HEAD_HEIGHT;
+            bodyRect.y += HeadHeight;
+            bodyRect.height -= HeadHeight;
 			
             GUI.BeginGroup(bodyRect, GUI.skin.box);
             bodyRect.position = Vector2.zero;
@@ -159,7 +159,7 @@ namespace JusticeFramework.Editor.NodeEditor {
             inPoint.DisolveConnection();
             outPoint.DisolveConnection();
         
-            OnDelete?.Invoke(this);
+            onDelete?.Invoke(this);
         }
     }
 }

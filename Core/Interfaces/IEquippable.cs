@@ -11,12 +11,12 @@ namespace JusticeFramework.Core.Interfaces {
 		/// <summary>
 		/// Event called when the item is equipped
 		/// </summary>
-		event OnItemEquipped OnItemEquipped;
+		event OnItemEquipped onItemEquipped;
 		
 		/// <summary>
 		/// Event called when the item is unequipped
 		/// </summary>
-		event OnItemUnequipped OnItemUnequipped;
+		event OnItemUnequipped onItemUnequipped;
 		
 		/// <summary>
 		/// The slot that this item should be equipped to

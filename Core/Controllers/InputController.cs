@@ -135,13 +135,13 @@ namespace JusticeFramework.Core.Controllers {
 		}
 		
 		private void Start() {
-			GameManager.Instance.OnGamePause += OnGamePause;
+			GameManager.Instance.onGamePause += OnGamePause;
 		}
 
 		private void OnDestroy() {
 			Destroy(gameObject.GetComponent<CharacterController>());
 
-			GameManager.Instance.OnGamePause -= OnGamePause;
+			GameManager.Instance.onGamePause -= OnGamePause;
 
 			if (removeCameraOnDestroy && camera != null) {
 				Destroy(camera.GetComponent<Camera>());

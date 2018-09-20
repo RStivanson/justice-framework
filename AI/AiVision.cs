@@ -14,7 +14,7 @@ namespace JusticeFramework.AI {
         /// <summary>
         /// The amount of time between scans
         /// </summary>
-		private const float DELAY_BETWEEN_SCANS_IN_SECONDS = 1.5f;
+		private const float DelayBetweenScansInSeconds = 1.5f;
 
         /// <summary>
         /// The amount of times passed since the last scane
@@ -82,7 +82,7 @@ namespace JusticeFramework.AI {
 			timeSinceLastScan += Time.deltaTime;
 
             // If the time exceeds the delay, process the surroundings
-			if (timeSinceLastScan >= DELAY_BETWEEN_SCANS_IN_SECONDS) {
+			if (timeSinceLastScan >= DelayBetweenScansInSeconds) {
 			    ScanSurroundings();
 			    timeSinceLastScan = 0;
 			}

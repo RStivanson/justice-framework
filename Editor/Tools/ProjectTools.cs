@@ -2,7 +2,7 @@
 
 namespace JusticeFramework.Editor.Tools {
 	public class ProjectUtility {
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Project/Initialize New...", false, 10)]
+		[MenuItem(EditorSettings.MenuPrefix + "/Project/Initialize New...", false, 10)]
 		public static void InitializeNewProject() {
 			string dialogMessage = "You are about to initialize a new project. This will create folders in your project spaces and set up the editor. Do you wish to continue?";
 			

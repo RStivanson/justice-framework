@@ -4,7 +4,7 @@ namespace JusticeFramework.Core.Interfaces {
     public delegate void OnWorldTargetChanged(WorldObject newTarget);
 
     public interface IInteractionController {
-        event OnWorldTargetChanged OnInteractionTargetChanged;
+        event OnWorldTargetChanged onInteractionTargetChanged;
 
         WorldObject CurrentTarget { get; }
     }

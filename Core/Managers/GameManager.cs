@@ -17,7 +17,7 @@ namespace JusticeFramework.Core.Managers {
 	
 	[Serializable]
 	public class GameManager : MonoBehaviour {
-		public event OnPauseStateChanged OnGamePause;
+		public event OnPauseStateChanged onGamePause;
 		
         #region Variables
 
@@ -90,7 +90,7 @@ namespace JusticeFramework.Core.Managers {
 					Cursor.lockState = CursorLockMode.Locked;
 				}
 
-				Instance.OnGamePause?.Invoke(Instance.isPaused);
+				Instance.onGamePause?.Invoke(Instance.isPaused);
 			}
 		}
 		

@@ -72,110 +72,110 @@ namespace JusticeFramework.Editor.Tools {
 			return asset;
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Activator")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Activator")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Activator")]
         public static void CreateActivatorData() {
             CreateScriptableObject<ActivatorModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Actor")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Actor")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Actor")]
         public static void CreateActorData() {
             CreateScriptableObject<ActorModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Ammo")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Ammo")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Ammo")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Ammo")]
         public static void CreateAmmoData() {
             CreateScriptableObject<AmmoModel>();
         }
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Armor")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Armor")]
+		[MenuItem(EditorSettings.MenuPrefix + "/Create/Create Armor")]
+		[MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Armor")]
 		public static void CreateArmorData() {
 			CreateScriptableObject<ArmorModel>();
 		}
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Codex")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Codex")]
+		[MenuItem(EditorSettings.MenuPrefix + "/Create/Create Codex")]
+		[MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Codex")]
 		public static void CreateCodexData() {
 			CreateScriptableObject<CodexModel>();
 		}
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Consumable")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Consumable")]
+		[MenuItem(EditorSettings.MenuPrefix + "/Create/Create Consumable")]
+		[MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Consumable")]
 		public static void CreateConsumableData() {
 			CreateScriptableObject<ConsumableModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Conversation")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Conversation")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Conversation")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Conversation")]
         public static void CreateConversation() {
             CreateScriptableObject<Conversation>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Chest")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Chest")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Chest")]
+		[MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Chest")]
 		public static void CreateChestData() {
 			CreateScriptableObject<ChestModel>();
 		}
 
-		[MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Door")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Door")]
+		[MenuItem(EditorSettings.MenuPrefix + "/Create/Create Door")]
+		[MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Door")]
 		public static void CreateDoorData() {
 			CreateScriptableObject<DoorModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Faction")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Faction")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Faction")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Faction")]
         public static void CreateFaction() {
             CreateScriptableObject<Faction>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Flower")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Flower")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Flower")]
         public static void CreateFlowerData() {
             CreateScriptableObject<FlowerModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Item")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Item")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Item")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Item")]
         public static void CreateItemData() {
             CreateScriptableObject<ItemModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Merchant Inventory")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Merchant Inventory")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Merchant Inventory")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Merchant Inventory")]
         public static void CreateMerchantInventory() {
             CreateScriptableObject<MerchantInventory>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Quest")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Quest")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Quest")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Quest")]
         public static void CreateQuest() {
             CreateScriptableObject<Quest>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Recipe")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Recipe")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Recipe")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Recipe")]
         public static void CreateRecipeData() {
             CreateScriptableObject<Recipe>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Setting")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Setting")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Setting")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Setting")]
         public static void CreateSetting() {
             CreateScriptableObject<GameSetting>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Status Effect")]
-        [MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Status Effect")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Status Effect")]
+        [MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Status Effect")]
         public static void CreateStatusEffect() {
             CreateScriptableObject<StatusEffectModel>();
         }
 
-        [MenuItem(EditorSettings.MENU_PREFIX + "/Create/Create Weapon")]
-		[MenuItem("Assets/" + EditorSettings.MENU_PREFIX + "/Create/Create Weapon")]
+        [MenuItem(EditorSettings.MenuPrefix + "/Create/Create Weapon")]
+		[MenuItem("Assets/" + EditorSettings.MenuPrefix + "/Create/Create Weapon")]
 		public static void CreateWeaponData() {
 			CreateScriptableObject<WeaponModel>();
 		}

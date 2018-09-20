@@ -9,9 +9,9 @@ using UnityEngine;
 namespace JusticeFramework.Controllers {
 	[Serializable]
 	public class InteractionController : MonoBehaviour, IInteractionController {
-		private const float INTERACTION_DISTANCE = 2.5f;
+		private const float InteractionDistance = 2.5f;
 
-		public event OnWorldTargetChanged OnInteractionTargetChanged;
+		public event OnWorldTargetChanged onInteractionTargetChanged;
 
 		[SerializeField]
 		private Transform mainCamera;
@@ -48,14 +48,14 @@ namespace JusticeFramework.Controllers {
 			mainCamera = Camera.main.transform;
 			lookingAt = null;
 
-			GameManager.Instance.OnGamePause += OnGamePaused;
+			GameManager.Instance.onGamePause += OnGamePaused;
 		}
 
 		/// <summary>
 		/// Cleans up if this object is destroyed
 		/// </summary>
 		private void OnDestroy() {
-			GameManager.Instance.OnGamePause -= OnGamePaused;
+			GameManager.Instance.onGamePause -= OnGamePaused;
 		}
 
 		/// <summary>
@@ -72,7 +72,7 @@ namespace JusticeFramework.Controllers {
 		/// </summary>
 		private void HandleLookAtUpdate() {
 			// If the player is looking at something
-			if (mainCamera.RaycastFromCenterForward(out raycastHit, INTERACTION_DISTANCE)) {
+			if (mainCamera.RaycastFromCenterForward(out raycastHit, InteractionDistance)) {
 				// If the object the player is looking at is the same as the current target
 				if (ReferenceEquals(lookingAtTransform, raycastHit.transform)) {
 					return;
@@ -92,7 +92,7 @@ namespace JusticeFramework.Controllers {
 				}
 
                 // Inform anyone listening
-                OnInteractionTargetChanged?.Invoke(lookingAt);
+                onInteractionTargetChanged?.Invoke(lookingAt);
 			} else {
                 // If the current target is already null, do nothing
                 // We use ReferenceEquals to check if the variable is actually null or if we still have an object pointer
@@ -105,7 +105,7 @@ namespace JusticeFramework.Controllers {
 				lookingAt = null;
 
                 // Inform anyone listening
-                OnInteractionTargetChanged?.Invoke(lookingAt);
+                onInteractionTargetChanged?.Invoke(lookingAt);
 			}
 		}
 

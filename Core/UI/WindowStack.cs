@@ -14,12 +14,12 @@ namespace JusticeFramework.Core.UI {
 		/// <summary>
 		/// Event called when a window is encountered that causes game pausing
 		/// </summary>
-		public event OnPauseRequested OnPause;
+		public event OnPauseRequested onPause;
 		
 		/// <summary>
 		/// Event called when all game pausing windows have been closed
 		/// </summary>
-		public event OnUnpauseRequested OnUnpause;
+		public event OnUnpauseRequested onUnpause;
 		
 		/// <summary>
 		/// The list of currently open/spawned windows
@@ -145,7 +145,7 @@ namespace JusticeFramework.Core.UI {
 
 				// Assign the window an Id and subscribe to its OnClose
 				windowScript.Id = windows.Count;
-				windowScript.OnWindowClose += OnWindowClosed;
+				windowScript.onWindowClose += OnWindowClosed;
 
 				// Attach the spawned object to the canvas and the window stack then show it
 				spawnedWindow.transform.SetParent(uiCanvas, false);
@@ -220,7 +220,7 @@ namespace JusticeFramework.Core.UI {
 			}
 
 			if (newWindow.CausesGamePause) {
-				OnPause?.Invoke();
+				onPause?.Invoke();
 			}
 		}
 
@@ -258,7 +258,7 @@ namespace JusticeFramework.Core.UI {
 			// If there is no other pausing windows and this window caused pausing, then send off
 			// an unpause event
 			if (!hasAPauseElsewhere && closedWindow.CausesGamePause) {
-				OnUnpause?.Invoke();
+				onUnpause?.Invoke();
 			}
 		}
 

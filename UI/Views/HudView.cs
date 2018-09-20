@@ -37,8 +37,8 @@ namespace JusticeFramework.UI.Views {
 
 			interactionController = player.GetComponent<IInteractionController>();
 
-			interactionController.OnInteractionTargetChanged += crosshair.OnInteractionTargetChanged;
-			interactionController.OnInteractionTargetChanged += OnInteractionTargetChanged;
+			interactionController.onInteractionTargetChanged += crosshair.OnInteractionTargetChanged;
+			interactionController.onInteractionTargetChanged += OnInteractionTargetChanged;
 			OnInteractionTargetChanged(interactionController.CurrentTarget);
 		}
 		
@@ -89,7 +89,7 @@ namespace JusticeFramework.UI.Views {
 			compass.Close();
             notifications.Close();
 			
-			interactionController.OnInteractionTargetChanged -= OnInteractionTargetChanged;
+			interactionController.onInteractionTargetChanged -= OnInteractionTargetChanged;
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace JusticeFramework.Components {
 	/// </summary>
 	[Serializable]
 	public class Actor : WorldObject, IActor, IDamageable {
-		public const int HEROIC_ATTACK_BUFFER = 3;
+		public const int HeroicAttackBuffer = 3;
 		
 		public event OnCurrentHealthChanged onCurrentHealthChanged;
 		public event OnDamageTaken onDamageTaken;
@@ -494,7 +494,7 @@ namespace JusticeFramework.Components {
 					result = target.Level <= Level;
 					break;
 				case EBattleConfidence.Heroic:
-					result = target.Level <= (Level + HEROIC_ATTACK_BUFFER);
+					result = target.Level <= (Level + HeroicAttackBuffer);
 					break;
 			}
 			

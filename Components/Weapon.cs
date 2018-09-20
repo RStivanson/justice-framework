@@ -9,8 +9,8 @@ using JusticeFramework.Core.Managers;
 namespace JusticeFramework.Components {
 	[Serializable]
 	public class Weapon : Item, IWeapon {
-		public event OnItemEquipped OnItemEquipped;
-		public event OnItemUnequipped OnItemUnequipped;
+		public event OnItemEquipped onItemEquipped;
+		public event OnItemUnequipped onItemUnequipped;
 
 #region Variables
 

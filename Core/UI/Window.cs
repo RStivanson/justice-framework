@@ -18,32 +18,32 @@ namespace JusticeFramework.Core.UI {
 		/// <summary>
 		/// Event called before the window is shown
 		/// </summary>
-		public event OnWindowShowing OnWindowShowing;
+		public event OnWindowShowing onWindowShowing;
 
 		/// <summary>
 		/// Event called after the window is shown
 		/// </summary>
-		public event OnWindowShow OnWindowShow;
+		public event OnWindowShow onWindowShow;
 		
 		/// <summary>
 		/// Event called before the window is shown
 		/// </summary>
-		public event OnWindowHiding OnWindowHiding;
+		public event OnWindowHiding onWindowHiding;
 
 		/// <summary>
 		/// Event called after the window is shown
 		/// </summary>
-		public event OnWindowHide OnWindowHide;
+		public event OnWindowHide onWindowHide;
 
 		/// <summary>
 		/// Event called after the window is hidden
 		/// </summary>
-		public event OnWindowClosing OnWindowClosing;
+		public event OnWindowClosing onWindowClosing;
 		
 		/// <summary>
 		/// Event called after the window is hidden
 		/// </summary>
-		public event OnWindowClose OnWindowClose;
+		public event OnWindowClose onWindowClose;
 
 		/// <summary>
 		/// An Id number set by the window stack
@@ -156,21 +156,21 @@ namespace JusticeFramework.Core.UI {
 		/// Shows the windows
 		/// </summary>
 		public void Show() {
-			OnWindowShowing?.Invoke(this);
+			onWindowShowing?.Invoke(this);
 			
 			OnShow();
 			
 			IsShowing = true;
 			gameObject.SetActive(true);
 
-			OnWindowShow?.Invoke(this);
+			onWindowShow?.Invoke(this);
 		}
 
 		/// <summary>
 		/// Hides the window
 		/// </summary>
 		public void Hide() {
-			OnWindowHiding?.Invoke(this);
+			onWindowHiding?.Invoke(this);
 
 			OnHide();
 
@@ -178,20 +178,20 @@ namespace JusticeFramework.Core.UI {
                 gameObject.SetActive(false);
             }
 
-			OnWindowHide?.Invoke(this);
+			onWindowHide?.Invoke(this);
 		}
 
 		/// <summary>
 		/// Closes the window by destroying the game object
 		/// </summary>
 		public void Close() {
-			OnWindowClosing?.Invoke(this);
+			onWindowClosing?.Invoke(this);
 
 			OnClose();
 
 			IsShowing = false;
 
-			OnWindowClose?.Invoke(this);
+			onWindowClose?.Invoke(this);
 			
 			Destroy(gameObject);
 		}

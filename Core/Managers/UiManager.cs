@@ -39,8 +39,8 @@ namespace JusticeFramework.Core.Managers {
 			uiManager = this;
             uiWindowStack.ProcessWindowPrefabs();
 
-			UI.OnPause += GameManager.Pause;
-			UI.OnUnpause += GameManager.Unpause;
+			UI.onPause += GameManager.Pause;
+			UI.onUnpause += GameManager.Unpause;
 		}
 		
 		private void Start() {

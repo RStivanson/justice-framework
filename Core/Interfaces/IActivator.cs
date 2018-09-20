@@ -10,7 +10,7 @@ namespace JusticeFramework.Core.Interfaces {
 		/// <summary>
 		/// Event called when the activator is activated
 		/// </summary>
-		event OnActivationStateChanged OnActivated;
+		event OnActivationStateChanged onActivated;
 		
 		/// <summary>
 		/// The sound played when the activator is activated

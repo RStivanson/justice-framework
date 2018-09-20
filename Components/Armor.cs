@@ -10,8 +10,8 @@ namespace JusticeFramework.Components {
 	[RequireComponent(typeof(Rigidbody))]
 	[RequireComponent(typeof(BoxCollider))]
 	public class Armor : Item, IArmor, IRigged {
-		public event OnItemEquipped OnItemEquipped;
-		public event OnItemUnequipped OnItemUnequipped;
+		public event OnItemEquipped onItemEquipped;
+		public event OnItemUnequipped onItemUnequipped;
 		
 #region Variables
 		
