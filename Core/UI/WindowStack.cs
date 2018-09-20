@@ -149,7 +149,7 @@ namespace JusticeFramework.Core.UI {
 
 				// Attach the spawned object to the canvas and the window stack then show it
 				spawnedWindow.transform.SetParent(uiCanvas, false);
-				windows.Add(spawnedWindow.GetComponent<Window>());
+				windows.Add(windowScript);
 				windowScript.Show();
 			} else {
 				Destroy(spawnedWindow);

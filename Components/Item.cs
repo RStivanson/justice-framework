@@ -67,7 +67,7 @@ namespace JusticeFramework.Components {
 
 			if (e?.ActivatedBy is IContainer) {
 				IContainer container = (IContainer)e?.ActivatedBy;
-				container.Inventory.Add(ItemModel.id, StackAmount);
+                container.Inventory.Add(ItemModel.id, StackAmount);
 				Destroy(gameObject);
 			}
 		}

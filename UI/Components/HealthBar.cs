@@ -21,7 +21,7 @@ namespace JusticeFramework.UI.Components {
 			toMonitor.onCurrentHealthChanged += OnMonitorHealthChanged;
 			OnMonitorHealthChanged(toMonitor);
 		}
-		
+
 		private void OnMonitorHealthChanged(IDamageable damageable) {
 			if (damageable != null) {
 				SetValue(damageable.CurrentHealth, damageable.MaxHealth);

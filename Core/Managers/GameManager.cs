@@ -19,7 +19,7 @@ namespace JusticeFramework.Core.Managers {
 	public class GameManager : MonoBehaviour {
 		public event OnPauseStateChanged OnGamePause;
 		
-#region Variables
+        #region Variables
 
 		[SerializeField]
 		private static GameManager gameManager;
@@ -51,9 +51,9 @@ namespace JusticeFramework.Core.Managers {
         [SerializeField]
         protected AudioSource ambientAudioSource;
 		
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 
 		public static GameManager Instance {
 			get { return gameManager; }
@@ -145,13 +145,14 @@ namespace JusticeFramework.Core.Managers {
             dialogueManager = new DialogueManager();
             questManager = new QuestManager();
             recipeManager = new RecipeManager();
+            CommandLibrary = new CommandLibrary();
 
             assetManager.LoadResources();
             dialogueManager.LoadResources();
 			questManager.LoadResources();
             recipeManager.LoadResources();
 
-            CommandLibrary = new CommandLibrary();
+            questManager.onQuestUpdated += OnQuestUpdated;
 
             OnInitialized();
 		}
@@ -162,23 +163,34 @@ namespace JusticeFramework.Core.Managers {
         protected virtual void OnInitialized() {
 		}
 
-		public virtual void BeginGame() {
+        #region Game State Methods
+
+        public virtual void BeginGame() {
 		}
 		
 		public virtual void EndGame() {
 		}
 		
 		public static void ExitGame() {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
 			EditorApplication.isPlaying = false;
-#else
+        #else
 			Application.Quit();
-#endif
-		}
-		
-#region Cell Functions
+        #endif
+        }
 
-		[ConsoleCommand("sts", "Sends the player to the specified scene at the given coordinates")]
+        #endregion
+
+        #region Event Callbacks
+
+        protected virtual void OnQuestUpdated(string id, int marker) {
+        }
+
+        #endregion
+
+        #region Cell Functions
+
+        [ConsoleCommand("sts", "Sends the player to the specified scene at the given coordinates")]
 		public static void SendToScene(string sceneName, Vector3 position) {
 			UnloadAllLevels();
 			LoadLevel(sceneName, () => {
@@ -206,9 +218,9 @@ namespace JusticeFramework.Core.Managers {
 			transform.position = position;
 		}
 
-#endregion
+        #endregion
 		
-#region Pause Functions
+        #region Pause Functions
 
 		public static void Pause() {
 			IsPaused = true;
@@ -220,9 +232,9 @@ namespace JusticeFramework.Core.Managers {
 			Time.timeScale = 1;
 		}
 
-#endregion
+        #endregion
 		
-#region Spawning Functions
+        #region Spawning Functions
 
 		[ConsoleCommand("spawn", "Spawns a new copy of the specified asset")]
 		public static IWorldObject Spawn(string id) {
@@ -264,9 +276,9 @@ namespace JusticeFramework.Core.Managers {
 			return Spawn(id, spawnPos);
 		}
 
-#endregion
+        #endregion
 		
-#region Scene Management
+        #region Scene Management
 
         /// <summary>
         /// Loads a specific scene
@@ -330,6 +342,6 @@ namespace JusticeFramework.Core.Managers {
 			}
 		}
 
-#endregion
+        #endregion
 	}
 }

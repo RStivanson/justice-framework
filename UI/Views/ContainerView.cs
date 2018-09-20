@@ -271,7 +271,7 @@ namespace JusticeFramework.UI.Views {
             listContainer.DestroyAllChildren();
 
             if (itemMask.HasFlag(EContainerViewMask.All) || itemMask.HasFlag(EContainerViewMask.Equipped)) {
-                if (container.IsType<Actor>()) {
+                if (container is Actor) {
                     Actor actor = (Actor)container;
                     IEquippable item;
 

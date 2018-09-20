@@ -21,7 +21,7 @@ namespace JusticeFramework.Core.Models.Quest {
             get { return id; }
         }
 
-        public string Name {
+        public string DisplayName {
             get { return name; }
         }
 

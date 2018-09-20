@@ -121,7 +121,15 @@ namespace JusticeFramework.Components {
 			
 
 			model = (clone ? Instantiate(newModel) : newModel);
+
+            OnDataModelChanged();
 		}
+
+        /// <summary>
+        /// Callback invoked when the data on this object changes
+        /// </summary>
+        protected virtual void OnDataModelChanged() {
+        }
 
 		/// <summary>
 		/// Determines if this reference has an associated model

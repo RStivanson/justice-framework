@@ -15,7 +15,7 @@ namespace JusticeFramework.UI.Views {
 		[SerializeField]
 		private GameObject buttonPrefab;
 
-#region Button Callbacks
+        #region Button Callbacks
 
 		public void NewGame() {
             GameManager.Instance.BeginGame();
@@ -29,6 +29,6 @@ namespace JusticeFramework.UI.Views {
 			GameManager.ExitGame();
 		}
 
-#endregion
+        #endregion
 	}
 }

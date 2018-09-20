@@ -11,7 +11,7 @@ namespace JusticeFramework.Utility.Extensions {
 		/// <param name="left">The object whose type should be checked</param>
 		/// <param name="type">The type that should be compared against</param>
 		/// <returns>Returns true if the object is of the given type, false otherwise</returns>
-		public static bool IsType(this object left, Type type) {
+		private static bool IsType(this object left, Type type) {
 			return left.GetType() == type;
 		}
 		
@@ -44,14 +44,14 @@ namespace JusticeFramework.Utility.Extensions {
 		public static bool NotTypeOrSubType(this object left, Type type) {
 			return !left.IsTypeOrSubType(type);
 		}
-		
-		/// <summary>
-		/// Determines if the object is of the given type
-		/// </summary>
-		/// <param name="left">The object whose type should be checked</param>
-		/// <typeparam name="T">The type that should be compared against</typeparam>
-		/// <returns>Returns true if the object is of the given type, false otherwise</returns>
-		public static bool IsType<T>(this object left) {
+
+        /// <summary>
+        /// Determines if the object is of the given type
+        /// </summary>
+        /// <param name="left">The object whose type should be checked</param>
+        /// <typeparam name="T">The type that should be compared against</typeparam>
+        /// <returns>Returns true if the object is of the given type, false otherwise</returns>
+        private static bool IsType<T>(this object left) {
 			return left.IsType(typeof(T));
 		}
 		

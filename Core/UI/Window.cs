@@ -64,7 +64,7 @@ namespace JusticeFramework.Core.UI {
 		private bool hidesWindowsBelow;
 
 		/// <summary>
-		/// Flag indicating if the window causes the game pause
+		/// Flag indicating if the window causes the game to pause
 		/// </summary>
 		[SerializeField]
 		private bool causesGamePause;
@@ -74,7 +74,13 @@ namespace JusticeFramework.Core.UI {
 		/// </summary>
 		[SerializeField]
 		private bool canBeManuallyClosed;
-		
+
+        /// <summary>
+        /// Flag indicating if this object should be disabled when hidden
+        /// </summary>
+        [SerializeField]
+        private bool disableOnHide;
+
 		/// <summary>
 		/// An Id number set by the window stack
 		/// </summary>
@@ -105,21 +111,28 @@ namespace JusticeFramework.Core.UI {
 		public bool CausesGamePause {
 			get { return causesGamePause; }
 			set { causesGamePause = value; }
-		}
-		
-		/// <summary>
-		/// Flag indicating if this window can be closed by any source other than the system
-		/// </summary>
-		public bool CanBeManuallyClosed {
-			get { return canBeManuallyClosed; }
-			set { canBeManuallyClosed = value; }
-		}
-		
-		
-		/// <summary>
-		/// Flag indicating if the window is currently being shown
-		/// </summary>
-		public bool IsShowing { get; private set; }
+        }
+
+        /// <summary>
+        /// Flag indicating if this window can be closed by any source other than the system
+        /// </summary>
+        public bool CanBeManuallyClosed {
+            get { return canBeManuallyClosed; }
+            set { canBeManuallyClosed = value; }
+        }
+
+        /// <summary>
+        /// Flag indicating if this object should be disabled when hidden
+        /// </summary>
+        public bool DisableOnHide {
+            get { return disableOnHide; }
+            set { disableOnHide = value; }
+        }
+
+        /// <summary>
+        /// Flag indicating if the window is currently being shown
+        /// </summary>
+        public bool IsShowing { get; private set; }
 		
 		/// <summary>
 		/// Internal method called when the window is shown
@@ -160,8 +173,10 @@ namespace JusticeFramework.Core.UI {
 			OnWindowHiding?.Invoke(this);
 
 			OnHide();
-			
-			gameObject.SetActive(false);
+
+            if (disableOnHide) {
+                gameObject.SetActive(false);
+            }
 
 			OnWindowHide?.Invoke(this);
 		}

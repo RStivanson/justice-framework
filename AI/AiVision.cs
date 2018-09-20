@@ -106,7 +106,7 @@ namespace JusticeFramework.AI {
 			referencesByType.Clear();
 			
             // Find all colliders within the scan radius
-			Collider[] nearbyColliders = Physics.OverlapSphere(transform.position, scanRadius);
+			Collider[] nearbyColliders = Physics.OverlapSphere(transform.position, scanRadius, scanMask);
 
             // Process each collider
 			foreach (Collider nearbyCollider in nearbyColliders) {

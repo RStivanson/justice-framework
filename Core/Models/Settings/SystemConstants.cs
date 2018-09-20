@@ -18,6 +18,8 @@ namespace JusticeFramework.Core.Models.Settings {
         public const string InputMouseY = "Mouse Y";
         public const string InputHorizontal = "Horizontal";
         public const string InputVertical = "Vertical";
+
+        public const string LabelUnknown = "{UNKNOWN}";
         
         public static readonly string SavePath = Application.persistentDataPath;
         public const string SettingsFileName = "settings.json";

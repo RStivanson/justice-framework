@@ -30,14 +30,12 @@ namespace JusticeFramework.Components {
 		public event OnDamageTaken onDamageTaken;
 		public event OnHealingRecieved onHealingRecieved;
 		public event OnDeath onDeath;
-		public event OnItemAdded onItemAdded;
-		public event OnItemRemoved onItemRemoved;
 		public event OnLevelUp onLevelUp;
 
 		public event OnEnterCombat onEnterCombat;
 		public event OnExitCombat onExitCombat;
 
-#region Variables
+        #region Variables
 		
         /// <summary>
         /// Entity animator that manages the first person rig
@@ -106,9 +104,9 @@ namespace JusticeFramework.Components {
         [SerializeField]
         private List<StatusEffect> statusEffects;
 
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 		
 		private ActorModel ActorModel {
 			get { return model as ActorModel; }
@@ -271,10 +269,10 @@ namespace JusticeFramework.Components {
 		}
 
         public bool IsPlayer {
-            get { return Id.Equals(SystemConstants.AssetDataPlayerId); }
+            get { return ReferenceEquals(this, GameManager.Player); }
         }
 
-#endregion
+        #endregion
 
 		/// <inheritdoc cref="WorldObject" />
 		protected override void OnIntialized() {
@@ -293,21 +291,46 @@ namespace JusticeFramework.Components {
 			ExitCombat();
 		}
 
+        protected override void OnDataModelChanged() {
+            Inventory.onItemAdded += OnItemAdded;
+            Inventory.onItemRemoved += OnItemRemoved;
+        }
+
         protected virtual void Update() {
             ProcessStatusEffects(Time.deltaTime);
         }
 
 		private void OnDrawGizmosSelected() {
-            if (ActorModel == null) return;
+            if (ActorModel == null) {
+                return;
+            }
 
 			// Draw detection radius
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireSphere(transform.position, LoseInterestDistance);
 		}
 
-#region Health Functions
-		
-		[ConsoleCommand("kill", "Kills the target actor unless it is invincible", ECommandTarget.LookAt)]
+        #region Event Callbacks
+
+        private void OnItemAdded(Inventory inventory, string id, int quantity) {
+            if (IsPlayer) {
+                ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
+                Game.Notify($"Received item {item?.displayName ?? SystemConstants.LabelUnknown}{(quantity > 1 ? $" ({quantity})" : string.Empty)}");
+            }
+        }
+
+        private void OnItemRemoved(Inventory inventory, string id, int quantity) {
+            if (IsPlayer) {
+                ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
+                Game.Notify($"Removed item {item?.displayName ?? SystemConstants.LabelUnknown}{(quantity > 1 ? $" ({quantity})" : string.Empty)}");
+            }
+        }
+
+        #endregion
+
+        #region Health Functions
+
+        [ConsoleCommand("kill", "Kills the target actor unless it is invincible", ECommandTarget.LookAt)]
 		public void Kill() {
 			Damage(null, currentHealth, true);
 		}
@@ -378,7 +401,7 @@ namespace JusticeFramework.Components {
 		
 #endregion
 		
-#region Experience Functions
+        #region Experience Functions
 
 		[ConsoleCommand("addexp", "Adds experience to the target actor", ECommandTarget.LookAt)]
 		public void AddExperience(int amount) {
@@ -390,9 +413,9 @@ namespace JusticeFramework.Components {
 			CurrentExperience = CurrentExperience - amount;
 		}
 		
-#endregion
+        #endregion
 
-#region Combat
+        #region Combat
 		
 		public void EnterCombat(IActor firstEnemy = null) {
 			isInCombat = true;
@@ -478,9 +501,9 @@ namespace JusticeFramework.Components {
 			}
 		}
 		
-#endregion
+        #endregion
 
-#region Items and Inventory
+        #region Items and Inventory
 		
         /// <summary>
         /// Adds the given item to the actor's inventory
@@ -497,7 +520,7 @@ namespace JusticeFramework.Components {
 
             // Add the item to the inventory
             Inventory.Add(id, amount);
-		}
+        }
 		
         public void ActivateItem(string id) {
 			if (!Inventory.Contains(id)) {

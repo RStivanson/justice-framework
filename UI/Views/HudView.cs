@@ -27,6 +27,9 @@ namespace JusticeFramework.UI.Views {
 		
 		[SerializeField]
 		private Crosshair crosshair;
+
+        [SerializeField]
+        private NotificationView notifications;
 		
 		public void SetPlayer(Actor player) {
 			playerHealthBar.Monitor(player);
@@ -43,7 +46,7 @@ namespace JusticeFramework.UI.Views {
 		/// Sets the controller whose targets we should monitor
 		/// </summary>
 		/// <param name="controller">The controller to get updates from</param>
-		public void OnInteractionTargetChanged(IWorldObject reference) {
+		private void OnInteractionTargetChanged(IWorldObject reference) {
 			if (reference is IDamageable) {
 				targetHealthBar.Monitor((IDamageable)reference);
 				targetHealthBar.Show();
@@ -53,23 +56,38 @@ namespace JusticeFramework.UI.Views {
 			}
 		}
 
+        public void ShowNotification(string notification) {
+            notifications.CreateNotification(notification);
+        }
+
 		protected override void OnShow() {
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.visible = false;
 
-			targetHealthBar.Hide();
+            playerHealthBar.Show();
+            //compass.Show();
+            crosshair.Show();
+            notifications.Show();
+
+            OnInteractionTargetChanged(interactionController?.CurrentTarget);
 		}
 
 		protected override void OnHide() {
 			Cursor.lockState = CursorLockMode.None;
 			Cursor.visible = true;
-		}
+
+            playerHealthBar.Hide();
+            targetHealthBar.Hide();
+            //compass.Hide();
+            crosshair.Hide();
+        }
 
 		protected override void OnClose() {
 			playerHealthBar.Close();
 			targetHealthBar.Close();
 			crosshair.Close();
 			compass.Close();
+            notifications.Close();
 			
 			interactionController.OnInteractionTargetChanged -= OnInteractionTargetChanged;
 		}

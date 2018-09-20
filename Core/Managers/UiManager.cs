@@ -1,9 +1,10 @@
-﻿using System;
-using JusticeFramework.Core.UI;
+﻿using JusticeFramework.Core.UI;
+using JusticeFramework.Core.UI.Views;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.Core.Managers {
-	[Serializable]
+    [Serializable]
 	public class UiManager : MonoBehaviour {
 
 #region Variables

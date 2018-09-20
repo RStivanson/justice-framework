@@ -79,15 +79,36 @@ public class Game : GameManager {
         gameTime = gameTime.AddSeconds(15);
 	}
 
+    #region Event Callbacks
+
     protected override void OnLevelLoaded() {
+        base.OnLevelLoaded();
+
         // Close the loading screen, and open the HUD
         UiManager.UI.CloseTop(true);
         UiManager.UI.OpenWindow<HudView>().SetPlayer(Player as Actor);
     }
-	
-#region Game State Methods
 
-	public override void BeginGame() {
+    protected override void OnQuestUpdated(string id, int marker) {
+        base.OnQuestUpdated(id, marker);
+
+        string questDisplayName = QuestManager.GetQuestDisplayName(id);
+        Notify($"{questDisplayName} updated");
+    }
+
+    #endregion
+
+    public static void Notify(string notification) {
+        HudView hud = UiManager.UI.GetWindow<HudView>();
+
+        if (hud != null) {
+            hud.ShowNotification(notification);
+        }
+    }
+
+    #region Game State Methods
+
+    public override void BeginGame() {
 		LoadLevel("overworld", OnPostBeginGame);	
 	}
 

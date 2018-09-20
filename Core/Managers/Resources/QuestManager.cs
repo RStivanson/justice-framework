@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using JusticeFramework.Core.Models.Quest;
+using JusticeFramework.Core.Models.Settings;
 
 namespace JusticeFramework.Core.Managers.Resources {
+    public delegate void OnQuestAction(string questId, int marker);
+
     [Serializable]
     public class QuestManager : ResourceManager<Quest> {
+        public event OnQuestAction onQuestUpdated;
+
         private string DataPath = "Data/Quests";
 
         public override void LoadResources() {
@@ -28,6 +33,10 @@ namespace JusticeFramework.Core.Managers.Resources {
             return resources.Where(quest => quest.QuestState == EQuestState.Failed).ToList();
         }
 
+        public string GetQuestDisplayName(string id) {
+            return GetById(id)?.DisplayName ?? SystemConstants.LabelUnknown;
+        }
+
         public int GetQuestStage(string id) {
             return GetById(id)?.Marker ?? -1;
         }
@@ -44,11 +53,15 @@ namespace JusticeFramework.Core.Managers.Resources {
             return GetQuestState(id) == questState;
         }
 
-        public void SetQuestStage(string id, int marker) {
+        public void SetQuestStage(string id, int marker, bool silent = false) {
             Quest quest = GetById(id);
 
             if (quest != null) {
                 quest.SetMarker(marker);
+
+                if (!silent) {
+                    onQuestUpdated?.Invoke(id, marker);
+                }
             }
         }
     }
