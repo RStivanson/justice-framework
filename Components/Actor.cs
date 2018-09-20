@@ -160,7 +160,7 @@ namespace JusticeFramework.Components {
 		}
 		
 		public int Level {
-			get { return 1 + (CurrentExperience / 450); }
+			get { return (int)Math.Sqrt(((CurrentExperience - 125) * 100) / 125); }
 		}
 
 		public int CurrentExperience {
@@ -176,6 +176,10 @@ namespace JusticeFramework.Components {
 
 				if (currentLevel != newLevel) {
 					onLevelUp?.Invoke(this, newLevel);
+
+                    if (IsPlayer) {
+                        Game.Notify($"You are now level {newLevel}");
+                    }
 				}
 			}
 		}
@@ -405,12 +409,24 @@ namespace JusticeFramework.Components {
 
 		[ConsoleCommand("addexp", "Adds experience to the target actor", ECommandTarget.LookAt)]
 		public void AddExperience(int amount) {
-			CurrentExperience = CurrentExperience + amount;
+            if (IsPlayer) {
+                Game.Notify($"You gained {amount} experience");
+            }
+
+            CurrentExperience = CurrentExperience + amount;
+
+            OnReferenceStateChanged();
 		}
 		
 		[ConsoleCommand("removeexp", "Removes experience from the target actor", ECommandTarget.LookAt)]
 		public void RemoveExperience(int amount) {
-			CurrentExperience = CurrentExperience - amount;
+            if (IsPlayer) {
+                Game.Notify($"You lost {amount} experience");
+            }
+
+            CurrentExperience = CurrentExperience - amount;
+
+            OnReferenceStateChanged();
 		}
 		
         #endregion
@@ -614,10 +630,6 @@ namespace JusticeFramework.Components {
             }
         }
 
-        private void OnStatusEffectDisolved(StatusEffect effect) {
-            statusEffects.Remove(effect);
-        }
-
 		public override void Activate(object sender, ActivateEventArgs e) {
 			if (e?.Activator != null) {
 				return;
@@ -639,6 +651,8 @@ namespace JusticeFramework.Components {
 				body.useGravity = active;
 				body.isKinematic = !active;
 			}
+
+            OnReferenceStateChanged();
 		}
 	}
 }
