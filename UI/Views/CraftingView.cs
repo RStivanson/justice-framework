@@ -61,41 +61,7 @@ namespace JusticeFramework.UI.Views {
         }
 
         public void OnItemActivated(IContainer target, IContainer source, Recipe recipe) {
-            if (CraftRecipe(target.Inventory, source.Inventory, recipe)) {
-                // Update ingredient display?
-            }
-        }
-
-        #endregion
-
-        #region Crafting Functions
-
-        private bool CraftRecipe(Inventory target, Inventory source, Recipe recipe) {
-            bool crafted = false;
-
-            if (HasIngredients(source, recipe)) {
-                target.Add(recipe.Result.Ingredient.id, recipe.Result.Quantity);
-                RemoveIngredients(source, recipe);
-                crafted = true;
-            }
-
-            return crafted;
-        }
-
-        private bool HasIngredients(Inventory source, Recipe recipe) {
-            bool hasIngredients = true;
-
-            foreach (RecipeItem recipeItem in recipe.Ingredients) {
-                hasIngredients &= source.Contains(recipeItem.Ingredient.id, recipeItem.Quantity);
-            }
-
-            return hasIngredients;
-        }
-
-        private void RemoveIngredients(Inventory source, Recipe recipe) {
-            foreach (RecipeItem recipeItem in recipe.Ingredients) {
-                source.Remove(recipeItem.Ingredient.id, recipeItem.Quantity);
-            }
+            recipe.Craft(target.Inventory, source.Inventory);
         }
 
         #endregion

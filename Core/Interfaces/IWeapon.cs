@@ -57,7 +57,8 @@ namespace JusticeFramework.Core.Interfaces {
         /// Updates the firing motion of the weapon
         /// </summary>
         /// <param name="ammoSupply">The container holding the inventory supply</param>
-        void UpdateFire(IContainer ammoSupply = null);
+        /// <return
+        EAttackStatus UpdateFire(IContainer ammoSupply = null);
 
         /// <summary>
         /// Cleans up and ends the firing motion of the weapon

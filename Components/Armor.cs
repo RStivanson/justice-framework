@@ -1,5 +1,4 @@
 ﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Events;
 using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.Models;
 using System;
@@ -10,9 +9,6 @@ namespace JusticeFramework.Components {
 	[RequireComponent(typeof(Rigidbody))]
 	[RequireComponent(typeof(BoxCollider))]
 	public class Armor : Item, IArmor, IRigged {
-		public event OnItemEquipped onItemEquipped;
-		public event OnItemUnequipped onItemUnequipped;
-		
 #region Variables
 		
 		[SerializeField]
@@ -29,8 +25,6 @@ namespace JusticeFramework.Components {
 		
 		[SerializeField]
 		private Transform[] defaultBones;
-
-        private Actor owner;
 
 #endregion
 
@@ -77,10 +71,6 @@ namespace JusticeFramework.Components {
 			thisRigidbody = GetComponent<Rigidbody>();
 			thisCollider = GetComponent<BoxCollider>();
 		}
-
-        public void SetOwner(WorldObject actor) {
-            owner = actor as Actor;
-        }
 
         /// <summary>
         /// Sets the bones of the object to the given renderer's bones

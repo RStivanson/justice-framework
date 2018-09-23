@@ -29,12 +29,6 @@ namespace JusticeFramework.Components {
 		private Animator animator;
 
 		/// <summary>
-		/// Attached audio source component
-		/// </summary>
-		[SerializeField]
-		private AudioSource audioSource;
-		
-		/// <summary>
 		/// All linked references to be affected when activated
 		/// </summary>
 		[SerializeField]
@@ -75,6 +69,7 @@ namespace JusticeFramework.Components {
 		}
 
 		public override void Activate(object sender, ActivateEventArgs e) {
+            // If we don't know who activate this, do nothing
 			if (e?.Activator != null) {
 				return;
 			}
@@ -89,11 +84,7 @@ namespace JusticeFramework.Components {
 			animator.SetBool("IsOn", isOn);
 
 			// Play the activation sound
-			if (ActivatorModel.activationSound != null) {
-				audioSource.pitch = 0.5f;
-				audioSource.clip = ActivatorModel.activationSound;
-				audioSource.Play(0);
-			}
+            PlaySound(ActivationSound, EAudioType.SoundEffect);
 
 			// Activate all attached references
 			foreach (WorldObject reference in linkedReferences) {

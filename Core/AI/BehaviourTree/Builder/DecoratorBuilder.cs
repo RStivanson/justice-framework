@@ -6,7 +6,11 @@ namespace JusticeFramework.Core.AI.BehaviourTree.Builder {
 		private readonly TParent parent;
 		private TNode node;
 
-		public DecoratorBuilder(TParent parent, TNode node) {
+        public TNode Node {
+            get { return Node; }
+        }
+
+        public DecoratorBuilder(TParent parent, TNode node) {
 			this.parent = parent;
 			this.node = node;
 		}

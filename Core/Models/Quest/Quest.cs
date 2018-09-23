@@ -6,7 +6,7 @@ namespace JusticeFramework.Core.Models.Quest {
 	[Serializable]
 	public class Quest : EntityModel {
         [SerializeField]
-        private string name; // Display name
+        private new string name; // Display name
 
         [SerializeField]
         private EQuestState questState = EQuestState.NotStarted;

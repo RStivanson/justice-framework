@@ -5,6 +5,10 @@ namespace JusticeFramework.Core.AI.BehaviourTree.Builder {
 		private readonly TParent parent;
 		private TNode node;
 
+        public TNode Node {
+            get { return Node; }
+        }
+
 		public LeafBuilder(TParent parent, TNode node) {
 			this.parent = parent;
 			this.node = node;

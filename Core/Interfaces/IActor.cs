@@ -70,7 +70,7 @@
         /// </summary>
         void BeginAttack();
 
-        void UpdateAttack();
+        EAttackStatus UpdateAttack();
 
         void EndAttack();
 

@@ -163,6 +163,15 @@ namespace JusticeFramework.Core.Managers {
         protected virtual void OnInitialized() {
 		}
 
+        /// <summary>
+        /// Determines if the given object is the player
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>Returns a flag indicating if the object is the player</returns>
+        public static bool IsPlayer(IWorldObject obj) {
+            return ReferenceEquals(Player, obj);
+        }
+
         #region Game State Methods
 
         public virtual void BeginGame() {

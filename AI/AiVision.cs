@@ -1,8 +1,7 @@
-﻿using System;
+﻿using JusticeFramework.Components;
+using JusticeFramework.Utility.Extensions;
+using System;
 using System.Collections.Generic;
-using JusticeFramework.Utility.Extensions;
-using JusticeFramework.Components;
-using JusticeFramework.Utility.Extensions;
 using UnityEngine;
 
 namespace JusticeFramework.AI {
@@ -232,6 +231,11 @@ namespace JusticeFramework.AI {
                 // Checks the match condition
                 bool matchedCondition = matchCondition?.Invoke((T)reference) ?? true;
 
+                // If this doesn't match the predicate, skip it
+                if (!matchedCondition) {
+                    continue;
+                }
+
                 // If the distance is valid
                 if (withinDistance != -1) {
                     // Calculate the distance
@@ -242,9 +246,9 @@ namespace JusticeFramework.AI {
                         continue;
                     }
                 }
-				
+
                 // Add the reference to the list
-				nearbyList.Add((T)reference);
+                nearbyList.Add((T)reference);
 			}
 
             // If the list should be sorted
@@ -275,5 +279,6 @@ namespace JusticeFramework.AI {
             // Return 1 is right is closest, else 0
 			return leftDistance > rightDistance ? 1 : 0;
 		}
+
 	}
 }

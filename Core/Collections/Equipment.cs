@@ -86,8 +86,14 @@ namespace JusticeFramework.Core.Collections {
                 animator?.SetOverrideController(weapon.FPOverrideController, weapon.TPOverrideController);
             }
 
-            // Unequip other pieces and store this item
-            return SwapEquippedItem(item, animator);
+            // Unequip any item aready in this slot
+            IEquippable unequipped = Unequip(item.EquipSlot);
+
+            // Put the new item in the slot
+            equipment[(int)item.EquipSlot] = new EquippedItem(item, animator);
+
+            // return the unequipped item
+            return unequipped;
         }
 
         /// <summary>
@@ -124,18 +130,6 @@ namespace JusticeFramework.Core.Collections {
             }
 
             return equipItem.EquippedObject;
-        }
-
-        /// <summary>
-        /// Removes the currently stored item and inserts the given item
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        private IEquippable SwapEquippedItem(IEquippable item, PerspectiveAnimator animator) {
-            IEquippable unequipped = Unequip(item.EquipSlot);
-            equipment[(int)item.EquipSlot] = new EquippedItem(item, animator);
-            
-            return unequipped;
         }
     }
 }

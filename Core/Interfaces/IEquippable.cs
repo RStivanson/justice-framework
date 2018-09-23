@@ -9,16 +9,6 @@ namespace JusticeFramework.Core.Interfaces {
 	/// </summary>
 	public interface IEquippable : IItem {
 		/// <summary>
-		/// Event called when the item is equipped
-		/// </summary>
-		event OnItemEquipped onItemEquipped;
-		
-		/// <summary>
-		/// Event called when the item is unequipped
-		/// </summary>
-		event OnItemUnequipped onItemUnequipped;
-		
-		/// <summary>
 		/// The slot that this item should be equipped to
 		/// </summary>
 		EEquipSlot EquipSlot { get; }
@@ -42,7 +32,5 @@ namespace JusticeFramework.Core.Interfaces {
         /// The collider attached to this object
         /// </summary>
         Collider Collider { get; }
-
-        void SetOwner(WorldObject worldObject);
     }
 }

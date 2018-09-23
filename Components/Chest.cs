@@ -13,9 +13,6 @@ using UnityEngine;
 namespace JusticeFramework.Components {
     [Serializable]
 	public class Chest : WorldObject, IChest, IContainer, IInteractable, ILockable {
-		public event OnItemAdded onItemAdded;
-		public event OnItemRemoved onItemRemoved;
-
 #region Variables
 
 		/// <summary>
@@ -56,7 +53,7 @@ namespace JusticeFramework.Components {
 			}
 		}
 		
-		public EInteractionType InteractionType {
+		public override EInteractionType InteractionType {
 			get { return EInteractionType.Loot; }
 		}
 		

@@ -22,8 +22,6 @@ namespace JusticeFramework.AI {
     [Serializable]
     [DisallowMultipleComponent()]
     public class AiController : Controller {
-		public const int HeroicAttackBufer = 5;
-
 		[SerializeField]
 		private Actor self;
 		

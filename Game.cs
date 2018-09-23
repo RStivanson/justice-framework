@@ -12,8 +12,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Game : GameManager {
-	private bool isConsoleOpen = false;
-
 	private BehaviourTree tree;
 	public AudioClip ambientMusic;
 	

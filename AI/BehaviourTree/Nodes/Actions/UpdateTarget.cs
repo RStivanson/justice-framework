@@ -21,7 +21,7 @@ namespace JusticeFramework.AI.BehaviourTree.Nodes.Actions {
 				if (nearbyActors != null) {
 					foreach (Actor actor in nearbyActors) {
 						// TODO: Check if the actor is actually an enemy before assigning it as a target
-						if (self.IsScared(actor)) {
+						if (self.IsScaredOf(actor)) {
 							continue;
 						}
 

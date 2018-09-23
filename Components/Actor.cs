@@ -276,6 +276,8 @@ namespace JusticeFramework.Components {
             get { return ReferenceEquals(this, GameManager.Player); }
         }
 
+        public bool IsAttacking { get; set; }
+
         #endregion
 
 		/// <inheritdoc cref="WorldObject" />
@@ -463,24 +465,26 @@ namespace JusticeFramework.Components {
 
             if (weapon?.CanFire() ?? true) {
                 weapon?.StartFire(this);
+
+                IsAttacking = true;
             }
         }
 
-        public void UpdateAttack() {
+        public EAttackStatus UpdateAttack() {
             IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
-            weapon?.UpdateFire(this);
+            return weapon?.UpdateFire(this) ?? EAttackStatus.Empty;
         }
 
         public void EndAttack() {
             IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
 
-            if (weapon?.CanFire() ?? true) {
+            if ((weapon?.CanFire() ?? true) || IsAttacking) {
                 weapon?.EndFire(IsPlayer ? Camera.main.transform : transform, this);
                 actorAnimator.SetTrigger(SystemConstants.AnimatorAttackParam);
             }
         }
-
-		public bool IsScared(Actor target) {
+        
+		public bool IsScaredOf(Actor target) {
 			bool result = false;
 
 			switch (ActorModel.battleConfidence) {

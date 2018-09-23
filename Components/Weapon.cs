@@ -1,17 +1,13 @@
-﻿using System;
-using JusticeFramework.Core.Models;
-using JusticeFramework.Core;
-using JusticeFramework.Core.Events;
+﻿using JusticeFramework.Core;
 using JusticeFramework.Core.Interfaces;
-using UnityEngine;
 using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models;
+using System;
+using UnityEngine;
 
 namespace JusticeFramework.Components {
-	[Serializable]
+    [Serializable]
 	public class Weapon : Item, IWeapon {
-		public event OnItemEquipped onItemEquipped;
-		public event OnItemUnequipped onItemUnequipped;
-
 #region Variables
 
         [SerializeField]
@@ -102,10 +98,6 @@ namespace JusticeFramework.Components {
             }
         }
 
-        public void SetOwner(WorldObject actor) {
-            owner = actor as Actor;
-        }
-
         public bool CanFire() {
             return lastAttackTime == -1 || (Time.time - lastAttackTime) > 1;
         }
@@ -144,8 +136,8 @@ namespace JusticeFramework.Components {
             }
         }
 
-        public void UpdateFire(IContainer ammoSupply = null) {
-
+        public EAttackStatus UpdateFire(IContainer ammoSupply = null) {
+            return EAttackStatus.Empty;
         }
 
         public void EndFire(Transform origin, IContainer ammoSupply = null) {

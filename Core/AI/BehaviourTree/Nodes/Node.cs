@@ -6,37 +6,37 @@ namespace JusticeFramework.Core.AI.BehaviourTree.Nodes {
 	public class Node {
 		private static int nodeIdCounter = 0;
 
-		private int id;
-		private int tickCount;
 		private bool isOpened;
 
 		public int Id {
-			get { return id; }
+            get;
+            private set;
 		}
 		
 		public int TickCount {
-			get { return tickCount; }
+            get;
+            private set;
 		}
 		
 		public Node() {
-			id = nodeIdCounter++;
-			tickCount = 0;
+			Id = nodeIdCounter++;
+            TickCount = 0;
 			isOpened = false;
 		}
 
 		public ENodeStatus Tick(TickState tick) {
-			tickCount++;
+			TickCount++;
 			
 			if (!isOpened) {
 				isOpened = true;
 				Open(tick);
 			}
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
 			if (tick.debug) {
 				Debug.Log(GetType());
 			}
-#endif
+        #endif
 			
 			ENodeStatus status = OnTick(tick);
 
@@ -52,6 +52,9 @@ namespace JusticeFramework.Core.AI.BehaviourTree.Nodes {
 			return ENodeStatus.Success;
 		}
 		
+        protected virtual void Cancel(TickState tick) {
+        }
+
 		protected virtual void Open(TickState tick) {
 		}
 

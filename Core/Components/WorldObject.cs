@@ -168,7 +168,12 @@ namespace JusticeFramework.Components {
         /// <param name="clip">The audio clip to play</param>
         /// <param name="volume">The volume to play the sound at</param>
         public void PlaySound(AudioClip clip, EAudioType audioType, float volume = 1) {
-            audioSource?.PlayOneShot(clip, SystemSettings.GetScaledVolume(volume, audioType));
+            if (clip == null || audioSource == null) {
+                return;
+            }
+
+            volume = SystemSettings.GetScaledVolume(volume, audioType);
+            audioSource.PlayOneShot(clip, volume);
         }
         
     }
