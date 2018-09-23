@@ -1,5 +1,6 @@
 ﻿using JusticeFramework.Core.Collections;
 using JusticeFramework.Core.Managers;
+using JusticeFramework.Core.Models.Settings;
 using System;
 using UnityEngine;
 
@@ -34,6 +35,13 @@ namespace JusticeFramework.Core.Models.Crafting {
         /// </summary>
         public RecipeItem[] Ingredients {
             get { return ingredients; }
+        }
+
+        /// <summary>
+        /// Gets the display name of the Result Item
+        /// </summary>
+        public string DisplayName {
+            get { return Result?.Ingredient.displayName ?? SystemConstants.LabelUnknown; }
         }
 
         #region Crafting Functions

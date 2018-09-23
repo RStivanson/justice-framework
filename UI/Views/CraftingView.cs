@@ -61,7 +61,11 @@ namespace JusticeFramework.UI.Views {
         }
 
         public void OnItemActivated(IContainer target, IContainer source, Recipe recipe) {
-            recipe.Craft(target.Inventory, source.Inventory);
+            if (!recipe.HasIngredients(source.Inventory)) {
+                Game.Notify($"You do not have the required ingredients to craft {recipe.DisplayName}");
+            } else if (recipe.Craft(target.Inventory, source.Inventory)) {
+                Game.Notify($"{recipe.DisplayName} crafted");
+            }
         }
 
         #endregion

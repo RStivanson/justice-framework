@@ -6,18 +6,25 @@ namespace JusticeFramework.Core.UI.Components {
     [Serializable]
     public class NotificationText : MonoBehaviour {
         [SerializeField]
-        private float displayTime = 2.25f;
+        private float displayTime = 3.25f;
 
         [SerializeField]
         private Text buttonText;
 
+        [SerializeField]
+        private float fadeSpeed = 2.25f;
+
         private float currentTimeDisplayed = 0;
 
         private void Update() {
-            currentTimeDisplayed += Time.deltaTime;
+            currentTimeDisplayed += Time.unscaledDeltaTime;
 
             if (currentTimeDisplayed >= displayTime) {
-                Destroy(gameObject);
+                if (buttonText.color != Color.clear) {
+                    buttonText.color = Color.Lerp(buttonText.color, Color.clear, Time.unscaledDeltaTime * fadeSpeed);
+                } else {
+                    Destroy(gameObject);
+                }
             }
         }
 
