@@ -115,7 +115,7 @@ namespace JusticeFramework.Components {
                         ammoSupply.Inventory.Remove(testArrowId, 1);
 
                         AmmoModel ammo = GameManager.AssetManager.GetById<AmmoModel>("TestArrow");
-                        GameObject go = Instantiate(ammo.prefab);
+                        GameObject go = Instantiate(ammo.groundItemPrefab);
 
                         loadedProjectile = go.GetComponent<Ammo>();
 

@@ -261,19 +261,27 @@ namespace JusticeFramework.Core.Managers {
         }
 
         public static IWorldObject Spawn(WorldObjectModel worldObjectModel, Vector3 position, Quaternion rotation) {
-            if (worldObjectModel != null) {
-                GameObject obj = Instantiate(worldObjectModel.prefab, position, rotation);
+            IWorldObject worldObject = Spawn(worldObjectModel.groundItemPrefab, position, rotation);
+
+            if (worldObject != null) {
+                worldObject.SetData(worldObjectModel, true);
+            }
+
+            return worldObject;
+        }
+
+        public static IWorldObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation) {
+            IWorldObject result = null;
+
+            if (prefab != null) {
+                GameObject obj = Instantiate(prefab, position, rotation);
 
                 if (obj != null) {
-                    IWorldObject reference = obj.GetComponent<IWorldObject>();
-
-                    reference.SetData(worldObjectModel, true);
-
-                    return reference;
+                    result = obj.GetComponent<IWorldObject>();
                 }
             }
 
-            return null;
+            return result;
         }
 
         [ConsoleCommand("spawnatplayer", "Spawns a new copy of the specified asset next to the player")]
@@ -285,8 +293,22 @@ namespace JusticeFramework.Core.Managers {
 			return Spawn(id, spawnPos);
 		}
 
+        public static IEquippable SpawnEquipment(string id) {
+            return SpawnEquipment(AssetManager.GetById<EquippableModel>(id));
+        }
+
+        public static IEquippable SpawnEquipment(EquippableModel equippable) {
+            IEquippable result = null;
+
+            if (equippable != null) {
+                result = (IEquippable)Spawn(equippable.equipmentPrefab, Vector3.zero, Quaternion.identity);
+            }
+
+            return result;
+        }
+
         #endregion
-		
+
         #region Scene Management
 
         /// <summary>
@@ -295,7 +317,7 @@ namespace JusticeFramework.Core.Managers {
         /// <param name="sceneName">The name of the scene to load</param>
         /// <param name="onLoadComplete">Callback to be called when the scene has finished loading</param>
         /// <param name="showLoadScreen">Flag indicating if the loading screen should be shown</param>
-		protected static void LoadLevel(string sceneName, UnityAction onLoadComplete = null, bool showLoadScreen = true) {
+        protected static void LoadLevel(string sceneName, UnityAction onLoadComplete = null, bool showLoadScreen = true) {
 			// Close all open windows and all open scenes
 			UiManager.UI.CloseAllWindows();
 			UnloadAllLevels();

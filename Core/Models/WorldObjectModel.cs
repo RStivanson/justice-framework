@@ -21,6 +21,6 @@ namespace JusticeFramework.Core.Models {
 		/// <summary>
 		/// Prefab model used when spawning this model
 		/// </summary>
-		public GameObject prefab = null;
+		public GameObject groundItemPrefab = null;
 	}
 }

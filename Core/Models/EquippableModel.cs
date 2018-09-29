@@ -8,7 +8,12 @@ namespace JusticeFramework.Core.Models {
 	/// </summary>
 	[Serializable]
 	public class EquippableModel : ItemModel {
-		/// <summary>
+        /// <summary>
+        /// The object that should be spawned when this item is equipped
+        /// </summary>
+        public GameObject equipmentPrefab;
+        
+        /// <summary>
 		/// The slot where the armor should be equipped
 		/// </summary>
 		public EEquipSlot equipSlot = EEquipSlot.Head;

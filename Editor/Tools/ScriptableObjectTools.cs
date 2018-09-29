@@ -194,7 +194,7 @@ namespace JusticeFramework.Editor.Tools {
 				spawnPoint = lastSceneViewCameraTransform.position + (lastSceneViewCameraTransform.forward * 10.0f);
 			}
 
-			WorldObject reference = ((GameObject)PrefabUtility.InstantiatePrefab(worldObject.prefab)).GetComponent<WorldObject>();
+			WorldObject reference = ((GameObject)PrefabUtility.InstantiatePrefab(worldObject.groundItemPrefab)).GetComponent<WorldObject>();
 
 			reference.transform.position = spawnPoint;
 			reference.transform.rotation = Quaternion.identity;
@@ -208,8 +208,8 @@ namespace JusticeFramework.Editor.Tools {
 		private static bool SendToSceneValidation() {
 			WorldObjectModel worldObject = Selection.activeObject as WorldObjectModel;
 			
-			bool hasPrefab = worldObject?.prefab != null;
-			bool prefabHasReferenceScript = worldObject?.prefab?.GetComponent<WorldObject>() != null;
+			bool hasPrefab = worldObject?.groundItemPrefab != null;
+			bool prefabHasReferenceScript = worldObject?.groundItemPrefab?.GetComponent<WorldObject>() != null;
 			
 			return hasPrefab && prefabHasReferenceScript;
 		}

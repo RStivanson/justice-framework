@@ -107,7 +107,7 @@ namespace JusticeFramework.Core.Collections {
             equipment[index] = new EquippedItem(null, null);
 
             // If the item isn't null
-            if (equipItem.EquippedObject != null) {
+            if (equipItem != null && equipItem.EquippedObject != null) {
                 // If this is a rigged item
                 if (equipItem.EquippedObject is IRigged) {
                     IRigged riggedItem = equipItem.EquippedObject as IRigged;
@@ -129,7 +129,7 @@ namespace JusticeFramework.Core.Collections {
                 equipItem.EquippedObject.Transform.SetParent(null);
             }
 
-            return equipItem.EquippedObject;
+            return equipItem?.EquippedObject ?? null;
         }
     }
 }

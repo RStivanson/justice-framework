@@ -286,15 +286,17 @@ namespace JusticeFramework.Components {
             statusEffects = new List<StatusEffect>();
 
 			threats = new List<IActor>();
+            equipment = new Equipment();
 
+            IEquippable item = GameManager.SpawnEquipment("TestHelm");
+            Equip(this, item);
             /*
-			Equip(GameManager.Spawn("TestHelm001") as IEquippable);
-			Equip(GameManager.Spawn("TestChestplate001") as IEquippable);
+            Equip(GameManager.Spawn("TestChestplate001") as IEquippable);
 			Equip(GameManager.Spawn("TestPlatelegs001") as IEquippable);
 			Equip(GameManager.Spawn("TestSword001") as IEquippable);
             */
 
-			ExitCombat();
+            ExitCombat();
 		}
 
         protected override void OnDataModelChanged() {
@@ -551,7 +553,7 @@ namespace JusticeFramework.Components {
 			
 			if (itemModel is EquippableModel) {
 				Inventory.Remove(id, 1);
-				IEquippable item = GameManager.Spawn(itemModel, Vector3.zero, Quaternion.identity) as IEquippable;
+				IEquippable item = GameManager.SpawnEquipment(itemModel as EquippableModel);
 
 				if (item != null) {
                     equipment.Equip(item, mainhandBone, actorAnimator, meshRenderer);
@@ -602,6 +604,11 @@ namespace JusticeFramework.Components {
         }
 
         public static bool Equip(Actor target, IEquippable equippable) {
+            if (target.mainhandBone == null) {
+                Debug.Log(target.DisplayName);
+                return false;
+            }
+
             equippable = target.Equipment.Equip(equippable, target.mainhandBone, target.actorAnimator, target.meshRenderer);
 
             if (equippable != null) {
