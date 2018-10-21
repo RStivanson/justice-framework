@@ -17,19 +17,19 @@ namespace JusticeFramework.Core.Managers.Resources {
             LoadResources(DataPath);
         }
 
-        public List<Quest> GetNotStartedQuests(string id) {
+        public List<Quest> GetNotStartedQuests() {
             return resources.Where(quest => quest.QuestState == EQuestState.NotStarted).ToList();
         }
 
-        public List<Quest> GetInProgressQuests(string id) {
+        public List<Quest> GetInProgressQuests() {
             return resources.Where(quest => quest.QuestState == EQuestState.InProgress).ToList();
         }
 
-        public List<Quest> GetCompletedQuests(string id) {
+        public List<Quest> GetCompletedQuests() {
             return resources.Where(quest => quest.QuestState == EQuestState.Completed).ToList();
         }
 
-        public List<Quest> GetFailedQuests(string id) {
+        public List<Quest> GetFailedQuests() {
             return resources.Where(quest => quest.QuestState == EQuestState.Failed).ToList();
         }
 

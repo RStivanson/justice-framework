@@ -7,5 +7,6 @@ namespace JusticeFramework.Core.Models.Quest {
 		public string logEntry; // Text to show on the quest log
 		public bool completeQuest; // Flag stating if this stage completes the quest
 		public bool failQuest; // Flag stating if this stage fails the quest
+        public bool completed; // Flag indicated if this stage was completed
 	}
 }

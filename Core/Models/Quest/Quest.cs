@@ -17,23 +17,46 @@ namespace JusticeFramework.Core.Models.Quest {
         [SerializeField]
 		private List<QuestStage> stages; // Quest Components
 
+        [SerializeField]
+        private bool hiddenFromPlayer;
+
         public string Id {
             get { return id; }
+            set { id = value; }
         }
 
         public string DisplayName {
             get { return name; }
+            set { name = value; }
         }
 
         public EQuestState QuestState {
             get { return questState; }
+            set { questState = value; }
         }
 
         public int Marker {
             get { return currentMarker; }
+            set { currentMarker = value; }
+        }
+
+        public List<QuestStage> Stages {
+            get { return stages; }
+            set { stages = value; }
+        }
+
+        public bool HiddenFromPlayer {
+            get { return hiddenFromPlayer; }
+            set { hiddenFromPlayer = value; }
         }
 
         public void SetMarker(int marker) {
+            QuestStage currentStage = GetStageByMarker(currentMarker);
+
+            if (currentStage != null) {
+                currentStage.completed = true;
+            }
+
             currentMarker = marker;
 
             QuestStage stage = GetStageByMarker(currentMarker);

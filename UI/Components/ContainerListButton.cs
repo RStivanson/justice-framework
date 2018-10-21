@@ -51,7 +51,7 @@ namespace JusticeFramework.UI.Components {
         /// Attaches the data to this object
         /// </summary>
         /// <param name="itemEntry">The container item data</param>
-		/// <param name="showQuantity">Flag indicating if the quantity of the item should be shown</param>
+		/// <param name="callback">The event to call when the button is clicked</param>
         public void SetItem(ContainerView.ContainerItem item, OnContainerAction callback) {
             containerItem = item;
 

@@ -1,7 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using JusticeFramework.Editor.NodeEditor;
 
-namespace JusticeFramework.Editor.NodeEditor.BehaviourTree {
+namespace JusticeFramework.Editor.Windows {
 	public class BehaviourTreeNodeEditor : NodeEditor {
 		[MenuItem(EditorSettings.MenuPrefix + "/Editor/Behaviour Editor")]
 		private static void OpenWindow() {

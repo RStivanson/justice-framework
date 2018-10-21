@@ -74,6 +74,12 @@ public class Game : GameManager {
             }
         }
 
+        if (Input.GetKeyDown(KeyCode.R)) {
+            if (UiManager.UI.Peek() is HudView) {
+                QuestView view = UiManager.UI.OpenWindow<QuestView>();
+            }
+        }
+
         gameTime = gameTime.AddSeconds(15);
 	}
 
