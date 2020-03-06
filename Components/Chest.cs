@@ -1,59 +1,52 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Collections;
-using JusticeFramework.Core.Console;
-using JusticeFramework.Core.Events;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Models;
+﻿using JusticeFramework.Collections;
+using JusticeFramework.Console;
+using JusticeFramework.Data;
 using JusticeFramework.Interfaces;
-using JusticeFramework.UI.Views;
+using JusticeFramework.Logic;
+using JusticeFramework.Managers;
 using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
     [Serializable]
-	public class Chest : WorldObject, IChest, IContainer, IInteractable, ILockable {
-#region Variables
-
+	public class Chest : WorldObject, IContainer, ILockable {
 		/// <summary>
-		/// The inventory of items in this container
+		/// The inventory of items in this container.
 		/// </summary>
 		[SerializeField]
 		private Inventory inventory;
 
 		/// <summary>
-		/// Flag indicating if this chest is locked
+		/// Flag indicating if this chest is locked.
 		/// </summary>
 		[SerializeField]
 		private bool isLocked;
 
 		/// <summary>
-		/// The difficulty of the lock
+		/// The difficulty of the lock on this chest.
 		/// </summary>
 		[SerializeField]
 		private ELockDifficulty lockDifficulty;
 
-#endregion
-		
-#region Properties
+        /// <summary>
+        /// The key required to unlock this chest.
+        /// </summary>
+        [SerializeField]
+        private ItemData requiredKey;
 
-		private ChestModel ChestModel {
-			get { return model as ChestModel; }
-		}
-		
-		public override string DisplayName {
-			get {
-				string displayName = ChestModel.displayName;
+        public override string DisplayName {
+            get {
+                string displayName = base.DisplayName;
 
-				if (IsLocked) {
-					displayName = $"{displayName} ({LockDifficulty.ToString()})";
-				}
+                if (IsLocked) {
+                    displayName = $"{displayName} ({LockDifficulty.ToString()})";
+                }
 
-				return displayName;
-			}
-		}
-		
-		public override EInteractionType InteractionType {
+                return displayName;
+            }
+        }
+
+        public override EInteractionType InteractionType {
 			get { return EInteractionType.Loot; }
 		}
 		
@@ -69,15 +62,27 @@ namespace JusticeFramework.Components {
 			get { return lockDifficulty; }
 		}
 
-		public AudioClip OpenSound {
-			get { return ChestModel.openSound; }
-		}
-		
-#endregion
+        public ItemData RequiredKey {
+            get { return requiredKey; }
+        }
+
+        protected override void OnIntialized() {
+            ResetToDefaultItems();
+        }
+
+        public void ResetToDefaultItems() {
+            ChestData data = dataObject as ChestData;
+
+            Inventory.Clear();
+
+            foreach (ItemStackData isd in data.DefaultInventory) {
+                Inventory.Add(isd.itemData.Id, isd.quantity);
+            }
+        }
 
 		[ConsoleCommand("giveitem", "Gives the chest the item with the given id and quantity", ECommandTarget.LookAt)]
 		private void GiveItem(string id, int amount) {
-			if (!GameManager.AssetManager.Contains<ItemModel>(id)) {
+			if (!GameManager.DataManager.IsAssetLoaded<ItemData>(id)) {
 				return;
 			}
 
@@ -91,31 +96,44 @@ namespace JusticeFramework.Components {
 		[ConsoleCommand("lock", "Locks the target container", ECommandTarget.LookAt)]
 		public void Lock() {
 			isLocked = true;
-			OnReferenceStateChanged();
+            // TODO
+            // PlaySound(LockSound, EAudioType.SoundEffect, 1);
+            OnReferenceStateChanged();
 		}
 		
 		[ConsoleCommand("unlock", "Unlocks the target container", ECommandTarget.LookAt)]
 		public void Unlock() {
 			isLocked = false;
-			OnReferenceStateChanged();
+            // TODO
+            // PlaySound(LockSound, EAudioType.SoundEffect, 1);
+            OnReferenceStateChanged();
 		}
 
-		private void ToggleLock() {
-			isLocked = !isLocked;
-			OnReferenceStateChanged();
-		}
+        protected override Logic.Action OnActivate(IWorldObject activator) {
+            Logic.Action action = null;
 
-		public override void Activate(object sender, ActivateEventArgs e) {
-			if (e?.Activator != null) {
-				ToggleLock();
-			} else if (ReferenceEquals(GameManager.Player, e?.ActivatedBy)) {
-				if (!IsLocked) {
-					ContainerView view = UiManager.UI.OpenWindow<ContainerView>();
-					view.View(e?.ActivatedBy as Actor, this, targetMask: EContainerViewMask.Items);
-				} else {
-					Debug.Log("This needs picklocked");
-				}
-			}
+            if (IsLocked) {
+                if (LockDifficulty == ELockDifficulty.Impossible && requiredKey == null) {
+                    action = new ActionFailed(this, "This chest cannot be unlocked.");
+                    return action;
+                }
+
+                IContainer container = activator as IContainer;
+                if (container.Inventory.Contains(requiredKey.Id)) {
+                    Unlock();
+                } else if (container.Inventory.HasItemWithTag("ItemLockpick")) {
+                    // TODO
+                    // action = new ActionLockpick(this);
+                    // return;
+                }
+            }
+
+            if (!IsLocked) {
+                action = new ActionOpen(this);
+                return action;
+            }
+
+            return new ActionFailed(this, null);
 		}
 	}
 }

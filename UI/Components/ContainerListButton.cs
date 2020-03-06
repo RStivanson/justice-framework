@@ -72,18 +72,18 @@ namespace JusticeFramework.UI.Components {
                 itemNameText.text = "Missing item data...";
             } else {
                 if (containerItem.Model != null) {
-                    itemNameText.text = containerItem.Model.displayName;
+                    itemNameText.text = containerItem.Model.DisplayName;
 
-                    if (containerItem.Stack.Quantity > 1) {
-                        itemNameText.text += $" ({containerItem.Stack.Quantity})";
+                    if (containerItem.Quantity > 1) {
+                        itemNameText.text += $" ({containerItem.Quantity})";
                     }
 
                     if (containerItem.IsEquipped) {
                         itemNameText.text += " (E)";
                     }
 
-                    itemWeightText.text = containerItem.Model.weight.ToString();
-                    itemValueText.text = containerItem.Model.value.ToString();
+                    itemWeightText.text = containerItem.Model.Weight.ToString();
+                    itemValueText.text = containerItem.Model.Value.ToString();
                 } else {
                     itemNameText.text = containerItem.EquippedItem.DisplayName;
 

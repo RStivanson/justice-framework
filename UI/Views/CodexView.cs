@@ -1,11 +1,12 @@
-﻿using System;
-using JusticeFramework.Components;
+﻿using JusticeFramework.Components;
 using JusticeFramework.Core.UI;
+using JusticeFramework.Data;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Views {
-	[Serializable]
+    [Serializable]
 	public class CodexView : Window {
 		[SerializeField]
 		private Text title;
@@ -32,8 +33,9 @@ namespace JusticeFramework.UI.Views {
 				title.text = string.Empty;
 				content.text = string.Empty;
 			} else {
-				title.text = current.DisplayName;
-				content.text = current.Text.Replace("<br>", "\n");
+                CodexData data = codex.GetData<CodexData>();
+				title.text = data.DisplayName;
+				content.text = data.Text.Replace("<br>", "\n");
 			}
 		}
 

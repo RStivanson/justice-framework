@@ -1,9 +1,9 @@
-﻿using JusticeFramework.Core;
+﻿using JusticeFramework.Data;
 using UnityEditor;
 using UnityEngine;
 
 namespace JusticeFramework.Editor.Drawers {
-    [CustomPropertyDrawer(typeof(Condition))]
+    [CustomPropertyDrawer(typeof(ConditionData))]
     public class ConditionDrawer : PropertyDrawer {
         private const float PropertyBuffer = 5;
         private const float SelfFlagWidth = 15;
@@ -32,8 +32,8 @@ namespace JusticeFramework.Editor.Drawers {
             Rect floatRect = new Rect(position.x + (SelfFlagWidth + PropertyBuffer + TargetWidth + PropertyBuffer + EqualityWidth + PropertyBuffer + StringWidth + PropertyBuffer), position.y, position.width - (SelfFlagWidth + PropertyBuffer + TargetWidth + PropertyBuffer + EqualityWidth + PropertyBuffer + StringWidth + PropertyBuffer), position.height);
 
             // Draw fields - passs GUIContent.none to each so they are drawn without labels
-            EditorGUI.PropertyField(selfRect, property.FindPropertyRelative("targetSelf"), GUIContent.none);
-            EditorGUI.PropertyField(conditionRect, property.FindPropertyRelative("conditionMethod"), GUIContent.none);
+            EditorGUI.PropertyField(selfRect, property.FindPropertyRelative("shouldTargetSelf"), GUIContent.none);
+            EditorGUI.PropertyField(conditionRect, property.FindPropertyRelative("conditionType"), GUIContent.none);
             EditorGUI.PropertyField(equalityRect, property.FindPropertyRelative("equalityType"), GUIContent.none);
             EditorGUI.PropertyField(stringRect, property.FindPropertyRelative("stringValue"), GUIContent.none);
             EditorGUI.PropertyField(floatRect, property.FindPropertyRelative("floatValue"), GUIContent.none);

@@ -1,16 +1,10 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Models;
+﻿using JusticeFramework.Interfaces;
 using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
     [Serializable]
-	[RequireComponent(typeof(Rigidbody))]
-	[RequireComponent(typeof(BoxCollider))]
-	public class Armor : Item, IArmor, IRigged {
-#region Variables
-		
+	public class Armor : Item, IRigged {
 		[SerializeField]
 		private SkinnedMeshRenderer thisRenderer;
 		
@@ -25,27 +19,7 @@ namespace JusticeFramework.Components {
 		
 		[SerializeField]
 		private Transform[] defaultBones;
-
-#endregion
-
-#region Properties
-
-		private ArmorModel ArmorModel {
-			get { return model as ArmorModel; }
-		}
-		
-		public EEquipSlot EquipSlot {
-			get { return ArmorModel.equipSlot; }
-		}
-		
-		public AudioClip EquipSound {
-			get { return ArmorModel.equipSound; }
-		}
-		
-		public int ArmorRating {
-			get { return ArmorModel.armorRating; }
-        }
-
+        
         public Renderer Renderer {
             get { return thisRenderer; }
         }
@@ -57,9 +31,7 @@ namespace JusticeFramework.Components {
         public Collider Collider {
             get { return thisCollider; }
         }
-
-        #endregion
-
+        
         protected override void OnIntialized() {
 			if (thisRenderer == null) {
 				Debug.LogError($"Skinned mesh renderer on '{name}' has not been defined!");
@@ -67,9 +39,6 @@ namespace JusticeFramework.Components {
 				defaultRootBone = thisRenderer.rootBone;
 				defaultBones = thisRenderer.bones;
 			}
-
-			thisRigidbody = GetComponent<Rigidbody>();
-			thisCollider = GetComponent<BoxCollider>();
 		}
 
         /// <summary>

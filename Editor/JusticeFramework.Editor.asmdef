@@ -1,12 +1,19 @@
 {
     "name": "JusticeFramework.Editor",
     "references": [
-        "JusticeFramework",
-        "JusticeFramework.Core",
-        "JusticeFramework.Utility"
+        "GUID:36e1f7ca591ef634c868eb4b5f7fcc12",
+        "GUID:2c944f3d06552c248ab562f21789a77e",
+        "GUID:a4eea635dfabee3428300e10f51eb281"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }

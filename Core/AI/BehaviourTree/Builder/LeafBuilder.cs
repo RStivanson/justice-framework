@@ -1,6 +1,4 @@
-﻿using JusticeFramework.Core.AI.BehaviourTree.Nodes;
-
-namespace JusticeFramework.Core.AI.BehaviourTree.Builder {
+﻿namespace JusticeFramework.Core.AI.BehaviourTree.Builder {
 	public class LeafBuilder<TParent, TNode> where TNode : Leaf {
 		private readonly TParent parent;
 		private TNode node;

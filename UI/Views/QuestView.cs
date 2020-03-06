@@ -1,7 +1,7 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Models.Quest;
 using JusticeFramework.Core.UI;
+using JusticeFramework.Logic;
+using JusticeFramework.Managers;
 using JusticeFramework.UI.Components;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Views {
-    public delegate void OnQuestAction(Quest quest);
+    public delegate void OnQuestAction(QuestSequence quest);
 
     [Serializable]
     public class QuestView : Window {
@@ -30,34 +30,30 @@ namespace JusticeFramework.UI.Views {
 
         [SerializeField]
         [HideInInspector]
-        private List<Quest> inProgressQuests;
+        private List<QuestSequence> inProgressQuests;
 
         [SerializeField]
-        private Quest selectedQuest;
+        private QuestSequence selectedQuest;
 
-        private void UpdateDescriptionFields(Quest quest) {
+        private void UpdateDescriptionFields(QuestSequence quest) {
             string description = string.Empty;
-            int counter = 0;
+            int counter = 1;
 
-            for (int i = 0; i < quest.Stages.Count; i++) {
-                if (!quest.Stages[i].completed && quest.Stages[i].marker != quest.Marker) {
-                    continue;
-                }
+            IEnumerable<QuestSequence.QuestStage> stages = quest.GetActiveStages();
+
+            foreach (QuestSequence.QuestStage stage in stages) {
+                description += $"{counter}. {stage.stageData.logEntry}";
+                description += Environment.NewLine;
 
                 counter++;
-                description += $"{counter}. {quest.Stages[i].logEntry}";
-
-                if (i < quest.Stages.Count - 1) {
-                    description += Environment.NewLine;
-                }
             }
 
-            selectedItemNameLabel.text = quest.DisplayName;
+            selectedItemNameLabel.text = quest.QuestData.DisplayName;
             selectedItemDescrLabel.text = description;
         }
 
         protected override void OnShow() {
-            inProgressQuests = GameManager.QuestManager.GetInProgressQuests();
+            inProgressQuests = new List<QuestSequence>();//GameManager.DataManager.GetInProgressQuests();
 
             PopulateQuestList();
         }
@@ -69,12 +65,12 @@ namespace JusticeFramework.UI.Views {
                 return;
             }
 
-            foreach (Quest quest in inProgressQuests) {
+            foreach (QuestSequence quest in inProgressQuests) {
                 AddButton(buttonContainer, quest);
             }
         }
 
-        private void AddButton(Transform container, Quest quest) {
+        private void AddButton(Transform container, QuestSequence quest) {
             GameObject spawnedObject = Instantiate(buttonPrefab);
 
             spawnedObject.GetComponent<QuestListButton>().SetQuest(quest, OnQuestSelected);
@@ -86,7 +82,7 @@ namespace JusticeFramework.UI.Views {
 
         #region Event Callbacks
 
-        protected virtual void OnQuestSelected(Quest quest) {
+        protected virtual void OnQuestSelected(QuestSequence quest) {
             selectedQuest = quest;
             UpdateDescriptionFields(quest);
         }

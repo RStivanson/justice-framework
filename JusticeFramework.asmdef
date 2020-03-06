@@ -1,9 +1,15 @@
 {
     "name": "JusticeFramework",
     "references": [
-        "JusticeFramework.Core",
-        "JusticeFramework.Utility"
+        "GUID:2c944f3d06552c248ab562f21789a77e"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }

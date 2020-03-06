@@ -1,5 +1,5 @@
 ﻿using JusticeFramework.Core.UI;
-using JusticeFramework.Core.UI.Components;
+using JusticeFramework.UI.Components;
 using UnityEngine;
 
 namespace JusticeFramework.UI.Views {

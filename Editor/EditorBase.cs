@@ -3,43 +3,75 @@ using UnityEditor;
 using UnityEngine;
 
 namespace JusticeFramework.Editor {
-	[Serializable]
-	public class EditorBase : EditorWindow {
-		[SerializeField]
-		private bool isLeftInspectorOpen;
+    [Serializable]
+    public class EditorBase : EditorWindow {
+        [SerializeField]
+        [HideInInspector]
+        private Rect leftInspectorViewPort;
+        
+        [SerializeField]
+        [HideInInspector]
+        private Rect rightInspectorViewPort;
 
-		[SerializeField]
-		private float leftInspectorWidth;
-		
-		[SerializeField]
-		[HideInInspector]
-		private Rect leftInspectorViewPort;
-		
-		[SerializeField]
-		private bool isRightInspectorOpen;
-		
-		[SerializeField]
-		private float rightInspectorWidth;
+        [SerializeField]
+        [HideInInspector]
+        private Rect bodyViewPort;
 
-		[SerializeField]
-		[HideInInspector]
-		private Rect rightInspectorViewPort;
-		
-		[SerializeField]
-		[HideInInspector]
-		private Rect bodyViewPort;
-		
-		protected virtual void Initialize() {
-			isLeftInspectorOpen = true;
-			leftInspectorWidth = 250f;
-			leftInspectorViewPort = new Rect(0, EditorStyles.toolbar.fixedHeight, leftInspectorWidth, position.height - EditorStyles.toolbar.fixedHeight);
+        protected string Title {
+            get { return titleContent.text; }
+            set { titleContent.text = value; }
+        }
+
+        protected bool IsLeftInspectorOpen {
+            get; set;
+        }
+
+        protected bool IsLeftInspectorEnabled {
+            get; set;
+        }
+
+        protected string LeftInspectorTitle {
+            get; set;
+        }
+
+        protected float LeftInspectorWidth {
+            get; set;
+        }
+
+        protected bool IsRightInspectorOpen {
+            get; set;
+        }
+
+        protected bool IsRightInspectorEnabled {
+            get; set;
+        }
+
+        protected string RightInspectorTitle {
+            get; set;
+        }
+
+        protected float RightInspectorWidth {
+            get; set;
+        }
+
+        public void Initialize() {
+            IsLeftInspectorOpen = IsLeftInspectorEnabled;
+            LeftInspectorTitle = "Left Inspector";
+			LeftInspectorWidth = 250f;
+			leftInspectorViewPort = new Rect(0, EditorStyles.toolbar.fixedHeight, LeftInspectorWidth, position.height - EditorStyles.toolbar.fixedHeight);
 			
-			isRightInspectorOpen = true;
-			rightInspectorWidth = 250f;
-			rightInspectorViewPort = new Rect(position.width - rightInspectorWidth, EditorStyles.toolbar.fixedHeight, rightInspectorWidth, position.height - EditorStyles.toolbar.fixedHeight);
+			IsRightInspectorOpen = IsRightInspectorEnabled;
+            RightInspectorTitle = "Right Inspector";
+            RightInspectorWidth = 250f;
+			rightInspectorViewPort = new Rect(position.width - RightInspectorWidth, EditorStyles.toolbar.fixedHeight, RightInspectorWidth, position.height - EditorStyles.toolbar.fixedHeight);
 			
 			bodyViewPort = new Rect(0, EditorStyles.toolbar.fixedHeight, position.width, position.height - EditorStyles.toolbar.fixedHeight);
+
+            OnInitialize();
 		}
+
+        protected virtual void OnInitialize() {
+        }
 		
         private void OnGUI() {
 	        UpdateViewPorts();
@@ -51,14 +83,14 @@ namespace JusticeFramework.Editor {
 	        
 	        DrawToolbar();
 	        
-	        if (isLeftInspectorOpen) {
+	        if (IsLeftInspectorEnabled && IsLeftInspectorOpen) {
 		        GUI.Box(leftInspectorViewPort, GUIContent.none);
 		        GUILayout.BeginArea(leftInspectorViewPort);
 				OnDrawInspectorLeft(new Rect(0, 0, leftInspectorViewPort.width, leftInspectorViewPort.height));
 		        GUILayout.EndArea();
 	        }
 	        
-	        if (isRightInspectorOpen) {
+	        if (IsRightInspectorEnabled && IsRightInspectorOpen) {
 		        GUI.Box(rightInspectorViewPort, GUIContent.none);
 		        GUILayout.BeginArea(rightInspectorViewPort);
 		        OnDrawInspectorRight(new Rect(0, 0, rightInspectorViewPort.width, rightInspectorViewPort.height));
@@ -75,20 +107,20 @@ namespace JusticeFramework.Editor {
 			bodyViewPort.width = position.width;
 			bodyViewPort.height = position.height - EditorStyles.toolbar.fixedHeight;
 			
-			if (isLeftInspectorOpen) {
-				leftInspectorViewPort.width = leftInspectorWidth;
+			if (IsLeftInspectorEnabled && IsLeftInspectorOpen) {
+				leftInspectorViewPort.width = LeftInspectorWidth;
 				leftInspectorViewPort.height = position.height - EditorStyles.toolbar.fixedHeight;
 
-				bodyViewPort.x += leftInspectorWidth;
-				bodyViewPort.width -= leftInspectorWidth;
+				bodyViewPort.x += LeftInspectorWidth;
+				bodyViewPort.width -= LeftInspectorWidth;
 			}
 			
-			if (isRightInspectorOpen) {
-				rightInspectorViewPort.x = position.width - rightInspectorWidth;
-				rightInspectorViewPort.width = rightInspectorWidth;
+			if (IsRightInspectorEnabled && IsRightInspectorOpen) {
+				rightInspectorViewPort.x = position.width - RightInspectorWidth;
+				rightInspectorViewPort.width = RightInspectorWidth;
 				rightInspectorViewPort.height = position.height - EditorStyles.toolbar.fixedHeight;
 				
-				bodyViewPort.width -= rightInspectorWidth;
+				bodyViewPort.width -= RightInspectorWidth;
 			}
 		}
         
@@ -107,14 +139,14 @@ namespace JusticeFramework.Editor {
         }
            
 	    protected virtual void OnDrawToolbarLeft() {
-		    if (GUILayout.Button("Left btn", EditorStyles.toolbarButton)) {
-			    isLeftInspectorOpen = !isLeftInspectorOpen;
+		    if (IsLeftInspectorEnabled && GUILayout.Button(LeftInspectorTitle, EditorStyles.toolbarButton)) {
+			    IsLeftInspectorOpen = !IsLeftInspectorOpen;
 		    }
 	    }
 	    
 	    protected virtual void OnDrawToolbarRight() {
-		    if (GUILayout.Button("Right btn", EditorStyles.toolbarButton)) {
-			    isRightInspectorOpen = !isRightInspectorOpen;
+		    if (IsRightInspectorEnabled && GUILayout.Button(RightInspectorTitle, EditorStyles.toolbarButton)) {
+			    IsRightInspectorOpen = !IsRightInspectorOpen;
 		    }
 	    }
 

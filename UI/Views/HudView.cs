@@ -1,12 +1,11 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Interfaces;
 using System;
 using UnityEngine;
 
 namespace JusticeFramework.UI.Views {
-    using Components;
-    using JusticeFramework.Core.Interfaces;
     using JusticeFramework.Core.UI;
+    using JusticeFramework.Interfaces;
+    using JusticeFramework.UI.Components;
 
     [Serializable]
 	public class HudView : Window {
@@ -36,8 +35,6 @@ namespace JusticeFramework.UI.Views {
 			compass.SetRelativeTo(player.transform);
 
 			interactionController = player.GetComponent<IInteractionController>();
-
-			interactionController.onInteractionTargetChanged += crosshair.OnInteractionTargetChanged;
 			interactionController.onInteractionTargetChanged += OnInteractionTargetChanged;
 			OnInteractionTargetChanged(interactionController.CurrentTarget);
 		}
@@ -46,7 +43,7 @@ namespace JusticeFramework.UI.Views {
 		/// Sets the controller whose targets we should monitor
 		/// </summary>
 		/// <param name="controller">The controller to get updates from</param>
-		private void OnInteractionTargetChanged(IWorldObject reference) {
+		private void OnInteractionTargetChanged(WorldObject reference) {
 			if (reference is IDamageable) {
 				targetHealthBar.Monitor((IDamageable)reference);
 				targetHealthBar.Show();
@@ -54,6 +51,8 @@ namespace JusticeFramework.UI.Views {
 				targetHealthBar.Monitor(null);
 				targetHealthBar.Hide();
 			}
+
+            crosshair.OnInteractionTargetChanged(reference);
 		}
 
         public void ShowNotification(string notification) {

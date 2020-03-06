@@ -1,15 +1,10 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Collections;
-using JusticeFramework.Core.Console;
-using JusticeFramework.Core.Events;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Models;
-using JusticeFramework.Core.Models.Settings;
-using JusticeFramework.Core.StatusEffects;
+﻿using JusticeFramework.Collections;
+using JusticeFramework.Console;
+using JusticeFramework.Data;
 using JusticeFramework.Interfaces;
+using JusticeFramework.Logic;
+using JusticeFramework.Managers;
 using JusticeFramework.StatusEffects;
-using JusticeFramework.UI.Views;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,20 +18,15 @@ namespace JusticeFramework.Components {
 	/// This class houses all model and functions relating for actors (NPCs and Player)
 	/// </summary>
 	[Serializable]
-	public class Actor : WorldObject, IActor, IDamageable {
+	public class Actor : WorldObject, IContainer, IDamageable {
 		public const int HeroicAttackBuffer = 3;
 		
 		public event OnCurrentHealthChanged onCurrentHealthChanged;
-		public event OnDamageTaken onDamageTaken;
-		public event OnHealingRecieved onHealingRecieved;
-		public event OnDeath onDeath;
 		public event OnLevelUp onLevelUp;
 
 		public event OnEnterCombat onEnterCombat;
 		public event OnExitCombat onExitCombat;
-
-        #region Variables
-		
+        
         /// <summary>
         /// Entity animator that manages the first person rig
         /// </summary>
@@ -77,7 +67,7 @@ namespace JusticeFramework.Components {
 		/// A list of all NPCs currently attacking this target
 		/// </summary>
 		[SerializeField]
-		private List<IActor> threats;
+		private List<Actor> threats;
 
 		/// <summary>
 		/// The rigidbody components attached to all pieces of the GameObject
@@ -96,7 +86,7 @@ namespace JusticeFramework.Components {
         /// Game events to take place when this character dies
         /// </summary>
         [SerializeField]
-        private GameEvent[] onKill;
+        private GameEventData[] onKill;
 
         /// <summary>
         /// List of status effects currently applied to this actor
@@ -104,25 +94,18 @@ namespace JusticeFramework.Components {
         [SerializeField]
         private List<StatusEffect> statusEffects;
 
-        #endregion
+        private Inventory inventory;
 
-        #region Properties
-		
-		private ActorModel ActorModel {
-			get { return model as ActorModel; }
-		}
-		
-		/// <inheritdoc />
-		public override bool CanBeActivated {
-			get { return (ActorModel?.canBeActivated ?? false) && !isInCombat; }
-		}
-		
-		public override EInteractionType InteractionType {
-			get { return IsDead ? EInteractionType.Loot : EInteractionType.Talk; }
+        public override EInteractionType InteractionType {
+			get {
+                if (IsInCombat)
+                    return EInteractionType.None;
+                return IsDead ? EInteractionType.Loot : EInteractionType.Talk;
+            }
 		}
 
 		public Inventory Inventory {
-			get { return ActorModel.inventory; }
+			get { return inventory; }
 		}
 		
         public Equipment Equipment {
@@ -133,14 +116,14 @@ namespace JusticeFramework.Components {
 		/// The base health of this actor
 		/// </summary>
 		public int BaseHealth {
-			get { return ActorModel.baseHealth; }
+			get { return GetData<ActorData>().BaseMaxHealth; }
 		}
 		
 		/// <summary>
 		/// The maximum health of this actor
 		/// </summary>
 		public int MaxHealth {
-			get { return ActorModel.baseHealth + (Level * 25); }
+			get { return GetData<ActorData>().BaseMaxHealth + (Level * 25); }
 		}
 		
 		/// <summary>
@@ -177,8 +160,8 @@ namespace JusticeFramework.Components {
 				if (currentLevel != newLevel) {
 					onLevelUp?.Invoke(this, newLevel);
 
-                    if (IsPlayer) {
-                        Game.Notify($"You are now level {newLevel}");
+                    if (GameManager.IsPlayer(this)) {
+                        UiManager.Notify($"You are now level {newLevel}");
                     }
 				}
 			}
@@ -188,40 +171,16 @@ namespace JusticeFramework.Components {
 		/// Flag stating if this actor is invincible (is killable)
 		/// </summary>
 		public bool IsInvincible {
-			get { return ActorModel.isInvincible; }
-			set { ActorModel.isInvincible = value; }
+			get { return GetData<ActorData>().IsInvincible; }
 		}
 		
 		/// <summary>
 		/// Flag stating if this actor is currently dead
 		/// </summary>
 		public bool IsDead {
-			get { return currentHealth <= 0 && !ActorModel.isInvincible; }
-		}
-		
-		public EBattleConfidence BattleConfidence {
-			get { return ActorModel.battleConfidence; }
-			set { ActorModel.battleConfidence = value; }
-		}
-
-		public EAggression Aggression {
-			get { return ActorModel.aggression; }
-			set { ActorModel.aggression = value; }
-		}
-
-		public EMorals Morals {
-			get { return ActorModel.morals; }
-			set { ActorModel.morals = value; }
-		}
-
-		public EInterestOrigin InterestOrigin {
-			get { return ActorModel.interestOrigin; }
-			set { ActorModel.interestOrigin = value; }
-		}
-		
-		public float LoseInterestDistance {
-			get { return ActorModel.loseInterestDistance; }
-			set { ActorModel.loseInterestDistance = value; }
+			get {
+                return currentHealth <= 0 && !GetData<ActorData>().IsInvincible;
+            }
 		}
 		
 		/// <summary>
@@ -231,7 +190,7 @@ namespace JusticeFramework.Components {
 			get { return isInCombat; }
 		}
 
-		public List<IActor> Threats {
+		public List<Actor> Threats {
 			get { return threats; }
 		}
 
@@ -272,76 +231,43 @@ namespace JusticeFramework.Components {
 			}
 		}
 
-        public bool IsPlayer {
-            get { return ReferenceEquals(this, GameManager.Player); }
-        }
-
         public bool IsAttacking { get; set; }
-
-        #endregion
-
+        
 		/// <inheritdoc cref="WorldObject" />
 		protected override void OnIntialized() {
 			ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
             statusEffects = new List<StatusEffect>();
 
-			threats = new List<IActor>();
+			threats = new List<Actor>();
             equipment = new Equipment();
+            inventory = new Inventory();
 
-            IEquippable item = GameManager.SpawnEquipment("TestHelm");
-            Equip(this, item);
-            /*
-            Equip(GameManager.Spawn("TestChestplate001") as IEquippable);
-			Equip(GameManager.Spawn("TestPlatelegs001") as IEquippable);
-			Equip(GameManager.Spawn("TestSword001") as IEquippable);
-            */
-
+            ResetToDefaultItems();
             ExitCombat();
 		}
 
-        protected override void OnDataModelChanged() {
-            Inventory.onItemAdded += OnItemAdded;
-            Inventory.onItemRemoved += OnItemRemoved;
-        }
-
-        protected virtual void Update() {
+        /*protected virtual void Update() {
             ProcessStatusEffects(Time.deltaTime);
-        }
+        }*/
 
 		private void OnDrawGizmosSelected() {
-            if (ActorModel == null) {
+            if (dataObject == null) {
                 return;
             }
 
-			// Draw detection radius
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireSphere(transform.position, LoseInterestDistance);
+            ActorData data = dataObject as ActorData;
+
+            // Draw detection radius
+            Gizmos.color = Color.yellow;
+			Gizmos.DrawWireSphere(transform.position, Mathf.Sqrt(data.AiData.LoseInterestDistanceSqr));
 		}
-
-        #region Event Callbacks
-
-        private void OnItemAdded(Inventory inventory, string id, int quantity) {
-            if (IsPlayer) {
-                ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
-                Game.Notify($"Received item {item?.displayName ?? SystemConstants.LabelUnknown}{(quantity > 1 ? $" ({quantity})" : string.Empty)}");
-            }
-        }
-
-        private void OnItemRemoved(Inventory inventory, string id, int quantity) {
-            if (IsPlayer) {
-                ItemModel item = GameManager.AssetManager.GetById<ItemModel>(id);
-                Game.Notify($"Removed item {item?.displayName ?? SystemConstants.LabelUnknown}{(quantity > 1 ? $" ({quantity})" : string.Empty)}");
-            }
-        }
-
-        #endregion
 
         #region Health Functions
 
-        [ConsoleCommand("kill", "Kills the target actor unless it is invincible", ECommandTarget.LookAt)]
+        /*[ConsoleCommand("kill", "Kills the target actor unless it is invincible", ECommandTarget.LookAt)]
 		public void Kill() {
 			Damage(null, currentHealth, true);
-		}
+		}*/
 		
         [ConsoleCommand("dam", "Damages the yourself")]
 		public void Damage(Actor attacker, float damageAmount, bool ignoreDamageReduction = false) {
@@ -361,17 +287,13 @@ namespace JusticeFramework.Components {
 
 			currentHealth -= damageAmount;
 
+            ActorData data = dataObject as ActorData;
 			if (currentHealth <= 0) {
-				if (ActorModel.isInvincible) {
+				if (data.IsInvincible) {
 					currentHealth = 1;
 				} else {
 					currentHealth = 0;
-					onDeath?.Invoke(this, attacker);
-
-                    foreach (GameEvent killEvent in onKill) {
-                        killEvent.Execute(this, attacker);
-                    }
-
+                    GameEvent.ExecuteAll(onKill, this, attacker);
 					ExitCombat();
 				}
 			}
@@ -381,15 +303,15 @@ namespace JusticeFramework.Components {
 			}
 
 			OnReferenceStateChanged();
-			onDamageTaken?.Invoke(this, attacker, damageAmount);
 			onCurrentHealthChanged?.Invoke(this);
 		}
 
 		public void Heal(Actor healer, float amount) {
 			currentHealth += amount;
 
-			if (currentHealth <= 0) {
-				if (ActorModel.isInvincible) {
+            ActorData data = dataObject as ActorData;
+            if (currentHealth <= 0) {
+				if (data.IsInvincible) {
 					currentHealth = 1;
 				} else {
 					currentHealth = 0;
@@ -403,18 +325,17 @@ namespace JusticeFramework.Components {
 			}
 
 			OnReferenceStateChanged();
-			onHealingRecieved?.Invoke(this, healer, amount);
 			onCurrentHealthChanged?.Invoke(this);
 		}
 		
-#endregion
+        #endregion
 		
         #region Experience Functions
 
-		[ConsoleCommand("addexp", "Adds experience to the target actor", ECommandTarget.LookAt)]
+		/*[ConsoleCommand("addexp", "Adds experience to the target actor", ECommandTarget.LookAt)]
 		public void AddExperience(int amount) {
-            if (IsPlayer) {
-                Game.Notify($"You gained {amount} experience");
+            if (GameManager.IsPlayer(this)) {
+                GameManager.Notify($"You gained {amount} experience");
             }
 
             CurrentExperience = CurrentExperience + amount;
@@ -424,20 +345,20 @@ namespace JusticeFramework.Components {
 		
 		[ConsoleCommand("removeexp", "Removes experience from the target actor", ECommandTarget.LookAt)]
 		public void RemoveExperience(int amount) {
-            if (IsPlayer) {
-                Game.Notify($"You lost {amount} experience");
+            if (GameManager.IsPlayer(this)) {
+                GameManager.Notify($"You lost {amount} experience");
             }
 
             CurrentExperience = CurrentExperience - amount;
 
             OnReferenceStateChanged();
-		}
+		}*/
 		
         #endregion
 
         #region Combat
 		
-		public void EnterCombat(IActor firstEnemy = null) {
+		public void EnterCombat(Actor firstEnemy = null) {
 			isInCombat = true;
 			threats.Clear();
 			
@@ -445,7 +366,7 @@ namespace JusticeFramework.Components {
 				threats.Add(firstEnemy);
 			}
 
-            actorAnimator.SetBool(SystemConstants.AnimatorIsInCombatParam, true);
+            actorAnimator.SetBool("IsInCombat", true);
 
             OnReferenceStateChanged();
 			onEnterCombat?.Invoke(this);
@@ -456,7 +377,7 @@ namespace JusticeFramework.Components {
 			
 			threats.Clear();
 
-            actorAnimator.SetBool(SystemConstants.AnimatorIsInCombatParam, false);
+            actorAnimator.SetBool("IsInCombat", false);
 
             OnReferenceStateChanged();
 			onExitCombat?.Invoke(this);
@@ -481,15 +402,16 @@ namespace JusticeFramework.Components {
             IWeapon weapon = equipment.Get<IWeapon>(EEquipSlot.Mainhand);
 
             if ((weapon?.CanFire() ?? true) || IsAttacking) {
-                weapon?.EndFire(IsPlayer ? Camera.main.transform : transform, this);
-                actorAnimator.SetTrigger(SystemConstants.AnimatorAttackParam);
+                weapon?.EndFire(GameManager.IsPlayer(this) ? Camera.main.transform : transform, this);
+                actorAnimator.SetTrigger("Attack");
             }
         }
         
 		public bool IsScaredOf(Actor target) {
 			bool result = false;
 
-			switch (ActorModel.battleConfidence) {
+            ActorData data = dataObject as ActorData;
+            switch (data.AiData.Confidence) {
 				case EBattleConfidence.Afraid:
 					result = true;
 					break;
@@ -508,7 +430,8 @@ namespace JusticeFramework.Components {
 		}
 
 		public bool InInterestDistance(WorldObject target) {
-			return (Transform.position - target.Transform.position).sqrMagnitude <= Math.Pow(LoseInterestDistance, 2);
+            ActorData data = dataObject as ActorData;
+            return (Transform.position - target.Transform.position).sqrMagnitude <= data.AiData.LoseInterestDistanceSqr;
 		}
 
 		public void AddThreat(Actor actor) {
@@ -522,11 +445,25 @@ namespace JusticeFramework.Components {
 				ExitCombat();
 			}
 		}
-		
+
         #endregion
 
         #region Items and Inventory
-		
+
+        public void ResetToDefaultItems() {
+            ChestData data = dataObject as ChestData;
+
+            if (data == null) {
+                return;
+            }
+
+            Inventory.Clear();
+
+            foreach (ItemStackData isd in data.DefaultInventory) {
+                Inventory.Add(isd.itemData.Id, isd.quantity);
+            }
+        }
+
         /// <summary>
         /// Adds the given item to the actor's inventory
         /// </summary>
@@ -536,7 +473,7 @@ namespace JusticeFramework.Components {
 		[ConsoleCommand("giveitem", "Gives the actor the item with the given id and quantity", ECommandTarget.LookAt)]
 		private void GiveItem(string id, int amount) {
             // If the item doesn't exist, don't add it
-			if (!GameManager.AssetManager.Contains<ItemModel>(id)) {
+			if (!GameManager.DataManager.IsAssetLoaded<ItemData>(id)) {
                 return;
             }
 
@@ -549,34 +486,35 @@ namespace JusticeFramework.Components {
 				return;
 			}
 
-			ItemModel itemModel = GameManager.AssetManager.GetById<ItemModel>(id);
+			ItemData ItemData = GameManager.DataManager.GetAssetById<ItemData>(id);
 			
-			if (itemModel is EquippableModel) {
+			if (ItemData is ArmorData || ItemData is WeaponData) {
 				Inventory.Remove(id, 1);
-				IEquippable item = GameManager.SpawnEquipment(itemModel as EquippableModel);
+                // TODO
+                IEquippable item = null; // GameManager.SpawnEquipment(ItemData as EquippableModel);
 
 				if (item != null) {
                     equipment.Equip(item, mainhandBone, actorAnimator, meshRenderer);
 				}
-			} else if (itemModel is ConsumableModel) {
-				Inventory.Remove(itemModel.id, 1);
-				Consume((ConsumableModel)itemModel);
+			} else if (ItemData is PotionData potion) {
+				Inventory.Remove(potion.Id, 1);
+				Consume(potion);
 			}
 		}
 
-		public void Consume(ConsumableModel consumableModel) {
-            if (consumableModel.statusEffects == null) {
+		public void Consume(PotionData consumableModel) {
+            if (consumableModel.StatusEffects == null) {
                 return;
             }
             
-            foreach (StatusEffectModel model in consumableModel.statusEffects) {
+            foreach (StatusEffectData model in consumableModel.StatusEffects) {
                 StatusEffect effect;
 
-                switch (model.buffType) {
-                    case Core.EBuffType.Healing:
+                switch (model.BuffType) {
+                    case EBuffType.Healing:
                         effect = new HealingBuff(model, gameObject);
                         break;
-                    case Core.EBuffType.Speed:
+                    case EBuffType.Speed:
                         effect = new SpeedBuff(model, gameObject);
                         break;
                     default:
@@ -629,7 +567,7 @@ namespace JusticeFramework.Components {
 
         #endregion
 
-        protected void ProcessStatusEffects(float deltaTime) {
+        /*protected void ProcessStatusEffects(float deltaTime) {
             if (statusEffects == null) {
                 return;
             }
@@ -639,22 +577,23 @@ namespace JusticeFramework.Components {
                     statusEffects.RemoveAt(i);
                 }
             }
-        }
+        }*/
 
-		public override void Activate(object sender, ActivateEventArgs e) {
-			if (e?.Activator != null) {
-				return;
-			}
-			
-			if (ReferenceEquals(GameManager.Player, e?.ActivatedBy)) {
-				if (IsDead) {
-					ContainerView view = UiManager.UI.OpenWindow<ContainerView>();
-					view.View(e?.ActivatedBy as Actor, this);
-				} else {
-					DialogueView view = UiManager.UI.OpenWindow<DialogueView>();
-					view.SetTarget(this);
-				}
-			}
+        protected override Logic.Action OnActivate(IWorldObject activator) {
+            Logic.Action action = null;
+
+            if (IsInCombat) {
+                action = new ActionEmpty();
+                return action;
+            }
+
+            if (IsDead) {
+                action = new ActionOpen(this);
+                return action;
+            }
+
+            action = new ActionTalk(this);
+            return action;
 		}
 		
 		public void SetRagdollActive(bool active) {

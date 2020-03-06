@@ -1,9 +1,8 @@
-﻿using System;
-using JusticeFramework.Core.UI.Components;
-using JusticeFramework.Interfaces;
+﻿using JusticeFramework.Interfaces;
+using System;
 
 namespace JusticeFramework.UI.Components {
-	[Serializable]
+    [Serializable]
 	public class HealthBar : ProgressBar {
 		private IDamageable toMonitor;
 

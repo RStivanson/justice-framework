@@ -1,8 +1,8 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Core.Events;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Events;
+using JusticeFramework.Interfaces;
+using JusticeFramework.Managers;
+using JusticeFramework.Core.Extensions;
 using System;
 using UnityEngine;
 
@@ -47,21 +47,16 @@ namespace JusticeFramework.Controllers {
 		private void Awake() {
 			mainCamera = Camera.main.transform;
 			lookingAt = null;
-
-			GameManager.Instance.onGamePause += OnGamePaused;
-		}
-
-		/// <summary>
-		/// Cleans up if this object is destroyed
-		/// </summary>
-		private void OnDestroy() {
-			GameManager.Instance.onGamePause -= OnGamePaused;
 		}
 
 		/// <summary>
 		/// Update every frame called after the physics engine has updated
 		/// </summary>
 		private void Update() {
+            if (GameManager.IsPaused) {
+                return;
+            }
+
 			// Update the current target and check for interactions
 			HandleLookAtUpdate();
 			HandleInteraction();
@@ -116,17 +111,18 @@ namespace JusticeFramework.Controllers {
 			// If the user is trying to interact
 			if (Input.GetKeyDown(interactKeyCode)) {
 				// Activate the object if able
-				lookingAt?.Activate(this, new ActivateEventArgs(null, GameManager.Player));
+				Logic.Action a = lookingAt?.Activate(GameManager.GetPlayer());
+                a?.Execute(GameManager.GetPlayer());
 			} else {
                 // Else if the user is trying to attack
-                HandleAttack(GameManager.Player, attackKeyCode, attackSecondaryKeyCode);
+                //HandleAttack(GameManager.Player, attackKeyCode, attackSecondaryKeyCode);
 			}
 		}
 
 		/// <summary>
 		/// Handles the attacking flow on the given actor
 		/// </summary>
-		private void HandleAttack(IActor actor, KeyCode primaryKey, KeyCode secondaryKey) {
+		/*private void HandleAttack(IActor actor, KeyCode primaryKey, KeyCode secondaryKey) {
             if (actor.IsInCombat) {
                 if (Input.GetKeyDown(secondaryKey)) {
                     actor.ExitCombat();
@@ -147,18 +143,6 @@ namespace JusticeFramework.Controllers {
                     ignoreNextKey = true;
                 }
             }
-		}
-
-#region Event Callbacks
-
-		/// <summary>
-		/// Handles disabling the component when the game is paused
-		/// </summary>
-		/// <param name="isPaused">Flag inidicating the pause status of the game</param>
-		private void OnGamePaused(bool isPaused) {
-			enabled = !isPaused;
-		}
-
-#endregion
+		}*/
 	}
 }

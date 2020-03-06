@@ -1,13 +1,13 @@
-﻿using System;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.UI;
+﻿using JusticeFramework.Core.UI;
+using JusticeFramework.Managers;
+using System;
 using UnityEngine;
 
 namespace JusticeFramework.UI.Views {
-	/// <summary>
-	/// Main menu window class
-	/// </summary>
-	[Serializable]
+    /// <summary>
+    /// Main menu window class
+    /// </summary>
+    [Serializable]
 	public class MainMenuView : Window {
 		[SerializeField]
 		private Transform buttonContainer;

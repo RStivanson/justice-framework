@@ -1,19 +1,14 @@
-﻿using System;
-using JusticeFramework.Console;
-using JusticeFramework.Core.Models;
-using JusticeFramework.Core;
-using JusticeFramework.Core.Events;
-using JusticeFramework.Core.Interfaces;
+﻿using JusticeFramework.Console;
+using JusticeFramework.Data;
+using JusticeFramework.Interfaces;
+using JusticeFramework.Logic;
+using System;
 using UnityEngine;
-using JusticeFramework.Core.Console;
-using JusticeFramework.Core.Managers;
 
 namespace JusticeFramework.Components {
-	[Serializable]
+    [Serializable]
 	[RequireComponent(typeof(Animator))]
-	public class Door : WorldObject, IDoor {
-#region Variables
-
+	public class Door : WorldObject {
 		[SerializeField]
 		private Animator animator;
 
@@ -27,10 +22,7 @@ namespace JusticeFramework.Components {
 		private ELockDifficulty lockDifficulty;
 
         [SerializeField]
-        private bool hasKey;
-
-        [SerializeField]
-        private string keyId;
+        private ItemData requiredKey;
 
         [SerializeField]
 		private string destinationScene;
@@ -39,22 +31,14 @@ namespace JusticeFramework.Components {
 		private Vector3 destinationPosition;
 		
 		[SerializeField]
-		private Vector3 destinationRotation;
-		
-#endregion
-
-#region Properties
-
-		private DoorModel DoorModel {
-			get { return model as DoorModel; }
-		}
+		private Quaternion destinationRotation;
 		
 		public override string DisplayName {
 			get {
-				string displayName = DoorModel.displayName;
+                string displayName = base.DisplayName;
 
-				if (IsLocked) {
-					displayName = $"{displayName} ({LockDifficulty.ToString()})";
+                if (isLocked) {
+					displayName = $"{displayName} ({lockDifficulty.ToString()})";
 				}
 
 				return displayName;
@@ -63,7 +47,13 @@ namespace JusticeFramework.Components {
 		
 		public override EInteractionType InteractionType {
 			get {
-				switch (DoorModel.doorType) {
+                DoorData data = dataObject as DoorData;
+
+                if (data == null) {
+                    return EInteractionType.Open;
+                }
+
+				switch (data.DoorType) {
 					case EDoorType.Portal:
 						return EInteractionType.Open;
 					default:
@@ -71,32 +61,6 @@ namespace JusticeFramework.Components {
 				}
 			}
 		}
-		
-		public bool IsLocked {
-			get { return isLocked; }
-		}
-
-		public ELockDifficulty LockDifficulty {
-			get { return lockDifficulty; }
-		}
-		
-		public string DestinationScene {
-			get { return destinationScene; }
-		}
-
-		public Vector3 DestinationPosition {
-			get { return destinationPosition; }
-		}
-		
-		public Vector3 DestinationRotation {
-			get { return destinationRotation; }
-		}
-
-		public AudioClip OpenSound {
-			get { return DoorModel.activationSound; }
-		}
-
-#endregion
 		
 		protected override void OnIntialized() {
 			animator = GetComponent<Animator>();
@@ -106,61 +70,75 @@ namespace JusticeFramework.Components {
 		public void Open() {
 			isOpen = true;
 			animator?.SetBool("IsOpen", true);
-			OnReferenceStateChanged();
+            // TODO
+            //PlaySound(OpenSound, EAudioType.SoundEffect, 1);
+            OnReferenceStateChanged();
 		}
 
 		public void Close() {
 			isOpen = false;
 			animator?.SetBool("IsOpen", false);
-			OnReferenceStateChanged();
+            // TODO
+            //PlaySound(OpenSound, EAudioType.SoundEffect, 1);
+            OnReferenceStateChanged();
 		}
-		
-		[ConsoleCommand("lock", "Locks the target container", ECommandTarget.LookAt)]
+
+        public void ToggleOpen() {
+            if (isOpen) {
+                Close();
+            } else {
+                Open();
+            }
+        }
+
+        [ConsoleCommand("lock", "Locks the target container", ECommandTarget.LookAt)]
 		public void Lock() {
 			isLocked = true;
-			OnReferenceStateChanged();
+            // TODO
+            // PlaySound(LockSound, EAudioType.SoundEffect, 1);
+            OnReferenceStateChanged();
 		}
 		
 		[ConsoleCommand("unlock", "Unlocks the target container", ECommandTarget.LookAt)]
 		public void Unlock() {
 			isLocked = false;
-			OnReferenceStateChanged();
+            // TODO
+            // PlaySound(LockSound, EAudioType.SoundEffect, 1);
+            OnReferenceStateChanged();
 		}
 
-		private void ToggleLock() {
-			isLocked = !isLocked;
-			OnReferenceStateChanged();
-		}
+        protected override Logic.Action OnActivate(IWorldObject activator) {
+            DoorData data = dataObject as DoorData;
+            Logic.Action action = null;
 
-		public override void Activate(object sender, ActivateEventArgs e) {
-			if (IsLocked) {
-                if (hasKey && e.ActivatedBy != null) {
-                    IContainer container = e.ActivatedBy as IContainer;
-
-                    if (container != null && container.Inventory.Contains(keyId)) {
-                        container.Inventory.Remove(keyId, 1);
-                        Unlock();
-                    } else {
-                        Debug.Log("Door - Missing key : " + keyId);
-                    }
-                } else {
-                    Debug.Log("Door - Unable to open this door, it is currently locked!");
+            if (isLocked) {
+                if (lockDifficulty == ELockDifficulty.Impossible && requiredKey == null) {
+                    action = new ActionFailed(this, "This door cannot be unlocked.");
+                    return action;
                 }
-			} else {
-				switch (DoorModel.doorType) {
-					case EDoorType.Portal:
-						GameManager.SendToScene(DestinationScene, DestinationPosition, DestinationRotation);
-						break;
-					default:
-						if (isOpen) {
-							Close();
-						} else {
-							Open();
-						}
 
-						break;
-				}
-			}
+                IContainer container = activator as IContainer;
+                if (container.Inventory.Contains(requiredKey.Id)) {
+                    Unlock();
+                } else if (container.Inventory.HasItemWithTag("ItemLockpick")) {
+                    // TODO
+                    // action = new ActionLockpick(this);
+                    // return;
+                }
+            }
+
+            if (!isLocked) {
+                if (data.DoorType == EDoorType.Portal) {
+                    action = new ActionTeleport(this, destinationScene, destinationPosition, destinationRotation);
+                    return action;
+                } else {
+                    ToggleOpen();
+                    action = new ActionEmpty();
+                    return action;
+                }
+            }
+
+            return new ActionFailed(this, null);
 		}
 	}
 }

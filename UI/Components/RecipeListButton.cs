@@ -1,14 +1,14 @@
-﻿using System;
-using JusticeFramework.Core.Models.Crafting;
+﻿using JusticeFramework.Data;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Components {
-	/// <inheritdoc />
-	/// <summary>
-	/// Basic model container script attached to each button in the crafting screen list
-	/// </summary>
-	[Serializable]
+    /// <inheritdoc />
+    /// <summary>
+    /// Basic model container script attached to each button in the crafting screen list
+    /// </summary>
+    [Serializable]
 	public class RecipeListButton : MonoBehaviour {
 		/// <summary>
 		/// The main button script on this object
@@ -26,12 +26,12 @@ namespace JusticeFramework.UI.Components {
 		/// The recipe data this button relates to
 		/// </summary>
 		[SerializeField]
-		private Recipe recipe;
+		private RecipeData recipe;
 
 		/// <summary>
 		/// Gets the recipe attached to this object
 		/// </summary>
-		public Recipe Recipe {
+		public RecipeData Recipe {
 			get { return recipe; }
 		}
 		
@@ -39,7 +39,7 @@ namespace JusticeFramework.UI.Components {
 		/// Attaches the recipe to this object
 		/// </summary>
 		/// <param name="recipe">The recipe data</param>
-		public void SetRecipe(Recipe recipe) {
+		public void SetRecipe(RecipeData recipe) {
 			this.recipe = recipe;
 			
 			RefreshFields();
@@ -53,7 +53,7 @@ namespace JusticeFramework.UI.Components {
 				return;
 			}
 
-			recipeNameText.text = recipe.Result.Ingredient.displayName;
+			recipeNameText.text = recipe.Result.itemData.DisplayName;
 		}
 	}
 }

@@ -1,6 +1,5 @@
-﻿using JusticeFramework.Core.Controllers;
-using JusticeFramework.Core.Models;
-using JusticeFramework.Core.StatusEffects;
+﻿using JusticeFramework.Controllers;
+using JusticeFramework.Data;
 using System;
 using UnityEngine;
 
@@ -10,20 +9,20 @@ namespace JusticeFramework.StatusEffects {
         [SerializeField]
         private InputController controller;
 
-        public SpeedBuff(StatusEffectModel model, GameObject target) : base(model, target) {
+        public SpeedBuff(StatusEffectData model, GameObject target) : base(model, target) {
             controller = target.GetComponent<InputController>();
         }
         
         protected override void Activate() {
-            controller.crouchSpeedMod += model.modifier;
-            controller.walkSpeedMod += model.modifier;
-            controller.runSpeedMod += model.modifier;
+            controller.crouchSpeedMod += model.Modifier;
+            controller.walkSpeedMod += model.Modifier;
+            controller.runSpeedMod += model.Modifier;
         }
 
         protected override void Disolve() {
-            controller.crouchSpeedMod -= model.modifier;
-            controller.walkSpeedMod -= model.modifier;
-            controller.runSpeedMod -= model.modifier;
+            controller.crouchSpeedMod -= model.Modifier;
+            controller.walkSpeedMod -= model.Modifier;
+            controller.runSpeedMod -= model.Modifier;
         }
     }
 }

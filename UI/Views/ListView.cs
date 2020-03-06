@@ -1,12 +1,12 @@
-﻿using System;
+﻿using JusticeFramework.Core.UI;
+using System;
 using System.Collections.Generic;
-using JusticeFramework.Core.UI;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Views {
-	[Serializable]
+    [Serializable]
 	public class ListView : Window {
 		[SerializeField]
 		protected RectTransform buttonContainer;

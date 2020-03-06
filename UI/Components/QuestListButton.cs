@@ -1,4 +1,5 @@
-﻿using JusticeFramework.Core.Models.Quest;
+﻿using JusticeFramework.Data;
+using JusticeFramework.Logic;
 using JusticeFramework.UI.Views;
 using System;
 using UnityEngine;
@@ -27,12 +28,12 @@ namespace JusticeFramework.UI.Components {
         /// The reference to quest data
         /// </summary>
         [SerializeField]
-        private Quest quest;
+        private QuestSequence quest;
 
         /// <summary>
         /// Gets the quest attached to this object
         /// </summary>
-        public Quest Quest {
+        public QuestSequence Quest {
             get { return quest; }
         }
 
@@ -41,7 +42,7 @@ namespace JusticeFramework.UI.Components {
         /// </summary>
         /// <param name="quest">The quest data</param>
 		/// <param name="callback">The event to call when the button is clicked</param>
-        public void SetQuest(Quest quest, OnQuestAction callback) {
+        public void SetQuest(QuestSequence quest, OnQuestAction callback) {
             this.quest = quest;
 
             if (callback != null) {
@@ -60,7 +61,7 @@ namespace JusticeFramework.UI.Components {
             if (quest == null) {
                 nameText.text = "Missing quest data...";
             } else {
-                nameText.text = quest.DisplayName;
+                nameText.text = quest.QuestData.DisplayName;
             }
         }
     }

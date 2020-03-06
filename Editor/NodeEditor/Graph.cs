@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using JusticeFramework.Components;
-using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Extensions;
 using UnityEditor;
 using UnityEngine;
 

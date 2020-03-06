@@ -1,5 +1,5 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Utility.Extensions;
+using JusticeFramework.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

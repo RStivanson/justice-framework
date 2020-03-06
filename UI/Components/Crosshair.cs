@@ -1,6 +1,4 @@
 ﻿using JusticeFramework.Components;
-using JusticeFramework.Core;
-using JusticeFramework.Core.Interfaces;
 using JusticeFramework.Core.UI;
 using System;
 using UnityEngine;
@@ -41,8 +39,8 @@ namespace JusticeFramework.UI.Components {
 			// Switch the current monitored reference to the new one
 			SwitchCurrentTarget(newTarget);
 			
-			// If the current target is activatable and not null
-			if (current?.CanBeActivated ?? false) {
+			// If the current target is not null
+			if (current != null) {
 				// Update the crosshair values
 				SetCrosshair(current.DisplayName, current.InteractionType);
 			} else {
@@ -62,9 +60,9 @@ namespace JusticeFramework.UI.Components {
 				return;
 			}
 
-			// If the current reference can be activated, update the crosshair
-			if (current?.CanBeActivated ?? false) {
-				SetCrosshair(current.DisplayName, current.InteractionType);
+            // If the current target is not null
+            if (current != null) {
+                SetCrosshair(current.DisplayName, current.InteractionType);
 			} else {
 				// Else reset the crosshair to have no interaction information
 				ResetCrosshair();

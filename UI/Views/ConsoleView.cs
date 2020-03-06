@@ -1,4 +1,4 @@
-﻿using JusticeFramework.Core.Console;
+﻿using JusticeFramework.Console;
 using JusticeFramework.Core.UI;
 using System;
 using System.Collections.Generic;

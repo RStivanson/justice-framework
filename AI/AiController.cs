@@ -1,24 +1,17 @@
-﻿using JusticeFramework.AI.BehaviourTree.Nodes.Actions;
-using JusticeFramework.AI.BehaviourTree.Nodes.Conditions;
+﻿using JusticeFramework.AI.BehaviourNodes;
 using JusticeFramework.Components;
-using JusticeFramework.Core.AI;
+using JusticeFramework.Controllers;
 using JusticeFramework.Core.AI.BehaviourTree;
 using JusticeFramework.Core.AI.BehaviourTree.Builder;
-using JusticeFramework.Core.AI.BehaviourTree.Nodes;
-using JusticeFramework.Core.AI.BehaviourTree.Nodes.Composites;
-using JusticeFramework.Core.AI.BehaviourTree.Nodes.Decorators;
-using JusticeFramework.Core.AI.BehaviourTree.Nodes.Leafs;
-using JusticeFramework.Core.Controllers;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Models.Settings;
+using JusticeFramework.Core.AI.BehaviourTree.BuiltInNodes;
+using JusticeFramework.Data;
+using JusticeFramework.Managers;
 using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace JusticeFramework.AI {
-    using BehaveTree = Core.AI.BehaviourTree.BehaviourTree;
-
     [Serializable]
     [DisallowMultipleComponent()]
     public class AiController : Controller {
@@ -51,9 +44,9 @@ namespace JusticeFramework.AI {
 		}
 
 		public bool active;
-		private BehaveTree tree;
+		private BehaviourTree tree;
 		//private List<BehaviourSet> setList;
-		private TickState tickState;
+		private BehaviourTree.Context tickState;
 		
 		private void Awake() {
 			InitalizeBehaviour();
@@ -70,7 +63,7 @@ namespace JusticeFramework.AI {
 		}
 		
 		private void Update() {
-			if (!active) {
+			if (!active || self.GetData<ActorData>().AiData == null) {
 				return;
 			}
 
@@ -85,21 +78,21 @@ namespace JusticeFramework.AI {
 			}
 
             if (animator != null) {
-                animator?.SetBool(SystemConstants.AnimatorIsWalkingParam, agent.hasPath);
+                animator?.SetBool("IsWalking", agent.hasPath);
             }
 		}
 
 		public void InitalizeBehaviour() {
 			tree = CreateBehaviourTree();
 			
-			tickState = new TickState() {
+			tickState = new BehaviourTree.Context() {
 				blackboard = new Blackboard(),
 			};
 			
 			tickState.blackboard.Set("controller", this);
 		}
 
-		private BehaveTree CreateBehaviourTree() {
+		private BehaviourTree CreateBehaviourTree() {
 			return new BehaviourTreeBuilder()
 					.Composite<Selector>()
 						.Include(BuildCombatSubTree())

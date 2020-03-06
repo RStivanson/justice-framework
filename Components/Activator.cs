@@ -1,8 +1,7 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Events;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Models;
-using JusticeFramework.Utility.Extensions;
+﻿using JusticeFramework.Core.Extensions;
+using JusticeFramework.Data;
+using JusticeFramework.Interfaces;
+using JusticeFramework.Logic;
 using System;
 using UnityEngine;
 
@@ -14,14 +13,7 @@ namespace JusticeFramework.Components {
     [Serializable]
 	[RequireComponent(typeof(Animator))]
 	[RequireComponent(typeof(AudioSource))]
-	public class Activator : WorldObject, IActivator {
-		/// <summary>
-		/// Event called when the activator's state changes
-		/// </summary>
-		public event OnActivationStateChanged onActivated;
-
-#region Variables
-		
+	public class Activator : WorldObject {
 		/// <summary>
 		/// Attached animator component
 		/// </summary>
@@ -32,33 +24,35 @@ namespace JusticeFramework.Components {
 		/// All linked references to be affected when activated
 		/// </summary>
 		[SerializeField]
-		private WorldObject[] linkedReferences = null;
+		private WorldObject[] linkedWorldObjects;
 		
 		/// <summary>
 		/// Flag variables stating if the activator is currently on or off
 		/// </summary>
 		[SerializeField]
 		private bool isOn;
-		
-#endregion
 
-#region Properties
-
-		private ActivatorModel ActivatorModel {
-			get { return model as ActivatorModel; }
-		}
-		
-		/// <inheritdoc />
-		public override EInteractionType InteractionType {
-			get { return EInteractionType.Activate; }
+        /// <inheritdoc />
+        public override EInteractionType InteractionType {
+			get {
+                if (animator.IsPlaying(0))
+                    return EInteractionType.None;
+                return EInteractionType.Activate;
+            }
 		}
 
-		public AudioClip ActivationSound {
-			get { return ActivatorModel.activationSound; }
-			set { ActivatorModel.activationSound = value; }
-		}
+        public bool IsOn {
+            get { return isOn; }
+            set {
+                if (isOn != value) {
+                    isOn = value;
+                    animator.SetBool("IsOn", isOn);
 
-#endregion
+                    // Send out a state changed event
+                    OnReferenceStateChanged();
+                }
+            }
+        }
 
 		/// <inheritdoc />
 		protected override void OnIntialized() {
@@ -68,32 +62,14 @@ namespace JusticeFramework.Components {
 			animator.SetBool("IsOn", isOn);
 		}
 
-		public override void Activate(object sender, ActivateEventArgs e) {
-            // If we don't know who activate this, do nothing
-			if (e?.Activator != null) {
-				return;
-			}
-			
-			// If the animator is currently animated, do nothing
-			if (animator.IsPlaying(0)) {
-				return;
-			}
+        protected override Logic.Action OnActivate(IWorldObject activator) {
+            // If we are not still animating
+            if (!animator.IsPlaying(0)) {
+                ActivatorData data = dataObject as ActivatorData;
+                return new ActionActivate(this, linkedWorldObjects, data.ActivationSound, EAudioType.SoundEffect, 1);
+            }
 
-			// Toggle the activator on
-			isOn = !isOn;
-			animator.SetBool("IsOn", isOn);
-
-			// Play the activation sound
-            PlaySound(ActivationSound, EAudioType.SoundEffect);
-
-			// Activate all attached references
-			foreach (WorldObject reference in linkedReferences) {
-				reference?.Activate(this, new ActivateEventArgs(this, sender));
-			}
-
-			// Send out a state changed event
-			OnReferenceStateChanged();
-			onActivated?.Invoke(this, sender, isOn);
-		}
-	}
+            return base.OnActivate(activator);
+        }
+    }
 }

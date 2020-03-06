@@ -1,14 +1,16 @@
-﻿using System;
-using JusticeFramework.Core.Interfaces;
+﻿using JusticeFramework.Core.Extensions;
+using JusticeFramework.Core.UI;
+using JusticeFramework.Data;
+using JusticeFramework.Interfaces;
+using JusticeFramework.Logic;
+using JusticeFramework.Managers;
 using JusticeFramework.UI.Components;
-using JusticeFramework.Utility.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using JusticeFramework.Core.UI;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Models.Crafting;
-using JusticeFramework.Core.Collections;
 
 namespace JusticeFramework.UI.Views {
     [Serializable]
@@ -22,14 +24,17 @@ namespace JusticeFramework.UI.Views {
         private Text selectedRecipeDescrLabel;
 
         [SerializeField]
+        private Transform recipeContainer;
+
+        [SerializeField]
         private GameObject recipeButtonPrefab;
 
         [SerializeField]
-        private Transform recipeContainer;
+        private GameObject categoryHeaderPrefab;
 
         private IContainer ingredientContainer;
-        private int selectedRecipeIndex;
-        private Recipe selectedRecipe;
+        private List<RecipeData> recipes;
+        private RecipeData selectedRecipe;
 
         #region Unity Events
 
@@ -40,7 +45,7 @@ namespace JusticeFramework.UI.Views {
             }
 
             if (Input.GetKeyDown(CraftKeyCode)) {
-                OnItemActivated(GameManager.Player, ingredientContainer, selectedRecipe);
+                OnItemActivated(GameManager.GetPlayer(), ingredientContainer, selectedRecipe);
             }
         }
 
@@ -48,23 +53,18 @@ namespace JusticeFramework.UI.Views {
 
         #region Event Callbacks
 
-        private void OnRecipeSelected(int index, Recipe recipe) {
-            selectedRecipeIndex = index;
+        private void OnRecipeSelected(RecipeData recipe) {
             selectedRecipe = recipe;
-
-            selectedRecipeNameLabel.text = recipe.Result.Ingredient.displayName;
-            selectedRecipeDescrLabel.text = string.Empty;
-
-            foreach (RecipeItem recipeItem in recipe.Ingredients) {
-                selectedRecipeDescrLabel.text += $"{recipeItem.Ingredient.displayName} ({recipeItem.Quantity}){Environment.NewLine}";
-            }
+            RefreshSelectedRecipeFields();
         }
 
-        public void OnItemActivated(IContainer target, IContainer source, Recipe recipe) {
-            if (!recipe.HasIngredients(source.Inventory)) {
-                Game.Notify($"You do not have the required ingredients to craft {recipe.DisplayName}");
-            } else if (recipe.Craft(target.Inventory, source.Inventory)) {
-                Game.Notify($"{recipe.DisplayName} crafted");
+        public void OnItemActivated(IContainer target, IContainer source, RecipeData recipeData) {
+            string displayName = Crafting.GetDisplayName(recipeData);
+
+            if (!Crafting.HasIngredients(recipeData, source.Inventory)) {
+                UiManager.Notify(string.Format(EngineSettings.SettingMsgNotEnoughIngredients, displayName));
+            } else if (Crafting.Craft(recipeData, target.Inventory, source.Inventory)) {
+                UiManager.Notify(string.Format(EngineSettings.SettingMsgItemCrafted, displayName));
             }
         }
 
@@ -73,62 +73,69 @@ namespace JusticeFramework.UI.Views {
         #region UI Functions
 
         private void RefreshRecipeList() {
-            Recipe[] recipes = GameManager.RecipeManager.Resources;
-            bool entryFound = false;
+            List<string> processedRecipes = new List<string>();
 
-            recipeContainer.DestroyAllChildren();
-
-            for (int i = 0; i < recipes.Length; ++i) {
-                int index = i;
-                Recipe recipe = recipes[i];
-
-                if (recipe == null) {
-                    continue;
+            foreach (string [] categoryPair in EngineSettings.CraftingCategories) {
+                List<RecipeData> recipesInCat = null;
+                if (!categoryPair[0].IsNullOrWhiteSpace()) {
+                    recipesInCat = recipes.Where(x => GameTag.HasTag(x, categoryPair[0]) && !processedRecipes.Contains(x.Id)).ToList();
+                } else {
+                    recipesInCat = recipes.Where(x => x.GameTags.Length == 0 && !processedRecipes.Contains(x.Id)).ToList();
                 }
 
-                AddButton(recipeContainer, recipe, delegate {
-                    OnRecipeSelected(index, recipe);
-                });
+                if (recipesInCat.Count > 0) {
+                    AddCategoryHeader(recipeContainer, categoryPair[1]);
 
-                if (!entryFound && selectedRecipe != null && ReferenceEquals(recipe, selectedRecipe)) {
-                    OnRecipeSelected(index, recipe);
-                    entryFound = true;
+                    foreach (RecipeData recipe in recipesInCat) {
+                        processedRecipes.Add(recipe.Id);
+
+                        AddButton(recipeContainer, recipe, delegate {
+                            OnRecipeSelected(recipe);
+                        });
+                    }
                 }
-            }
-
-            if (!entryFound) {
-                ClearSelectedItem();
             }
         }
 
-        private void AddButton(Transform container, Recipe recipe, UnityAction callback) {
-            GameObject spawnedObject = Instantiate(recipeButtonPrefab);
+        private void AddCategoryHeader(Transform container, string categoryName) {
+            GameObject spawnedObject = Instantiate(categoryHeaderPrefab, container, false);
+            spawnedObject.GetComponentInChildren<Text>().text = categoryName.ToUpper();
+        }
 
+        private void AddButton(Transform container, RecipeData recipeData, UnityAction callback) {
+            GameObject spawnedObject = Instantiate(recipeButtonPrefab, container, false);
             spawnedObject.GetComponent<Button>().onClick.AddListener(callback);
-            spawnedObject.GetComponent<RecipeListButton>().SetRecipe(recipe);
-
-            spawnedObject.transform.SetParent(container, false);
+            spawnedObject.GetComponent<RecipeListButton>().SetRecipe(recipeData);
         }
 
-        private void ClearSelectedItem() {
-            selectedRecipe = null;
+        private void RefreshSelectedRecipeFields() {
+            if (selectedRecipe != null) {
+                selectedRecipeNameLabel.text = Crafting.GetDisplayName(selectedRecipe);
+                selectedRecipeDescrLabel.text = string.Empty;
 
-            selectedRecipeNameLabel.text = string.Empty;
-            selectedRecipeDescrLabel.text = string.Empty;
+                foreach (RecipeData.RecipeIngredient ingredient in selectedRecipe.Ingredients) {
+                    selectedRecipeDescrLabel.text += $"{ingredient.itemData.DisplayName} ({ingredient.quantity}){Environment.NewLine}";
+                }
+            } else {
+                selectedRecipeNameLabel.text = EngineSettings.SettingMsgUnknownRecipe;
+                selectedRecipeDescrLabel.text = string.Empty;
+            }
         }
 
         #endregion
 
         public void View(IContainer container) {
             if (container == null) {
-                Debug.Log($"Ingredient container is NULL");
+                Debug.Log($"CraftingView - Ingredient container is NULL");
                 return;
             }
 
             ingredientContainer = container;
+            recipes = GameManager.DataManager.GetRecipes();
+            selectedRecipe = null;
 
             RefreshRecipeList();
-            ClearSelectedItem();
+            RefreshSelectedRecipeFields();
             Show();
         }
     }

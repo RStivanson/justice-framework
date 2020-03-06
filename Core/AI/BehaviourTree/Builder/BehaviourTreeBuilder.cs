@@ -1,5 +1,4 @@
 ﻿using System;
-using JusticeFramework.Core.AI.BehaviourTree.Nodes;
 
 namespace JusticeFramework.Core.AI.BehaviourTree.Builder {
 	public class BehaviourTreeBuilder {

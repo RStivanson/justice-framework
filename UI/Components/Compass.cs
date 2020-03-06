@@ -1,14 +1,12 @@
 ﻿using JusticeFramework.Core.UI;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace JusticeFramework.UI.Components {
-	/// <summary>
-	/// UI class that rotates a cardinal point image to show the facing direction of the watched object
-	/// </summary>
-	[Serializable]
+    /// <summary>
+    /// UI class that rotates a cardinal point image to show the facing direction of the watched object
+    /// </summary>
+    [Serializable]
 	public class Compass : Window {
 		/// <summary>
 		/// The cardinal point image

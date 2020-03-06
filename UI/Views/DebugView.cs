@@ -1,5 +1,5 @@
-﻿using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Managers;
+﻿using JusticeFramework.Interfaces;
+using JusticeFramework.Managers;
 using System;
 using UnityEngine;
 
@@ -92,9 +92,9 @@ namespace JusticeFramework.UI.Views {
 			GUILayout.BeginVertical("Box");
 			
 			if (GameManager.IsPlaying) {
-				IInteractionController controller = GameManager.Player.Transform.GetComponent<IInteractionController>();
+				IInteractionController controller = GameManager.GetPlayer().Transform.GetComponent<IInteractionController>();
 				
-				GUILayout.Label($"Player Coord: {GameManager.Player.Transform.position}");
+				GUILayout.Label($"Player Coord: {GameManager.GetPlayer().Transform.position}");
 				GUILayout.Label($"LookAt Id: {controller.CurrentTarget?.Id}");
 				GUILayout.Label($"LookAt Type: {controller.CurrentTarget?.GetType().Name}");
 			} else {

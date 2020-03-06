@@ -1,7 +1,4 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Models;
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
@@ -11,7 +8,7 @@ namespace JusticeFramework.Components {
     /// Base class for ammo related world object
     /// </summary>
     [Serializable]
-    public class Ammo : Item, IAmmo {
+    public class Ammo : Item {
         private float LifeTime = 60;
 
         public event OnAmmoHit onHit;
@@ -23,27 +20,11 @@ namespace JusticeFramework.Components {
         private float hitDespawnTime = 15;
 
         private bool fired;
-
-        #region Properties
-
-        private AmmoModel AmmoModel {
-            get { return model as AmmoModel; }
-        }
-
+        
         public override EInteractionType InteractionType {
             get { return EInteractionType.Take; }
         }
-
-        public EAmmoType AmmoType {
-            get { return AmmoModel.ammoType; }
-        }
-
-        public float Damage {
-            get { return AmmoModel.damage; }
-        }
-
-        #endregion
-
+        
         public void OnFire() {
             fired = true;
             Invoke("Despawn", LifeTime);

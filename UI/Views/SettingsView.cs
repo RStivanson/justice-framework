@@ -1,6 +1,6 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Models.Settings;
-using JusticeFramework.Core.UI;
+﻿using JusticeFramework.Core.UI;
+using JusticeFramework.Data;
+using JusticeFramework.Models.Settings;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,7 +11,7 @@ namespace JusticeFramework.UI.Views {
     public class SettingsView : Window {
         [SerializeField]
         [HideInInspector]
-        private SystemSettingsModel settings;
+        private SettingsData settings;
 
         [SerializeField]
         private GameObject displayContainer;
@@ -38,22 +38,22 @@ namespace JusticeFramework.UI.Views {
         private Slider sfxVolumeSlider;
 
         public void Apply() {
-            settings.resolutionWidth = Screen.resolutions[resolutionDropdown.value].width;
-            settings.resolutionHeight = Screen.resolutions[resolutionDropdown.value].height;
-            settings.resolutionRefreshRate = Screen.resolutions[resolutionDropdown.value].refreshRate;
+            settings.screenWidth = Screen.resolutions[resolutionDropdown.value].width;
+            settings.screenHeight = Screen.resolutions[resolutionDropdown.value].height;
+            settings.screenRefreshRate = Screen.resolutions[resolutionDropdown.value].refreshRate;
             settings.useVSync = useVSyncToggle.isOn;
 
             settings.masterVolume = masterVolumeSlider.value;
             settings.ambientVolume = ambientVolumeSlider.value;
-            settings.dialogueVolume = dialogueVolumeSlider.value;
-            settings.soundEffectVolume = sfxVolumeSlider.value;
+            settings.voiceVolume = dialogueVolumeSlider.value;
+            settings.sfxVolume = sfxVolumeSlider.value;
 
             SystemSettings.ApplySettings();
         }
 
-        private void UpdateOptionValues(SystemSettingsModel settings) {
+        private void UpdateOptionValues(SettingsData settings) {
             // Display
-            int selectedResolution = GetResolutionIndex(settings.resolutionWidth, settings.resolutionHeight, settings.resolutionRefreshRate);
+            int selectedResolution = GetResolutionIndex(settings.screenWidth, settings.screenHeight, settings.screenRefreshRate);
             if (selectedResolution == -1) {
                 selectedResolution = GetResolutionIndex(Screen.currentResolution.width, Screen.currentResolution.height, Screen.currentResolution.refreshRate);
             }
@@ -64,8 +64,8 @@ namespace JusticeFramework.UI.Views {
             // Audio
             masterVolumeSlider.value = settings.masterVolume;
             ambientVolumeSlider.value = settings.ambientVolume;
-            dialogueVolumeSlider.value = settings.dialogueVolume;
-            sfxVolumeSlider.value = settings.soundEffectVolume;
+            dialogueVolumeSlider.value = settings.voiceVolume;
+            sfxVolumeSlider.value = settings.sfxVolume;
         }
 
         public void ShowDisplayOptions() {
@@ -96,7 +96,8 @@ namespace JusticeFramework.UI.Views {
         }
 
         protected override void OnClose() {
-            SystemSettings.Save(SystemConstants.SavePath, SystemConstants.SettingsFileName);
+            // TODO
+            //SystemSettings.Save(Application.persistentDataPath, "settings.json");
         }
 
         #endregion

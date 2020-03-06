@@ -1,15 +1,12 @@
-﻿using JusticeFramework.Core;
-using JusticeFramework.Core.Interfaces;
-using JusticeFramework.Core.Managers;
-using JusticeFramework.Core.Models;
+﻿using JusticeFramework.Data;
+using JusticeFramework.Interfaces;
+using JusticeFramework.Managers;
 using System;
 using UnityEngine;
 
 namespace JusticeFramework.Components {
     [Serializable]
-	public class Weapon : Item, IWeapon {
-#region Variables
-
+	public class Weapon : Item {
         [SerializeField]
         private Renderer thisRenderer;
 
@@ -31,46 +28,6 @@ namespace JusticeFramework.Components {
 
         private float lastAttackTime = -1;
 
-#endregion
-
-#region Properties
-
-		private WeaponModel WeaponModel {
-			get { return model as WeaponModel; }
-		}
-		
-		public EEquipSlot EquipSlot {
-			get { return WeaponModel.equipSlot; }
-		}
-
-		public AudioClip EquipSound {
-			get { return WeaponModel.equipSound; }
-		}
-
-		public EWeaponType WeaponType {
-			get { return WeaponModel.weaponType; }
-		}
-		
-		public int Damage {
-			get { return WeaponModel.damage; }
-        }
-
-        public EWeaponFireType FireType {
-            get { return WeaponModel.fireType; }
-        }
-
-        public EAmmoType AcceptedAmmo {
-            get { return WeaponModel.acceptedAmmo; }
-        }
-
-        public AnimatorOverrideController FPOverrideController {
-            get { return WeaponModel.fpOverrideController; }
-        }
-
-        public AnimatorOverrideController TPOverrideController {
-            get { return WeaponModel.tpOverrideController; }
-        }
-
         public Renderer Renderer {
             get { return thisRenderer; }
         }
@@ -87,12 +44,10 @@ namespace JusticeFramework.Components {
             get { return offhandIkTarget; }
         }
 
-        #endregion
-
         protected override void OnIntialized() {
             base.OnIntialized();
 
-            if (FireType == EWeaponFireType.Hitbox) {
+            if (GetData<WeaponData>().FireType == EWeaponFireType.Hitbox) {
                 hitbox.HitCollider.enabled = false;
                 hitbox.onHit += OnHit;
             }
@@ -103,7 +58,9 @@ namespace JusticeFramework.Components {
         }
 
         public void StartFire(IContainer ammoSupply = null) {
-            switch (FireType) {
+            WeaponData data = dataObject as WeaponData;
+
+            switch (data.FireType) {
                 case EWeaponFireType.Hitbox:
                     hitbox.enabled = true;
 
@@ -114,8 +71,8 @@ namespace JusticeFramework.Components {
                     if (ammoSupply.Inventory.Contains(testArrowId, 1)) {
                         ammoSupply.Inventory.Remove(testArrowId, 1);
 
-                        AmmoModel ammo = GameManager.AssetManager.GetById<AmmoModel>("TestArrow");
-                        GameObject go = Instantiate(ammo.groundItemPrefab);
+                        AmmoData ammo = GameManager.DataManager.GetAssetById<AmmoData>("TestArrow");
+                        GameObject go = Instantiate(ammo.ScenePrefab);
 
                         loadedProjectile = go.GetComponent<Ammo>();
 
@@ -146,8 +103,9 @@ namespace JusticeFramework.Components {
             }
 
             lastAttackTime = Time.time;
+            WeaponData data = dataObject as WeaponData;
 
-            switch (FireType) {
+            switch (data.FireType) {
                 case EWeaponFireType.Hitbox:
                     hitbox.enabled = false;
 
@@ -159,7 +117,7 @@ namespace JusticeFramework.Components {
                         Actor actor = hit.transform.GetComponent<Actor>();
 
                         if (actor != null) {
-                            actor.Damage(owner, Damage);
+                            actor.Damage(owner, data.Damage);
                         }
                     }
 
@@ -190,7 +148,7 @@ namespace JusticeFramework.Components {
             Actor actor = hit as Actor;
 
             if (actor != null) {
-                actor.Damage(owner, Damage);
+                actor.Damage(owner, GetData<WeaponData>().Damage);
             }
         }
     }
